@@ -9,6 +9,7 @@
   "keywords": [],
   "author": "Stone Chen",
   "license": "ISC",
+  "repository": {},
   "devDependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",

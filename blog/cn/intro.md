@@ -91,7 +91,7 @@
 
 我酝酿SingularJS已经好几年了😓。
 
-多年前我们提到所谓软件栈时，一般是指LAMP，一位能独立开发网站的工程师，除了需要掌握配置Linux和Apache外，还要掌握MySQL、PHP以及HTML、CSS和JavaScript等多种语言。在2013年MEAN的概念<sup id="r5">[[5]](#f5)</sup>出现了，基于MongoDB、ExpressJS、AngularJS和Node.js，程序员终于可以用一种熟悉的语言，JavaScript，来开发包括前端界面、后端逻辑、到数据库储存的所有环节，这简直是程序员的圣杯。然而，手机软件的爆发拖延了MEAN的发展——程序员的注意力为了开发iOS和Android手机软件而转向Objective C和Java，而纯网站程序员只得借助[PhoneGap](http://phonegap.com/ "Adobe PhoneGap")（或其开源分支[Cordova](https://cordova.apache.org/ "Apache Cordova")）之类的API库进行混合模式的APP开发——即将HTML5页面直接嵌入手机软件中，其效果可想而知。
+多年前我们提到所谓软件栈时，一般是指LAMP，一位能独立开发网站的工程师，除了需要掌握配置Linux和Apache外，还要掌握MySQL、PHP以及HTML、CSS和JavaScript等多种语言。在2013年MEAN的概念<sup id="r5">[[5]](#f5)</sup>出现了，基于MongoDB、ExpressJS、AngularJS和Node.js，程序员终于可以用一种熟悉的语言，JavaScript，来开发包括前端界面、后端逻辑、到数据库储存的所有环节，这简直是程序员的圣杯。然而，手机软件的爆发拖延了MEAN的发展——程序员的注意力为了开发iOS和Android手机软件而转向Objective-C和Java，而纯网站程序员只得借助[PhoneGap](http://phonegap.com/ "Adobe PhoneGap")（或其开源分支[Cordova](https://cordova.apache.org/ "Apache Cordova")）之类的API库进行混合模式的APP开发——即将HTML5页面直接嵌入手机软件中，其效果可想而知。
 
 2015年初，在其React库的基础上，Facebook推出了React Native，一个针对手机软件，并能提供近乎原生代码性能的开源JavaScript库。这在互联网开发行业中可谓地动山摇。在两年多来连续不断的推陈更新，以及开源社区的共同努力下，React和React Native逐渐成熟，促成了MERN，MongoDB、ExpressJS、React（React Native）和Node.js。和MEAN以及LAMP最大的不同，MERN覆盖到包括iOS、Android乃至微软的UWP（Universal Windows Platform）等多个终端平台，程序员终于可以一种语言走天下了！
 
@@ -132,7 +132,7 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 #### 硬件
 
-这是件很有趣的是，我本是个忠实的Windows用户，但是前两年为了开发iOS软件，转到了OSX（后来macOS）上。我本以为这会是个很大的挑战，一旦开始用才发现，Windows和macOS之间的相同远远多于不同。而这两年微软和苹果的变化也很大，由于iOS、Android以及Linux的普及，大量的开发者从Windows平台转到了macOS上；反而，由于微软在平板电脑和数字画笔上的发力，以及对英伟达的支持，大量的设计师从macOS平台转向了Windows。倒退10年这几乎难以想象，这从另一发面证明了互联网开发行业变化之迅速。
+这是件很有趣的是，我本是个忠实的Windows用户，但是前两年为了开发iOS软件，转到了OSX（后来macOS）上。我本以为这会是个很大的挑战，一旦开始用才发现，Windows和macOS之间的相同远远多于不同。而这两年微软和苹果的变化也很大，由于iOS、Android以及Linux的普及，大量的开发者从Windows平台转到了macOS上；反之，由于微软在平板电脑和数字画笔上的发力，以及对英伟达的支持，大量的设计师从macOS平台转向了Windows。倒退10年这几乎难以想象，这从另一发面证明了互联网开发行业变化之迅速。
 
 ##### 笔记本
 
@@ -172,123 +172,19 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 ---
 
-以上是SingularJS开发所需的硬件，下面我们来谈谈软件。
-
-#### 软件
-
-##### [Xcode](https://itunes.apple.com/cn/app/xcode/id497799835 "Xcode")
-
-开发iOS或macOS软件所必须。
-
-**注意！注意！注意！** 重要的事情说三遍：一定要通过App Store来安装，不要嫌网速慢就搜个下载包，很可能带有病毒或蠕虫<sup id="r6">[[6]](#f6)</sup>。
-
-在macOS Sierra上安装Xcode将同时安装Git和Xcode的命令行工具，在后面的博客中将会详细讲述。
-
-6. <span id="f6">[^](#r6)<span> ["Xcode Ghost"](http://baike.baidu.com/item/XcodeGhost "Xcode Ghost") _百度百科_
-
-##### [Android Studio](https://developer.android.google.cn/studio/index.html "Android Studio")
-
-Android Studio是Google官方的IDE（**I**ntegrated **D**evelopment **E**nvironment），和Xcode一样，不要从非官方的渠道获得。
-
-* [英文版](https://developer.android.com/studio/install.html "Android Studio")
-* [中文版](https://developer.android.google.cn/studio/index.html "Android Studio")
-
-##### 软件包管理器
-
-软件包管理器来源于Linux，用于OS自动安装、配制、卸载和升级软件或服务。虽然macOS有App Store，Windows有Microsoft Store，但是不仅其软件数量和种类都过于局限，而且其图形界面相较于软件包管理器的命令行界面也过于臃肿和唐突。
-
-###### [Homebrew](https://brew.sh/index_zh-cn.html "Homebrew")
-
-Homebrew是macOS平台上最火的软件包管理器，在其基础上，你还可以安装[Homebrew-Cask](https://caskroom.github.io/ "Homebrew Cask")用以管理macOS应用软件（如Google Chrome等）。下面是一些常用的Homebrew指令。
-
-版本指令
-
-* `$ brew --version` 查看brew版本
-* `$ brew cask --version` 查看cask版本
-
-全局指令
-
-* `$ brew update` 升级brew和cask
-* `$ brew list` 列表已经安装的包
-* `$ brew outdated` 列表已被淘汰的包
-* `$ brew cleanup` 删除老版本的包
-
-软件包指令
-
-* `$ brew search <package keyword>` 搜索软件包
-* `$ brew install <package name>` 安装软件包
-* `$ brew upgrade <package name>` 升级软件包
-* `$ brew info <package name>` 软件包信息
-* `$ brew uninstall <package name>` 卸载软件包
-
-###### [Chocolatey](https://chocolatey.org/ "Chocolatey")
-
-Chocolatey号称是Windows平台的Homebrew+Cask。
-
-##### [Google Chrome](https://www.google.com/chrome/ "Google Chrome")
-
-桌面Chrome是目前最先进的浏览器，它的插件结构帮助其成为开发者的最爱。实际开发中要大量运用到Chrome，尤其是在React和React Native开发阶段。你可以通过官方渠道下载[中文版](http://www.google.cn/chrome/browser/desktop/index.html "Google Chrome")或[英文版](https://www.google.com/chrome/ "Google Chrome")。但由于众所周知的原因，英文版未必能够下载，如果确实需要英文版的话，我建议使用用软件包管理器。
-
-macOS
-
-`$ brew cask install google-chrome`
-
-Windows
-
-`C:> choco install googlechrome`
-
-##### [Docker](https://www.docker.com/ "Docker")
-
-Docker可以说是当前最火的容器平台。什么是“容器”呢？以我的理解，“容器”是一种虚拟的虚拟机。😕怎么解释呢？传统的虚拟机可以同时模拟出多个自带CPU、内存和硬盘等硬件的主机，而容器则在传统虚拟机所模拟出的一台主机上，依靠标准的接口，模拟出多台主机。最直接的感受就是，启动一台传统虚拟机要走完整个boot过程，往往需要几分钟；而启动（或重启）一台容器一般只需要几秒钟。
-
-在生产环境中使用Docker容器有以下（不完全）的优势
-
-* 更新一个Docker容器，你只需上传并覆盖原有的镜像文件，再启动新的镜像就行了。而且这些工作可以完全通过脚本完成，进一步缩减停工时间。
-* 实际工作中，一个容器一般只负责一个后端服务，你只需更新配置文件，就可以相对迅速地将一个容器从一台主机移到另一台主机，这给你的服务更多的伸缩空间。
-* 你可以通过v1.12.0及以后版本的Docker来部署服务器集群。
-
-而在开发环境中，使用Docker容器一样有很多优势，例如
-
-* 最大限度的模拟实际生产环境，最大限度的降低部署不同环境时所需要的工作量。
-* 在系统中安装不同版本的语言（Java/Ruby等）或服务（MongoDB/Node.js）时，有可能会带来冲突。通过容器进行开发，则完全避免了这个问题。
-* 通过容器，整个团队可以在配置统一的系统、框架、运行时等等上进行开发，不管是用macOS、Windows或是Linux。
-
-SingularJS将会开发、使用以下几个容器
-
-| 名称 | 地址 | 类型 | 功能 |
-| :- | :- | :- | :- |
-| 数据库 |  | MongoDB | 负责保存服务和用户数据 |
-| API | api.domain.com | Node.js | 负责前后端之间的主要通讯传输 |
-| 消费者App | app.domain.com | Node.js | 负责host消费者的web app |
-| 服务商APP | sp.domain.com | Node.js | 负责host服务商的web app |
-| 管理员APP | admin.domain.com | Node.js | 负责host管理员的web app |
-| 静态文件 | static.domain.com | Nginx | 负责host静态文件，如UI图片、CSS等 |
-| 文件处理 | file.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、PDF等 |
-| 用户文件 | uploads.domain.com | Nginx | 负责host处理过的用户文件 |
-
-##### [Postman](https://www.getpostman.com/ "Postman")
-
-Postman专为开发API而生。
-
-##### 文本编辑器
-
-当下编程文本编辑器多的数不胜数，或许你已经有自己习惯的一个，或许没有。没关系，看看我的选择或许会给你一些启发，或许没有，你只需要知道，一个好的编辑器会加快你的开发速度、提升你的开发体验，但是只要你愿意，Vim😵或Notepad😱照样能用来开发，不大可能🙄，但是可以。
-
-我选择编辑器有三个前提，首先，必须是跨平台的，最低限度也是跨macOS和Windows，这样，无论在哪个系统，我都有熟悉的操作界面、习惯的快捷方式，可以随时进入开发。第二，应有超越基本语法高亮的开发功能。第三，必须是免费的软件。这就把[Sublime Text](https://www.sublimetext.com/ "Sublime Text")和[WebStorm](https://www.jetbrains.com/webstorm/ "WebStorm")踢出了局，虽然这两个老牌JavaScript集成开发环境（IDE）仍有不少忠实粉丝，但是其US$70的价格或US$129的年费，相较于免费的选项来说，性价比可以说是空值了😉。
-
-于是，我的选项降至Github的[Atom](https://atom.io/ "Atom")和微软的[Visual Studio Code](https://code.visualstudio.com/ "Visual Studio Code")。我认为实际上，这两款IDE之间的相似处远远超过他们间的不同。如果说Atom有什么优于Visual Studio Code的地方，那可能是其Git整合，毕竟，Atom是Github开发的。如果说Visual Studio Code有什么优于Atom的地方，那就是速度，文本搜索和打开大的文件往往会噎着Atom，而Visual Studio Code则没问题。而且，Visual Studio Code也已整合了Git，虽然功能没有Atom全面，但是对我来说刚刚好——绝大部分时间你用不到那些功能。所以，对我来说，Visual Studio Code胜出。只是我仍要声明，选择Atom你也不会失望。
-
-如果你有来自前端开发的背景，你也可以从Adobe的[Brackets](http://brackets.io/ "Brackets")入手。Brackets和Visual Studio Code、Atom也很相似，只是更着重于前端开发，有着不错的设备预览和Photoshop整合，但对Node.js等的后端支持就比较弱了。
-
-最后我还要提一提[TextMate](http://macromates.com/ "TextMate")和[Notepad++](https://notepad-plus-plus.org/ "Notepad\++")，虽然这两款免费软件并不跨平台，也不是更全功能的IDE，但是我仍旧会安装，作为快速浏览、编辑代码的小工具。
-
-关于使用Visual Studio Code，我会另开博客详细介绍。
+以上是SingularJS开发所需的硬件，下面我们来谈谈服务。
 
 #### 开发服务
 
-##### 邮箱
+说完硬件了，不是应该说软件了吗🤔？如今，很多软件已经转型为云服务，你往往需要一个Email地址注册一个账户；再说，如果你想上架一款移动软件，相应商店的账户更是必须的。所以，在实际使用软件前，咱们应首先注册相应的服务。而支付宝、微信等服务，往往需要几天的认证过程，所以提前注册服务账户也是个好的习惯。
 
 ##### 域名
+
+国内的域名注册可以说已被万网垄断。是的，我也用过更便宜的域名注册服务，但是当我想将域名转到其他的服务商时，
+
+![阿里云注册](./aliyun_signup.png "阿里云注册")
+
+##### 邮箱
 
 ##### 云服务器
 
@@ -312,6 +208,131 @@ Postman专为开发API而生。
 ###### 微信公众号
 
 ###### 微信支付
+
+#### 软件
+
+软件是开发的核心工具。如果说硬件是开发者手中的宝剑，那么软件则是剑法秘笈。没有合适的、趁手的软件，硬件再好也无用武之地。
+
+##### 软件包管理器
+
+软件包管理器来源于Linux，用于OS自动安装、配制、卸载和升级软件或服务。虽然macOS有App Store，Windows有Microsoft Store，但是不仅其软件数量和种类都过于局限，而且其图形界面相较于软件包管理器的命令行界面也过于臃肿和唐突。
+
+###### Homebrew
+
+[Homebrew](https://brew.sh/index_zh-cn.html "Homebrew")是macOS平台上最火的软件包管理器，在其基础上，你还可以安装[Homebrew-Cask](https://caskroom.github.io/ "Homebrew Cask")用以管理macOS应用软件（如Google Chrome等）。下面是一些常用的Homebrew指令。
+
+版本指令
+
+* `$ brew --version` 查看brew版本
+* `$ brew cask --version` 查看cask版本
+
+全局指令
+
+* `$ brew update` 升级brew和cask
+* `$ brew list` 列表已经安装的包
+* `$ brew outdated` 列表已被淘汰的包
+* `$ brew cleanup` 删除老版本的包
+
+软件包指令
+
+* `$ brew search <package keyword>` 搜索软件包
+* `$ brew install <package name>` 安装软件包
+* `$ brew upgrade <package name>` 升级软件包
+* `$ brew info <package name>` 软件包信息
+* `$ brew uninstall <package name>` 卸载软件包
+
+###### Chocolatey
+
+[Chocolatey](https://chocolatey.org/ "Chocolatey")号称是Windows平台的Homebrew+Cask。
+
+##### Xcode
+
+[Xcode](https://itunes.apple.com/cn/app/xcode/id497799835 "Xcode")是开发iOS或macOS软件所必须。
+
+**注意！注意！注意！** 重要的事情说三遍：一定要通过App Store来安装，不要嫌网速慢就搜个下载包，很可能带有病毒或蠕虫<sup id="r6">[[6]](#f6)</sup>。
+
+在macOS Sierra上安装Xcode将同时安装Git和Xcode的命令行工具，在后面的博客中将会详细讲述。
+
+6. <span id="f6">[^](#r6)<span> ["Xcode Ghost"](http://baike.baidu.com/item/XcodeGhost "Xcode Ghost") _百度百科_
+
+##### Android Studio
+
+[Android Studio](https://developer.android.google.cn/studio/index.html "Android Studio")是Google官方的IDE（**I**ntegrated **D**evelopment **E**nvironment），和Xcode一样，不要从非官方的渠道获得。
+
+* [英文版](https://developer.android.com/studio/install.html "Android Studio")
+* [中文版](https://developer.android.google.cn/studio/index.html "Android Studio")
+
+##### Google Chrome
+
+桌面[Chrome](https://www.google.com/chrome/ "Google Chrome")是目前最先进的浏览器，它的插件结构帮助其成为开发者的最爱。实际开发中要大量运用到Chrome，尤其是在React和React Native开发阶段。你可以通过官方渠道下载[中文版](http://www.google.cn/chrome/browser/desktop/index.html "Google Chrome")或[英文版](https://www.google.com/chrome/ "Google Chrome")。但由于众所周知的原因，英文版未必能够下载，如果确实需要英文版的话，我建议使用用软件包管理器。
+
+macOS
+
+`$ brew cask install google-chrome`
+
+Windows
+
+`C:> choco install googlechrome`
+
+##### Docker
+
+[Docker](https://www.docker.com/ "Docker")可以说是当前最火的容器平台。什么是“容器”呢？以我的理解，“容器”是一种虚拟的虚拟机。😕怎么解释呢？传统的虚拟机可以同时模拟出多个自带CPU、内存和硬盘等硬件的主机，而容器则在传统虚拟机所模拟出的一台主机上，依靠标准的接口，模拟出多台主机。最直接的感受就是，启动一台传统虚拟机要走完整个boot过程，往往需要几分钟；而启动（或重启）一台容器一般只需要几秒钟。
+
+在开发过程中我们经常会遇到这样的情况：代码在程序员的主机上运作一切正常，一旦提交到生产环境却跑不了了。这往往是因为生产环境和开发环境的配置不同，导致代码不能兼容。于是最常见的升级方式就是，提前在网站预告某年某月某日的凌晨，服务器将进行升级维护，在此几个小时之间，服务将暂停，等等。对于现在面向全球各地服务的互联网来说，这样陈旧的方式已令人难以接受。而使用容器在一定程度上解决了这个问题：首先，最大限度的模拟实际生产环境，从而保证生产环境和开发环境的统一；其次，利用容器可以保证开发团队内部，不管个人使用什么操作系统，都针对统一版本、配置的系统、框架、运行时等等进行开发。
+
+在开发环境中使用Docker容器还有其他很多优势，例如
+
+* 在个人系统中可以安装不同版本的语言（Java/Ruby等）或服务（MongoDB/Node.js），而避免了相互冲突。比方你手头的项目一个需要Python 2而另一个需要Python 3，在系统中直接安装两版Python可能会造成冲突或混乱，而通过2个Python容器，则可以避免这个问题。
+
+而在生产环境中使用Docker容器，一样有很多优势，例如
+
+* 更新一个Docker容器，你只需上传并覆盖原有的镜像文件，再启动新的镜像就行了。而且这些工作可以完全通过脚本完成，进一步缩减停工时间。
+* 实际工作中，一个容器一般只负责一个后端服务，你只需更新配置文件，就可以相对迅速地将一个容器从一台主机移到另一台主机，这给你的服务更多的伸缩空间。
+* 你可以通过v1.12.0及以后版本的Docker来部署服务器集群。
+
+SingularJS将会开发、使用以下几个容器
+
+| 名称 | 地址 | 类型 | 功能 |
+| :- | :- | :- | :- |
+| 数据库 |  | MongoDB | 负责保存服务和用户数据 |
+| API | api.domain.com | Node.js | 负责前后端之间的主要通讯传输 |
+| 消费者App | app.domain.com | Node.js | 负责host消费者的web app |
+| 服务商APP | sp.domain.com | Node.js | 负责host服务商的web app |
+| 管理员APP | admin.domain.com | Node.js | 负责host管理员的web app |
+| 静态文件 | static.domain.com | Nginx | 负责host静态文件，如UI图片、CSS等 |
+| 文件处理 | file.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、PDF等 |
+| 用户文件 | uploads.domain.com | Nginx | 负责host处理过的用户文件 |
+
+##### Postman
+
+[Postman](https://www.getpostman.com/ "Postman")专为开发API而生，在API开发的过程中我感觉是不可或缺的。简而言之，Postman就是个REST GUI，专门用于测试API端点。
+
+![Postman](http://blog.getpostman.com/wp-content/uploads/2016/06/Screen-Shot-2016-06-30-at-16.24.19.png?x38712 "Postman")
+
+##### 文本编辑器
+
+当下编程文本编辑器多的数不胜数，或许你已经有自己习惯的一个，或许没有。没关系，看看我的选择或许会给你一些启发，或许没有，你只需要知道，一个好的编辑器会加快你的开发速度、提升你的开发体验，但是只要你愿意，Vim😵或Notepad😱照样能用来开发，不大可能，但是可以。
+
+我选择编辑器有三个前提，首先，必须是跨平台的，最低限度也是跨macOS和Windows，这样，无论在哪个系统，我都有熟悉的操作界面、习惯的快捷方式，可以随时进入开发。第二，应有超越基本语法高亮的开发功能。第三，必须是免费的软件。
+
+第一个要求就把[Sublime Text](https://www.sublimetext.com/ "Sublime Text")和[WebStorm](https://www.jetbrains.com/webstorm/ "WebStorm")踢出了局，虽然这两个老牌JavaScript集成开发环境（IDE）仍有不少忠实粉丝，但是其US$70的价格或US$129的年费，相较于免费的选项来说，性价比可以说是空值了😉。
+
+于是，我的选项降至Github的[Atom](https://atom.io/ "Atom")和微软的[Visual Studio Code](https://code.visualstudio.com/ "Visual Studio Code")。我认为实际上，这两款IDE之间的相似处远远超过他们间的不同。如果说Atom有什么优于Visual Studio Code的地方，那可能是其Git整合，毕竟，Atom是Github开发的。如果说Visual Studio Code有什么优于Atom的地方，那就是速度，文本搜索和打开大的文件往往会噎着Atom，而Visual Studio Code则没问题。而且，Visual Studio Code也已整合了Git，虽然功能没有Atom全面，但是对我来说刚刚好——绝大部分时间你用不到那些功能。所以，对我来说，Visual Studio Code胜出。只是我仍要声明，选择Atom你也不会失望。
+
+Visual Studio Code
+
+![Visual Studio Code](https://code.visualstudio.com/home/home-screenshot-mac-2x.png "Visual Studio Code")
+
+Atom
+
+![Atom](https://github-atom-io-herokuapp-com.global.ssl.fastly.net/assets/screenshot-main@2x-ca61af7db484f8df39fc8dea27ce1752.png "Atom")
+
+如果你有来自前端开发的背景，你也可以从Adobe的[Brackets](http://brackets.io/ "Brackets")入手。Brackets和Visual Studio Code、Atom也很相似，只是更着重于前端开发，有着不错的设备预览和Photoshop整合，但对Node.js等的后端支持就比较弱了。
+
+最后我还要提一提[TextMate](http://macromates.com/ "TextMate")和[Notepad++](https://notepad-plus-plus.org/ "Notepad\++")，虽然这两款免费软件并不跨平台（分别是macOS和Windows），也不是更全功能的IDE，但是我仍旧会安装，作为快速浏览、编辑代码的小工具。
+
+关于Visual Studio Code的使用，我会另开博客详细介绍。
+
 
 
 
