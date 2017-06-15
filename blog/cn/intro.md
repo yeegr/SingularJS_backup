@@ -180,9 +180,17 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 ##### 域名
 
-国内的域名注册可以说已被万网垄断。是的，我也用过更便宜的域名注册服务，但是当我想将域名转到其他的服务商时，
+国内的域名注册可以说已被[阿里云](https://wanwang.aliyun.com "阿里云")（原[万网](http://net.cn "万网")）垄断。是的，我也用过更便宜的域名注册服务，但是当我想将域名转到其他的服务商时却是困难重重，总有各种名目导致域名无法迁出。阿里云的域名服务已达到国际标准，而且也不是很贵，没特殊原因，我不建议使用国内其他的域名服务。
 
-![阿里云注册](./aliyun_signup.png "阿里云注册")
+国外最出名的域名注册商是[GoDaddy](http://godaddy.com "GoDaddy")和[Register.com](https://www.register.com "Register.com")，但是由于众所周知的原因，这两个服务商所代理的域名往往遭到污染，在国内无法正常访问，如果你的服务对象包括大陆，我还是建议使用阿里云。
+
+注册阿里云账号
+
+![阿里云-注册](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_signup.png?raw=true "阿里云-注册")
+
+*** 注意 *** 一个手机号码只能绑定最多两个阿里云账号！
+
+![阿里云-域名搜索](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_domain_search.png?raw=true "阿里云-域名搜索")
 
 ##### 邮箱
 
