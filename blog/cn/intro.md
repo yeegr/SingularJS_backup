@@ -200,6 +200,20 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 ###### 域名备案
 
+##### 邮箱
+
+一旦有了域名，下一步就是马上开一个企业邮箱。在国内诸多主流企业邮箱服务商中，只有[腾讯企业邮箱](https://exmail.qq.com "腾讯企业邮箱")是仍旧提供免费版，而且免费版支持上限50个账号！腾讯还有免费的[iPhone](https://itunes.apple.com/cn/app/id473225145)、[iPad](https://itunes.apple.com/cn/app/id880859615)和[Android](http://app.mail.qq.com/cgi-bin/mailapp?latest=y&from=2&downloadclick=)移动客户端——QQ邮箱，同时也支持其他APP通过POP3/IMAP协议访问，甚至能绑定微信和QQ账号。只要规范化操作，利用企业网盘和个人中转站，不把大的附件传来传去，对于绝大部分中小企业来说，免费的腾讯企业邮箱足够用了。
+
+![腾讯企业邮箱-购买](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_buy.png?raw=true "腾讯企业邮箱-购买")
+
+如果你的企业已经在使用微软的[Office 365商业高级版](https://www.microsoftstore.com.cn/office-365-business-bundle "Office 365企业套餐")的话，也可以考虑利用其邮箱服务——反正已经付费了。
+
+![微软Office 365企业套餐](https://github.com/yeegr/SingularJS/blob/master/blog/img/microsoft_office_365_business.png?raw=true "微软Office 365企业套餐")
+
+建立了企业邮箱，首先要设置几个常用的地址，
+
+![腾讯企业邮箱-账号](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_accounts.png?raw=true "腾讯企业邮箱-账号")
+
 ##### 云服务器
 
 Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azure](https://www.azure.cn/ "Microsoft Azure")是当前全球最大的两个云服务平台，以IaaS<sup id="r7">[[7]](#f7)</sup>为主，直接提供虚拟化的服务环境如防火墙、数据库、储存、计算等，主要优势是进一步降低维护成本，主要缺点是开发成本提升，开发者需要熟悉服务平台的开发方案。
@@ -208,24 +222,16 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 我们将首先考虑PaaS，不仅能熟悉部分Linux的运维操作，更重要的是，PaaS是符合多数大、中项目的需求。在SingularJS逐渐成熟后，在适当的时候，我们将加入AWS和Azure的移植方案。
 
-国内三大平台中，阿里云更为成熟，服务的广度、深度和稳定性相对要么持平要么更好，在项目没有特殊要求的前提下，我一般都会选择阿里云。
-
-###### 阿里云ECS
+国内三大平台中，阿里云更为成熟，服务的广度、深度和稳定性相对要么持平要么更好，在项目没有特殊要求的前提下，我一般都会选择阿里云。以下分别是阿里云的ECS购买首页、控制管理台首页和云服务管理台页的截屏。
 
 ![阿里云-ECS](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_ecs_buy.png?raw=true "阿里云-ECS")
 
-###### 阿里云控制台
-
 ![阿里云-控制台](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_control_panel.png?raw=true "阿里云-控制台")
-
-###### 阿里云ECS实例
 
 ![阿里云-ECS实例](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_ecs_instance.png?raw=true "阿里云-ECS实例")
 
 7. <span id="f7">[^](#r7)<span> ["Infrastructure as a Service"](http://baike.baidu.com/item/IaaS "基础设施即服务") _百度百科_
 8. <span id="f8">[^](#r8)<span> ["Platform as a Service"](http://baike.baidu.com/item/PaaS "平台即服务") _百度百科_
-
-##### 邮箱
 
 ##### GitHub
 
