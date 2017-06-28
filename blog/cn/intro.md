@@ -210,6 +210,10 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 国内三大平台中，阿里云更为成熟，服务的广度、深度和稳定性相对要么持平要么更好，在项目没有特殊要求的前提下，我一般都会选择阿里云。
 
+![阿里云-ECS](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_ECS.png?raw=true "阿里云-ECS")
+
+![阿里云-控制台](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_control_panel.png?raw=true "阿里云-控制台")
+
 7. <span id="f7">[^](#r7)<span> ["Infrastructure as a Service"](http://baike.baidu.com/item/IaaS "基础设施即服务") _百度百科_
 8. <span id="f8">[^](#r8)<span> ["Platform as a Service"](http://baike.baidu.com/item/PaaS "平台即服务") _百度百科_
 
