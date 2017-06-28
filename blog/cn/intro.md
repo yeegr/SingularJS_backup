@@ -112,7 +112,7 @@ SingularJS是我近20年开发工作的一个总结。这个项目的目标是�
 #### 商业需求
 
 1. SingularJS要覆盖三种不同的用户人群，消费者、服务商和平台。这是当前最常见的互联网服务架构之一，诸如电商（买家、卖家、平台）、打车（乘客、司机、平台）和活动（报名者、组织人、平台）都是采用这种架构。
-2. SingularJS要能提供电商、社交、活动、地图、直播等功能，这些不仅覆盖到当前最常见的互联网应用，并且将利用到大量设备本身硬件，包括摄像头、GPS、蓝牙等。
+2. SingularJS要能提供新闻、电商、活动、社交等板块，地图、直播等功能，这些不仅覆盖到当前最常见的互联网应用，并且将利用到大量设备本身硬件，包括摄像头、GPS、蓝牙等。
 3. SingularJS要尽可能覆盖到所有设备，也就是说，对于每种用户，都有相应的网站、移动网站、手机软件、平板软件用以操作。
 4. SingularJS要尽可能覆盖到所有的操作系统，也就是说，对于每种用户的手机和平板，都有iOS和Android的软件。并且将在适当的时候，加入UWP（Universal Windows Platform）软件。
 
@@ -136,7 +136,7 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 ##### 笔记本
 
-简而言之，鉴于我们将要开发iOS和Android软件，而iOS软件只能通过macOS开发（Android，则可以在Windows、macOS甚至Linux上开发），我们需要一台苹果电脑。我的建议是一台[MacBook Pro](https://www.apple.com/cn/macbook-pro/)加上尽可能多的内存。虽然程序开发本身对硬件没有很高的要求，我们将会安装Docker并驱动多个容器，而且在开发过程中难免会需要同时打开Photoshop和Illustrator，所以系统资源仍旧是越多越好。MacBook、MacBook Air和Mac mini的最大内存仅有8GB，而Mac Pro作为一个即将被淘汰的产品也不建议购买。
+简而言之，鉴于我们将要开发iOS和Android软件，而iOS软件只能通过macOS开发（Android，则可以在Windows、macOS甚至Linux上开发），我们需要一台苹果电脑。我的建议是一台[MacBook Pro](https://www.apple.com/cn/macbook-pro/)加上尽可能多的内存。虽然程序开发本身对硬件没有很高的要求，但我们将会安装Docker并驱动多个容器，而且在开发过程中难免会需要同时打开Photoshop和Illustrator，所以系统资源仍旧是越多越好。MacBook、MacBook Air和Mac mini的最大内存仅有8GB，而Mac Pro（垃圾桶）作为一个即将被淘汰的产品也不建议购买。
 
 如果你的项目不包括iOS（🤔真的吗？），你仍旧可以选择MBP，通过Bootcamp安装Windows，用双启动或虚拟机软件如[Parallels desktop](http://www.parallels.com/cn/ "Parallels desktop")等来跑Windows。当然，你也可以选择一台纯Windows笔记本，微软的[Surface Pro 4](https://www.microsoftstore.com.cn/surface/surface-book/p/mic1628)和戴尔的[XPS 15](http://china.dell.com/cn/p/xps-15-9560-laptop/pd?oc=xps%2015-9560-d1845)都是不错的选择。
 
@@ -184,17 +184,36 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 国外最出名的域名注册商是[GoDaddy](http://godaddy.com "GoDaddy")和[Register.com](https://www.register.com "Register.com")，但是由于众所周知的原因，这两个服务商所代理的域名往往遭到污染，在国内无法正常访问，如果你的服务对象包括大陆，我还是建议使用阿里云。
 
-注册阿里云账号
+###### 注册阿里云账号
 
 ![阿里云-注册](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_signup.png?raw=true "阿里云-注册")
 
 *** 注意 *** 一个手机号码只能绑定最多两个阿里云账号！
 
+###### 搜索域名
+
 ![阿里云-域名搜索](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_domain_search.png?raw=true "阿里云-域名搜索")
 
-##### 邮箱
+域名搜索会给你一大串结果，具体选择哪几个完全基于你的项目需求。现在，顶级域名后缀<sup id="r6">[[6]](#f6)</sup>越来越多，覆盖全部后缀既不可能，也不必要，完全是浪费银子。一般来说，如果你的项目是个商业项目，注册.com、.net、.cn、.com.cn、.net.cn就可以了，为了防止歧义，可以加注.org和.org.cn，其他如.biz、.info、.store和.mobi等则看项目需求，更新的后缀诸如.top、.wang等可以忽略不计了。至于中文后缀.中国、.网络、.公司，除非是要占坑，要不真没什么意义。
+
+6. <span id="f6">[^](#r6)<span> ["域名后缀"](http://baike.baidu.com/item/域名后缀 "域名后缀") _百度百科_
+
+###### 域名备案
 
 ##### 云服务器
+
+Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azure](https://www.azure.cn/ "Microsoft Azure")是当前全球最大的两个云服务平台，以IaaS<sup id="r7">[[7]](#f7)</sup>为主，直接提供虚拟化的服务环境如防火墙、数据库、储存、计算等，主要优势是进一步降低维护成本，主要缺点是开发成本提升，开发者需要熟悉服务平台的开发方案。
+
+相较而言，国内的三大云平台[百度云](https://cloud.baidu.com/ "百度云")、[阿里云](https://aliyun.com/ "阿里云")、[腾讯云](https://www.qcloud.com/ "腾讯云")则提供的是PaaS<sup id="r8">[[8]](#f8)</sup>，直接提供虚拟的服务器，主要优点是开发更直观，缺点则是类似负载均衡、硬件拓展等大量的运维工作仍需要自己管理。
+
+我们将首先考虑PaaS，不仅能熟悉部分Linux的运维操作，更重要的是，PaaS是符合多数大、中项目的需求。在SingularJS逐渐成熟后，在适当的时候，我们将加入AWS和Azure的移植方案。
+
+国内三大平台中，阿里云更为成熟，服务的广度、深度和稳定性相对要么持平要么更好，在项目没有特殊要求的前提下，我一般都会选择阿里云。
+
+7. <span id="f7">[^](#r7)<span> ["Infrastructure as a Service"](http://baike.baidu.com/item/IaaS "基础设施即服务") _百度百科_
+8. <span id="f8">[^](#r8)<span> ["Platform as a Service"](http://baike.baidu.com/item/PaaS "平台即服务") _百度百科_
+
+##### 邮箱
 
 ##### GitHub
 
@@ -257,11 +276,11 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 [Xcode](https://itunes.apple.com/cn/app/xcode/id497799835 "Xcode")是开发iOS或macOS软件所必须。
 
-**注意！注意！注意！** 重要的事情说三遍：一定要通过App Store来安装，不要嫌网速慢就搜个下载包，很可能带有病毒或蠕虫<sup id="r6">[[6]](#f6)</sup>。
+**注意！注意！注意！** 重要的事情说三遍：一定要通过App Store来安装，不要嫌网速慢就搜个下载包，很可能带有病毒或蠕虫<sup id="r7">[[7]](#f7)</sup>。
 
 在macOS Sierra上安装Xcode将同时安装Git和Xcode的命令行工具，在后面的博客中将会详细讲述。
 
-6. <span id="f6">[^](#r6)<span> ["Xcode Ghost"](http://baike.baidu.com/item/XcodeGhost "Xcode Ghost") _百度百科_
+7. <span id="f7">[^](#r7)<span> ["Xcode Ghost"](http://baike.baidu.com/item/XcodeGhost "Xcode Ghost") _百度百科_
 
 ##### Android Studio
 
