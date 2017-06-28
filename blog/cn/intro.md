@@ -214,6 +214,8 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 ![阿里云-控制台](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_control_panel.png?raw=true "阿里云-控制台")
 
+![阿里云-ECS实例](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_control_panel_instance.png?raw=true "阿里云-ECS实例")
+
 7. <span id="f7">[^](#r7)<span> ["Infrastructure as a Service"](http://baike.baidu.com/item/IaaS "基础设施即服务") _百度百科_
 8. <span id="f8">[^](#r8)<span> ["Platform as a Service"](http://baike.baidu.com/item/PaaS "平台即服务") _百度百科_
 
