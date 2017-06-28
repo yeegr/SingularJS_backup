@@ -212,7 +212,7 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 ###### 阿里云ECS
 
-![阿里云-ECS](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_ecs.png?raw=true "阿里云-ECS")
+![阿里云-ECS](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_ecs_buy.png?raw=true "阿里云-ECS")
 
 ###### 阿里云控制台
 
