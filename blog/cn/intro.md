@@ -210,7 +210,7 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 ![微软Office 365企业套餐](https://github.com/yeegr/SingularJS/blob/master/blog/img/microsoft_office_365_business.png?raw=true "微软Office 365企业套餐")
 
-建立了企业邮箱，首先要设置几个常用的地址，
+注册了企业邮箱之后，首先要设置几个常用的地址。我自己会设置
 
 ![腾讯企业邮箱-账号](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_accounts.png?raw=true "腾讯企业邮箱-账号")
 
