@@ -198,22 +198,6 @@ SingularJS对开发者的要求不高，主要包括基础的OS操作，如怎�
 
 6. <span id="f6">[^](#r6)<span> ["域名后缀"](http://baike.baidu.com/item/域名后缀 "域名后缀") _百度百科_
 
-###### 域名备案
-
-##### 邮箱
-
-一旦有了域名，下一步就是马上开一个企业邮箱。在国内诸多主流企业邮箱服务商中，只有[腾讯企业邮箱](https://exmail.qq.com "腾讯企业邮箱")是仍旧提供免费版，而且免费版支持上限50个账号！腾讯还有免费的[iPhone](https://itunes.apple.com/cn/app/id473225145)、[iPad](https://itunes.apple.com/cn/app/id880859615)和[Android](http://app.mail.qq.com/cgi-bin/mailapp?latest=y&from=2&downloadclick=)移动客户端——QQ邮箱，同时也支持其他APP通过POP3/IMAP协议访问，甚至能绑定微信和QQ账号。只要规范化操作，利用企业网盘和个人中转站，不把大的附件传来传去，对于绝大部分中小企业来说，免费的腾讯企业邮箱足够用了。
-
-![腾讯企业邮箱-购买](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_buy.png?raw=true "腾讯企业邮箱-购买")
-
-如果你的企业已经在使用微软的[Office 365商业高级版](https://www.microsoftstore.com.cn/office-365-business-bundle "Office 365企业套餐")的话，也可以考虑利用其邮箱服务——反正已经付费了。
-
-![微软Office 365企业套餐](https://github.com/yeegr/SingularJS/blob/master/blog/img/microsoft_office_365_business.png?raw=true "微软Office 365企业套餐")
-
-注册了企业邮箱之后，首先要设置几个常用的地址。我自己会设置
-
-![腾讯企业邮箱-账号](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_accounts.png?raw=true "腾讯企业邮箱-账号")
-
 ##### 云服务器
 
 Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azure](https://www.azure.cn/ "Microsoft Azure")是当前全球最大的两个云服务平台，以IaaS<sup id="r7">[[7]](#f7)</sup>为主，直接提供虚拟化的服务环境如防火墙、数据库、储存、计算等，主要优势是进一步降低维护成本，主要缺点是开发成本提升，开发者需要熟悉服务平台的开发方案。
@@ -232,6 +216,61 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 7. <span id="f7">[^](#r7)<span> ["Infrastructure as a Service"](http://baike.baidu.com/item/IaaS "基础设施即服务") _百度百科_
 8. <span id="f8">[^](#r8)<span> ["Platform as a Service"](http://baike.baidu.com/item/PaaS "平台即服务") _百度百科_
+
+###### 网站备案
+
+备案是大陆的特色。在国内，没有备案，域名就不能访问。
+
+> 根据工信部规定，使用大陆境内服务器的组织或个人，若要使用独立域名开办网站 ，就需要履行备案手续。
+
+备案可以以公司或个人的名义备案，具体的准备资料和操作流程，可以参考阿里云的[备案那些事](https://yq.aliyun.com/topic/57 "备案那些事")。初次备案一般需要2-3周左右，服务商初审通过后，一般会通知你备案结果在15个工作日内以短信模式下发到注册的手机号码上。虽然我几次备案的时间都更短，但是项目规划时还是要预出足够的时间。
+
+##### 邮箱
+
+有了域名和服务器，下一步就是建立一个企业邮箱了。我建议你选择一个企业邮箱服务商（SaaS<sup id="r9">[[9]](#f9)</sup>），虽然你也可以自建一个邮箱服务器，硬件、软件和维护成本实在是得不偿失。
+
+###### 选择服务商
+
+在国内诸多主流企业邮箱服务商中，只有[腾讯企业邮箱](https://exmail.qq.com "腾讯企业邮箱")是仍旧提供免费版，而且免费版支持上限50个账号！腾讯还有免费的[iPhone](https://itunes.apple.com/cn/app/id473225145)、[iPad](https://itunes.apple.com/cn/app/id880859615)和[Android](http://app.mail.qq.com/cgi-bin/mailapp?latest=y&from=2&downloadclick=)移动客户端——QQ邮箱，同时也支持其他APP通过POP3/IMAP协议访问，甚至能绑定微信和QQ账号。只要规范化操作，利用企业网盘和个人中转站，不把大的附件传来传去，对于绝大部分中小企业来说，免费的腾讯企业邮箱足够用了。
+
+![腾讯企业邮箱-购买](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_buy.png?raw=true "腾讯企业邮箱-购买")
+
+如果你的企业已经在使用微软的[Office 365商业高级版](https://www.microsoftstore.com.cn/office-365-business-bundle "Office 365企业套餐")的话，也可以考虑利用其邮箱服务——反正已经付费了。
+
+![微软Office 365企业套餐](https://github.com/yeegr/SingularJS/blob/master/blog/img/microsoft_office_365_business.png?raw=true "微软Office 365企业套餐")
+
+###### 指向
+
+一般来说，只要服务商备案初审通过了，你就可以在域名管理平台上将邮箱服务指向新建的企业邮箱了——没有这一步，邮件就找不到相应的服务器投送。腾讯提供详细的设置步骤：[在万网注册的域名如何设置MX记录？](http://service.exmail.qq.com/cgi-bin/help?subtype=1&&id=20012&&no=1000582)。你也可以在其[帮助中心](http://service.exmail.qq.com/)的[创建](http://service.exmail.qq.com/cgi-bin/help?id=20012)栏下找到其他域名服务商的设置步骤。
+
+| 记录类型 | 主机记录 | 解析线路 | 记录值 | MX优先级 | TTL |
+|:-|:-|:-|:-|:-|:-|
+| MX | (不需填写) | 默认 | mxbiz1.qq.com | 5 | 10分钟 |
+| MX | (不需填写) | 默认 | mxbiz2.qq.com | 10 | 10分钟 |
+
+###### 常用邮箱地址
+
+注册了企业邮箱之后，首先要设置几个常用的地址。我自己一般会设置以下几个账户：
+
+* dev: 开发账号，用于注册各种开发资源，包括Xcode、Android市场、微信开发、Github等等，属于研发部
+* pay: 支付账号，用于注册各种网络支付服务，包括支付宝、微信支付、Apple Pay等，属于财务部
+* ***: 公众账号，用于注册各种公众宣传账号，如微信公众号、头条号等，如果有品牌偶像，则可以使用其拟人名称，属于公关部
+* recruit: 招聘账号，用于注册各种招聘服务，如招聘网、无忧网等，属于人事部
+
+之后再根据部门需求设置部门邮件组。
+
+* rd: **R**esearch & **D**evelopment - 研发部
+* fa: **F**inance and **A**ccounting Department - 财务部
+* pr: **P**ublic **R**elations - 公关部
+* hr: **H**uman **R**esources - 人事部
+* mktg: **Marketing** - 市场部
+* sales: 销售部
+
+之后再设置个人邮箱。
+
+![腾讯企业邮箱-账号](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_accounts.png?raw=true "腾讯企业邮箱-账号")
+
+9. <span id="f9">[^](#r9)<span> ["Software as a Service"](http://baike.baidu.com/item/SaaS "软件即服务") _百度百科_
 
 ##### GitHub
 
