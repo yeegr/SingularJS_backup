@@ -227,11 +227,11 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 ##### 邮箱
 
-有了域名和服务器，下一步就是建立一个企业邮箱了。我建议你选择一个企业邮箱服务商（SaaS<sup id="r9">[[9]](#f9)</sup>），虽然你也可以自建一个邮箱服务器，硬件、软件和维护成本实在是得不偿失。
+有了域名和服务器，下一步就是建立一个企业邮箱了。我建议你选择一个企业邮箱云服务（SaaS<sup id="r9">[[9]](#f9)</sup>），虽然你也可以自建一个邮箱服务器，硬件、软件和维护成本实在是得不偿失。
 
-###### 选择服务商
+###### 选择云服务
 
-在国内诸多主流企业邮箱服务商中，只有[腾讯企业邮箱](https://exmail.qq.com "腾讯企业邮箱")是仍旧提供免费版，而且免费版支持上限50个账号！腾讯还有免费的[iPhone](https://itunes.apple.com/cn/app/id473225145)、[iPad](https://itunes.apple.com/cn/app/id880859615)和[Android](http://app.mail.qq.com/cgi-bin/mailapp?latest=y&from=2&downloadclick=)移动客户端——QQ邮箱，同时也支持其他APP通过POP3/IMAP协议访问，甚至能绑定微信和QQ账号。只要规范化操作，利用企业网盘和个人中转站，不把大的附件传来传去，对于绝大部分中小企业来说，免费的腾讯企业邮箱足够用了。
+在国内诸多主流企业邮箱云服务中，只有[腾讯企业邮箱](https://exmail.qq.com "腾讯企业邮箱")是仍旧提供免费版，而且免费版支持上限50个账号！腾讯还有免费的[iPhone](https://itunes.apple.com/cn/app/id473225145)、[iPad](https://itunes.apple.com/cn/app/id880859615)和[Android](http://app.mail.qq.com/cgi-bin/mailapp?latest=y&from=2&downloadclick=)移动客户端——QQ邮箱，同时也支持其他APP通过POP3/IMAP协议访问，甚至能绑定微信和QQ账号。只要规范化操作，利用企业网盘和个人中转站，不把大的附件传来传去，对于绝大部分中小企业来说，免费的腾讯企业邮箱足够用了。
 
 ![腾讯企业邮箱-购买](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_buy.png?raw=true "腾讯企业邮箱-购买")
 
@@ -247,6 +247,10 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 |:-|:-|:-|:-|:-|:-|
 | MX | (不需填写) | 默认 | mxbiz1.qq.com | 5 | 10分钟 |
 | MX | (不需填写) | 默认 | mxbiz2.qq.com | 10 | 10分钟 |
+
+实际上，在阿里云（万网）域名控制台解析域名时，利用其《新手设置引导》功能，可以直接选择的腾讯企业邮箱作为解析目标。
+
+![阿里云域名解析-MX](https://github.com/yeegr/SingularJS/blob/master/blog/img/aliyun_domain_mx.png?raw=true "阿里云域名解析-MX")
 
 ###### 常用邮箱地址
 
@@ -272,11 +276,64 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 9. <span id="f9">[^](#r9)<span> ["Software as a Service"](http://baike.baidu.com/item/SaaS "软件即服务") _百度百科_
 
-##### GitHub
+##### 版本控制
 
+版本控制<sup id="r10">[[10]](#f10)</sup>是开发中非常重要的一环，无论是团队还是个人。Git<sup id="r11">[[11]](#f11)</sup>在近几年内飞速发展，现在已经取代了SVN<sup id="r12">[[12]](#f12)</sup>成为最为普及的版本控制系统。安装Xcode会自动安装Git，而微软则号称拥有全球最大的Git代码库，并将Windows开发完全转移至Git上，Git的受欢迎度可见一斑。
 
+10. <span id="f10">[^](#r10)<span> ["版本控制"](http://baike.baidu.com/item/版本控制 "版本控制") _百度百科_
+11. <span id="f11">[^](#r11)<span> ["Git"](http://baike.baidu.com/item/Git "Git") _百度百科_
+12. <span id="f12">[^](#r12)<span> ["SVN"](http://baike.baidu.com/item/SVN "SVN") _百度百科_
 
-###### Alicode
+###### GitHub
+
+[GitHub](https://github.com "GitHub")则是当前全球最大的代码托管云服务，其版本控制系统完全基于开源的Git。使用GitHub这样的SaaS托管代码，与使用云邮箱服务一样，消除了自己建立并维护版本控制服务器的工作，保证团队可以在任何时间、任何地点获取所需的代码。而且，开发SingularJS所需的开源控件，也基本上都使用GitHub进行代码托管和版本控制，鉴于SingularJS是个开源项目，我们也不例外。
+
+###### 私有
+
+但如果你的项目是个非开源的项目，那么就需要找一个提供私有仓库的云服务了。GitHub也提供私有仓库，但是是收费的，而[GitLab](https://gitlab.com "GitLab")则可以免费建立私有仓库。
+
+由于众所周知的原因，GitHub和GitLab可能会出现偶尔不能访问的问题，你也可以选择一个国内的代码托管云服务，比较出名的包括[码云](https://git.oschina.net "码云")、[Coding.net](https://coding.net "Coding.net")、[CSDN Code](https://code.csdn.net "CSDN Code")，还有[Alicode](https://code.aliyun.com "Alicode")。
+
+更可靠的方案则是通过给代码仓库添加远程服务器，将国内的云托管作为GitHub或GitLab的备用。
+
+###### Git操作
+
+Git有不少命令，但你不需要都记下来，我将这些命令分为四大类。
+
+第一类是只用一次的命令，包括
+
+```bash
+git config
+git init
+git clone
+git remote
+```
+
+第二类是被直接整合到开发软件的操作中，包括
+
+```bash
+git add
+git rm
+git mv
+git status
+```
+
+第三类是被整合到开发软件的Git菜单里，包括
+
+```bash
+git commit
+git push
+git pull
+git stage
+```
+
+第四类是不常用也未被整合的命令，包括
+
+```bash
+git merge
+git branch
+git checkout
+```
 
 ##### 项目管理
 
