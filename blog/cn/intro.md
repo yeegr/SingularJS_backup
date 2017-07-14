@@ -101,7 +101,7 @@
 
 SingularJS是我近20年开发工作的一个总结。这个项目的目标是在MERN的基础上，开发一个拥有绝大部分常用功能的平台，如电商、社交、活动等，同时兼顾不同的系统和设备。当SingularJS上线后，一名有一定经验的JavaScript工程师，能通过它迅速的完成平台部署和基础开发，尽早一步开始创新。
 
-从现在开始，我将逐步记录下SingularJS的整个开发过程，向大家分享一些工作中遇到的问题和解决方案，以及一些心得。欢迎有兴趣的朋友提问指正。
+从现在开始，我将逐步记录下SingularJS的整个开发过程，向大家分享一些工作中遇到的问题和解决方案，以及一些心得。欢迎有兴趣的朋友提问、指正。这篇博客的主线不会深入涉及各项相关技术，只会肤浅地解释一些需要了解的知识点。更深入的内容，我会要么指向其他相关资源，要么另开贴详解。
 
 5. <span id="f5">[^](#r5)<span> ["The MEAN Stack: MongoDB, ExpressJS, AngularJS and Node.js"](https://medium.com/swlh/the-full-stack-developer-is-a-myth-4e3fb9c25867 "The MEAN Stack: MongoDB, ExpressJS, AngularJS and Node.js") by _Valeri Karpov_ (2013-04-30)
 
@@ -109,17 +109,37 @@ SingularJS是我近20年开发工作的一个总结。这个项目的目标是�
 
 ### 功能
 
-#### 商业需求
+#### 用户结构
 
-1. SingularJS要覆盖三种不同的用户人群，消费者、服务商和平台。这是当前最常见的互联网服务架构之一，诸如电商（买家、卖家、平台）、打车（乘客、司机、平台）和活动（报名者、组织人、平台）都是采用这种架构。
-2. SingularJS要能提供新闻、电商、活动、社交等板块，地图、直播等功能，这些不仅覆盖到当前最常见的互联网应用，并且将利用到大量设备本身硬件，包括摄像头、GPS、蓝牙等。
-3. SingularJS要尽可能覆盖到所有设备，也就是说，对于每种用户，都有相应的网站、移动网站、手机软件、平板软件用以操作。
-4. SingularJS要尽可能覆盖到所有的操作系统，也就是说，对于每种用户的手机和平板，都有iOS和Android的软件。并且将在适当的时候，加入UWP（Universal Windows Platform）软件。
+我的目标是能够从零开始，迅速搭建一个能满足当前绝大部分互联网平台项目需求的技术平台。首先要搞清楚的是，这样的平台需要什么样的用户结构。
 
-#### 技术需求
+除了如微信、微博等通讯、社交平台外，一般说来，互联网平台有三个用户人群：消费者、服务商和管理平台。传统的平台模式，以电商最为典型，服务商是主动方，而消费者则是被动方。
 
-1. 为了统一不同终端与后端的通信，前后端协议一律采用JSON API形式，并进行加密。
-2. 为了统一不同终端的操作流程，前端逻辑统一处理。
+1. 由服务商向平台提供服务，包括文字、产品、活动等；
+2. 管理平台审核服务内容，通过后向消费者展示或推送；
+3. 消费者选择对该服务相应的操作，阅读、购买、报名、或者掠过。
+
+而新一代的平台，如打车平台，消费者是主动方，服务商则是被动方，这里
+
+1. 消费者提出消费要求；
+2. 管理平台向合适的服务商转发该要求；
+3. 服务商选择是否接受消费要求。
+
+#### 功能需求
+
+搭建我想要的平台，需要至少满足以下的功能点：
+
+1. 要覆盖三种不同的用户人群，消费者、服务商和管理平台。
+2. 要能提供新闻、电商、活动、社交等板块，地图、直播等功能，这些不仅覆盖到当前最常见的互联网应用，并且将利用到大量设备本身硬件，包括摄像头、GPS、蓝牙等。
+3. 要尽可能覆盖到所有设备，也就是说，对于每种用户，都有相应的网站、移动网站、手机软件、平板软件用以操作。
+4. 要尽可能覆盖到所有的操作系统，也就是说，对于每种用户的手机和平板，都有iOS和Android的软件。并且将在适当的时候，加入UWP（Universal Windows Platform）软件。
+
+#### 技术要求
+
+即便满足了以上的各点，这个平台仍必须有严格的技术要求，才能保证可以持续高速开发。
+
+1. 前后端协议一律采用JSON API形式，并进行加密，统一不同终端与后端的通信。
+2. 前端逻辑统一处理，统一不同终端的操作流程。
 3. 因为前后端统一使用JavaScript，前后端相同功能的函数尽可能统一处理。
 4. 前端界面除个性化设置外，一律通过后端更新，尽可能减少前端升级需求。
 5. 支持多语言界面。
@@ -298,49 +318,98 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 ###### Git操作
 
-Git有不少命令，但你不需要都记下来，我将这些命令分为四大类。
+想真正掌握Git操作，可以从[Pro Git](https://git-scm.com/book/zh/v2 "Pro Git")开始，然而在实际工作中，Git的诸多命令你不需要都记下来。我将这些命令分为以下四大类。
 
-第一类是只用一次的命令，包括
+第一类是零星用到的命令，包括
 
 ```bash
-git config
-git init
-git clone
-git remote
+# 设置全局变量
+$ git config --global user.name <user name>
+$ git config --global user.email <user email address>
+
+# 在当前文件夹下初始化一个代码库
+$ git init
+
+# 新建一个文件夹，并为其初始化一个Git代码库
+$ git init [directory]
+
+# 克隆一个代码库
+$ git clone <url>
+
+# 克隆一个代码库至指定文件夹
+$ git clone <url> [directory]
+
+# 管理代码库
+$ git remote
 ```
 
-第二类是被直接整合到开发软件的操作中，包括
+第二类是被直接整合到开发软件的文件操作中，包括
 
 ```bash
-git add
-git rm
-git mv
-git status
+# 添加文件
+$ git add
+
+# 删除文件
+$ git rm
+
+# 重命名文件
+$ git mv
 ```
 
 第三类是被整合到开发软件的Git菜单里，包括
 
 ```bash
-git commit
-git push
-git pull
-git stage
+# 提交变化到仓库
+$ git commit -m <message>
+
+# 更新远程仓库
+$ git push
+
+# 下载远程仓库并与本地整合
+$ git pull
+
+# 显示当前工作树的状态
+$ git status
 ```
 
-第四类是不常用也未被整合的命令，包括
+第四类是不常用也未被整合的命令（针对[Visual Studio Code](#vsc "Visual Studio Code")而言），包括
 
 ```bash
-git merge
-git branch
-git checkout
+# 下载远程仓库
+$ git fetch
+
+# 合并分支
+$ git merge
+
+# 列表本地分支
+$ git branch
+
+# 新建分支并切换
+$ git checkout
+
+# 显示提交之间的变化
+$ git diff
 ```
+
+第一类属于设置一次就忘，建议用文档记录下来；第二和第三类的基本功能已经整合到IDE里，知道个大概也就好了；第四类主要用于处理问题，知道出现了什么问题应该该怎么处理就好，具体命令选项到时候再百度。
 
 ##### 项目管理
 
+有效的项目管理能协助团队掌控开发节奏，保持开发进度，而和市场、销售，乃至投资人等不间断的沟通，则可以保证产品不至于拐入死角。即便是一个人的独自开发，使用项目管理的方式方法也有助于培养个人的开发纪律，维持开发动力。然而项目管理的内容相当广泛，我不想在这里花更多的篇幅探讨，这里只针对全栈开发时可能用到的项目管理工具发表一下个人的意见。
+
+最注明的项目管理工具可能就是微软的[Project](https://products.office.com/zh-cn/project "Microsoft Project")，这是一个传统的Server-Client结构的软件，更适合有规模公司做项目规划，对今天互联网中小开发团队更灵活的需求显得臃肿庞大。目前国际上最火的项目管理服务是[Asana](https://asana.com/ "Asana")，对15人（包括）内的团队免费开放。另一个是出名的软件则是[JIRA](https://www.atlassian.com/software/jira/ "JIRA")，10人（包括）以内的团队自带服务器只需要一次性支付10美元就可以下载安装。相对来说，Asana是一个更通用的项目管理系统，而JIRA出身于软件缺陷跟踪系统，所以对软件开发的支持要强于Asana。
+
 ###### Teambition
 
-##### Xcode/DUNS
+然而我想主要介绍一下[Teambition](https://www.teambition.com/zh/ "Teambition")，一款可以和Asana、JIRA等业界大头相提并论的国产项目管理服务。和Asana、JIRA类似，Teambition的客户端包括了网站、移动网站、Windows和macOS桌面软件、iOS和Android手机、平台软件，可谓是全方位覆盖。Teambition提供了Asana和JIRA的绝大部分主要功能，而且不仅10人（包括）之内免费，10人以上的收费也是对手的1/3甚至更低。
 
+![项目列表](https://github.com/yeegr/SingularJS/blob/master/blog/img/teambition_mac_home.png?raw=true "Teambition项目列表")
+
+![项目首页](https://github.com/yeegr/SingularJS/blob/master/blog/img/teambition_mac_project.png?raw=true "Teambition项目首页")
+
+了解更多Teambition的功能，可以[点击这里](https://www.teambition.com/zh/tour "Teambition功能展示")
+
+##### Xcode/DUNS
 
 #### 第三方服务
 
@@ -452,21 +521,21 @@ SingularJS将会开发、使用以下几个容器
 
 ![Postman](http://blog.getpostman.com/wp-content/uploads/2016/06/Screen-Shot-2016-06-30-at-16.24.19.png?x38712 "Postman")
 
-##### 文本编辑器
+##### <span id="vsc">文本编辑器</span>
 
 当下编程文本编辑器多的数不胜数，或许你已经有自己习惯的一个，或许没有。没关系，看看我的选择或许会给你一些启发，或许没有，你只需要知道，一个好的编辑器会加快你的开发速度、提升你的开发体验，但是只要你愿意，Vim😵或Notepad😱照样能用来开发，不大可能，但是可以。
 
 我选择编辑器有三个前提，首先，必须是跨平台的，最低限度也是跨macOS和Windows，这样，无论在哪个系统，我都有熟悉的操作界面、习惯的快捷方式，可以随时进入开发。第二，应有超越基本语法高亮的开发功能。第三，必须是免费的软件。
 
-第一个要求就把[Sublime Text](https://www.sublimetext.com/ "Sublime Text")和[WebStorm](https://www.jetbrains.com/webstorm/ "WebStorm")踢出了局，虽然这两个老牌JavaScript集成开发环境（IDE）仍有不少忠实粉丝，但是其US$70的价格或US$129的年费，相较于免费的选项来说，性价比可以说是空值了😉。
+第三个要求就把[Sublime Text](https://www.sublimetext.com/ "Sublime Text")和[WebStorm](https://www.jetbrains.com/webstorm/ "WebStorm")踢出了局，虽然这两个老牌JavaScript集成开发环境（IDE）仍有不少忠实粉丝，但是其US$70的价格或US$129的年费，相较于免费的选项来说，性价比可以说是空值了😉。
 
 于是，我的选项降至Github的[Atom](https://atom.io/ "Atom")和微软的[Visual Studio Code](https://code.visualstudio.com/ "Visual Studio Code")。我认为实际上，这两款IDE之间的相似处远远超过他们间的不同。如果说Atom有什么优于Visual Studio Code的地方，那可能是其Git整合，毕竟，Atom是Github开发的。如果说Visual Studio Code有什么优于Atom的地方，那就是速度，文本搜索和打开大的文件往往会噎着Atom，而Visual Studio Code则没问题。而且，Visual Studio Code也已整合了Git，虽然功能没有Atom全面，但是对我来说刚刚好——绝大部分时间你用不到那些功能。所以，对我来说，Visual Studio Code胜出。只是我仍要声明，选择Atom你也不会失望。
 
-Visual Studio Code
+###### Visual Studio Code
 
 ![Visual Studio Code](https://code.visualstudio.com/home/home-screenshot-mac-2x.png "Visual Studio Code")
 
-Atom
+###### Atom
 
 ![Atom](https://github-atom-io-herokuapp-com.global.ssl.fastly.net/assets/screenshot-main@2x-ca61af7db484f8df39fc8dea27ce1752.png "Atom")
 
@@ -642,3 +711,16 @@ SingularJS
 
 #### Webpack
 
+ACL
+
+consumers
+guest
+member
+
+providers
+staff
+manager
+
+admin
+moderator
+editor
