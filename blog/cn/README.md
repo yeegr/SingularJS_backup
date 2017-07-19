@@ -411,19 +411,24 @@ $ git diff
 
 ##### Xcode/DUNS
 
-App Store是唯一的苹果官方软件下载渠道，上架一款软件首先要用一个Apple ID注册一个开发者账号，并支付99美刀年费。
+App Store是唯一的苹果官方软件下载渠道，上架一款软件首先要用一个Apple ID注册（Enroll）一个开发者账号，并支付99美刀年费。
 
 1. 注册信息要求除当地文字（汉字）以外，对非英语的国家和地区还要求相应的英文信息，包括姓名、地址等。
 2. 只支持信用卡收费，不支持银行卡或支付宝等。而且信用卡主应是注册人本人，不然注册会被延迟，并需要你提供个人的身份证的扫描件。
 
-开发者账号分为个人、企业和政府三种，后两种注册时需要提供企业和机关的名称等信息，以及[DUNS](http://baike.baidu.com/item/DUNS "邓氏编码")编码。只有这样，iTunes页面上的开发者（或开发商）后面才不会显示个人姓名。
+开发者账号分为个人、企业和政府三种，后两种注册时需要提供企业和机关的名称等信息，以及[邓氏编码](http://baike.baidu.com/item/DUNS "邓氏编码")编码。只有这样，iTunes页面上的开发者（或开发商）后面才不会显示个人姓名。
 
 如果不确定企业是否已经有邓氏编码，可以先通过苹果提供的[链接](https://developer.apple.com/enroll/duns-lookup/#/search "Look up your D-U-N-S Number")查看，如果找不到结果则可以选择一步提交申请，一般在两到三个工作日内就会接到电话回访，按照提交的信息确认，并说明是为了App Store上线软件就可以免费获得邓氏编码了。
+
+![Look up your D-U-N-S Number](https://github.com/yeegr/SingularJS/blob/master/blog/img/XCode_DUNS_Lookup.png?raw=true "Look up your D-U-N-S Number")
 
 有了邓氏编码就可以完成企业账号的注册。
 
 1. 和个人信息一样，需要准备好企业的英文信息，包括名称、地址等。
+2. 需要向苹果提供企业网址、座机和工作邮箱（不能使用类似gmail.com或hotmail.com之类的邮箱，不过163和126的邮箱是可以通过检验的，不过不建议使用）。
 3. 企业账号的年费用为299美刀。
+
+![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/XCode_Developer_Enroll_comany.png?raw=true "Apple Developer Program Enrollment")
 
 #### 第三方服务
 
