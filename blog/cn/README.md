@@ -428,7 +428,7 @@ App Store是唯一的苹果官方软件下载渠道，上架一款软件首先�
 2. 需要向苹果提供企业网址、座机和工作邮箱（不能使用类似gmail.com或hotmail.com之类的邮箱，不过163和126的邮箱是可以通过检验的，不过不建议使用）。
 3. 企业账号的年费用为299美刀。
 
-![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/XCode_Developer_Enroll_comany.png?raw=true "Apple Developer Program Enrollment")
+![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/XCode_Developer_Enrollment_Organization.png?raw=true "Apple Developer Program Enrollment")
 
 #### 第三方服务
 
