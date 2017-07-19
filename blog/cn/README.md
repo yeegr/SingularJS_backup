@@ -403,13 +403,27 @@ $ git diff
 
 然而我想主要介绍一下[Teambition](https://www.teambition.com/zh/ "Teambition")，一款可以和Asana、JIRA等业界大头相提并论的国产项目管理服务。和Asana、JIRA类似，Teambition的客户端包括了网站、移动网站、Windows和macOS桌面软件、iOS和Android手机、平台软件，可谓是全方位覆盖。Teambition提供了Asana和JIRA的绝大部分主要功能，而且不仅10人（包括）之内免费，10人以上的收费也是对手的1/3甚至更低。
 
-![项目列表](https://github.com/yeegr/SingularJS/blob/master/blog/img/teambition_mac_home.png?raw=true "Teambition项目列表")
+![项目列表](https://github.com/yeegr/SingularJS/blob/master/blog/img/Teambition_mac_home.png?raw=true "Teambition项目列表")
 
-![项目首页](https://github.com/yeegr/SingularJS/blob/master/blog/img/teambition_mac_project.png?raw=true "Teambition项目首页")
+![项目首页](https://github.com/yeegr/SingularJS/blob/master/blog/img/Teambition_mac_project.png?raw=true "Teambition项目首页")
 
 了解更多Teambition的功能，可以[点击这里](https://www.teambition.com/zh/tour "Teambition功能展示")
 
 ##### Xcode/DUNS
+
+App Store是唯一的苹果官方软件下载渠道，上架一款软件首先要用一个Apple ID注册一个开发者账号，并支付99美刀年费。
+
+1. 注册信息要求除当地文字（汉字）以外，对非英语的国家和地区还要求相应的英文信息，包括姓名、地址等。
+2. 只支持信用卡收费，不支持银行卡或支付宝等。而且信用卡主应是注册人本人，不然注册会被延迟，并需要你提供个人的身份证的扫描件。
+
+开发者账号分为个人、企业和政府三种，后两种注册时需要提供企业和机关的名称等信息，以及[DUNS](http://baike.baidu.com/item/DUNS "邓氏编码")编码。只有这样，iTunes页面上的开发者（或开发商）后面才不会显示个人姓名。
+
+如果不确定企业是否已经有邓氏编码，可以先通过苹果提供的[链接](https://developer.apple.com/enroll/duns-lookup/#/search "Look up your D-U-N-S Number")查看，如果找不到结果则可以选择一步提交申请，一般在两到三个工作日内就会接到电话回访，按照提交的信息确认，并说明是为了App Store上线软件就可以免费获得邓氏编码了。
+
+有了邓氏编码就可以完成企业账号的注册。
+
+1. 和个人信息一样，需要准备好企业的英文信息，包括名称、地址等。
+3. 企业账号的年费用为299美刀。
 
 #### 第三方服务
 
