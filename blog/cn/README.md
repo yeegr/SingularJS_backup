@@ -93,7 +93,7 @@
 
 多年前我们提到所谓软件栈时，一般是指LAMP，一位能独立开发网站的工程师，除了需要掌握配置Linux和Apache外，还要掌握MySQL、PHP以及HTML、CSS和JavaScript等多种语言。在2013年MEAN的概念<sup id="r5">[[5]](#f5)</sup>出现了，基于MongoDB、ExpressJS、AngularJS和Node.js，程序员终于可以用一种熟悉的语言，JavaScript，来开发包括前端界面、后端逻辑、到数据库储存的所有环节，这简直是程序员的圣杯。然而，手机软件的爆发拖延了MEAN的发展——程序员的注意力为了开发iOS和Android手机软件而转向Objective-C和Java，而纯网站程序员只得借助[PhoneGap](http://phonegap.com/ "Adobe PhoneGap")（或其开源分支[Cordova](https://cordova.apache.org/ "Apache Cordova")）之类的API库进行混合模式的APP开发——即将HTML5页面直接嵌入手机软件中，其效果可想而知。
 
-2015年初，在其React库的基础上，Facebook推出了React Native，一个针对手机软件，并能提供近乎原生代码性能的开源JavaScript库。这在互联网开发行业中可谓地动山摇。在两年多来连续不断的推陈更新，以及开源社区的共同努力下，React和React Native逐渐成熟，促成了MERN，MongoDB、ExpressJS、React（React Native）和Node.js。和MEAN以及LAMP最大的不同，MERN覆盖到包括iOS、Android乃至微软的UWP（Universal Windows Platform）等多个终端平台，程序员终于可以一种语言走天下了！
+2015年初，在其React库的基础上，Facebook推出了React Native，一个针对手机软件，并能提供近乎原生代码性能的开源JavaScript库。这在互联网开发行业中可谓地动山摇。在两年多来连续不断的推陈更新，以及开源社区的共同努力下，React和React Native逐渐成熟，促成了MERN——MongoDB、ExpressJS、React（包括React Native）和Node.js。和MEAN以及LAMP最大的不同，MERN覆盖到包括iOS、Android乃至微软的UWP（Universal Windows Platform）等多个终端平台，程序员终于可以一种语言走天下了！
 
 当然，“一种语言走天下”只是一个妄想，想成为一名合格的全栈，你仍旧要掌握大量相关的知识和丰富的实际工作经验。这样的积累不是三五个月就能获得，甚至不是三五年内就能获得，没有五到十年的沉淀，你难以在开发的每一个环节都达到令人满意的深度。
 
@@ -249,7 +249,7 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 
 有了域名和服务器，下一步就是建立一个企业邮箱了。我建议你选择一个企业邮箱云服务（SaaS<sup id="r9">[[9]](#f9)</sup>），虽然你也可以自建一个邮箱服务器，硬件、软件和维护成本实在是得不偿失。
 
-###### 选择云服务
+###### 云邮箱
 
 在国内诸多主流企业邮箱云服务中，只有[腾讯企业邮箱](https://exmail.qq.com "腾讯企业邮箱")是仍旧提供免费版，而且免费版支持上限50个账号！腾讯还有免费的[iPhone](https://itunes.apple.com/cn/app/id473225145)、[iPad](https://itunes.apple.com/cn/app/id880859615)和[Android](http://app.mail.qq.com/cgi-bin/mailapp?latest=y&from=2&downloadclick=)移动客户端——QQ邮箱，同时也支持其他APP通过POP3/IMAP协议访问，甚至能绑定微信和QQ账号。只要规范化操作，利用企业网盘和个人中转站，不把大的附件传来传去，对于绝大部分中小企业来说，免费的腾讯企业邮箱足够用了。
 
@@ -295,6 +295,27 @@ Amazon [AWS](https://aws.amazon.com/cn/ "Amazon Web Services")和Microsoft [Azur
 ![腾讯企业邮箱-账号](https://github.com/yeegr/SingularJS/blob/master/blog/img/tencent_exmail_accounts.png?raw=true "腾讯企业邮箱-账号")
 
 9. <span id="f9">[^](#r9)<span> ["Software as a Service"](http://baike.baidu.com/item/SaaS "软件即服务") _百度百科_
+
+##### Xcode/DUNS
+
+App Store是唯一的苹果官方软件下载渠道，上架一款软件首先要用一个Apple ID注册（Enroll）一个开发者账号，并支付99美刀年费。
+
+1. 注册信息要求除当地文字（汉字）以外，对非英语的国家和地区还要求相应的英文信息，包括姓名、地址等。
+2. 只支持信用卡收费，不支持银行卡或支付宝等。而且信用卡主应是注册人本人，不然注册会被延迟，并需要你提供个人的身份证的扫描件。
+
+开发者账号分为个人、企业和政府三种，后两种注册时需要提供企业和机关的名称等信息，以及[邓氏编码](http://baike.baidu.com/item/DUNS "邓氏编码")编码。只有这样，iTunes页面上的开发者（或开发商）后面才不会显示个人姓名。
+
+如果不确定企业是否已经有邓氏编码，可以先通过苹果提供的[链接](https://developer.apple.com/enroll/duns-lookup/#/search "Look up your D-U-N-S Number")查看，如果找不到结果则可以选择一步提交申请，一般在两到三个工作日内就会接到电话回访，按照提交的信息确认，并说明是为了App Store上线软件就可以免费获得邓氏编码了。
+
+![Look up your D-U-N-S Number](https://github.com/yeegr/SingularJS/blob/master/blog/img/Xcode_DUNS_Lookup.png?raw=true "Look up your D-U-N-S Number")
+
+有了邓氏编码就可以完成企业账号的注册。
+
+1. 和个人信息一样，需要准备好企业的英文信息，包括名称、地址等。
+2. 需要向苹果提供企业网址、座机和工作邮箱（不能使用类似gmail.com或hotmail.com之类的邮箱，不过163和126的邮箱是可以通过检验的，不过不建议使用）。
+3. 企业账号的年费用为299美刀。
+
+![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/Xcode_Developer_Enrollment_Organization.png?raw=true "Apple Developer Program Enrollment")
 
 ##### 版本控制
 
@@ -409,36 +430,15 @@ $ git diff
 
 了解更多Teambition的功能，可以[点击这里](https://www.teambition.com/zh/tour "Teambition功能展示")
 
-##### Xcode/DUNS
-
-App Store是唯一的苹果官方软件下载渠道，上架一款软件首先要用一个Apple ID注册（Enroll）一个开发者账号，并支付99美刀年费。
-
-1. 注册信息要求除当地文字（汉字）以外，对非英语的国家和地区还要求相应的英文信息，包括姓名、地址等。
-2. 只支持信用卡收费，不支持银行卡或支付宝等。而且信用卡主应是注册人本人，不然注册会被延迟，并需要你提供个人的身份证的扫描件。
-
-开发者账号分为个人、企业和政府三种，后两种注册时需要提供企业和机关的名称等信息，以及[邓氏编码](http://baike.baidu.com/item/DUNS "邓氏编码")编码。只有这样，iTunes页面上的开发者（或开发商）后面才不会显示个人姓名。
-
-如果不确定企业是否已经有邓氏编码，可以先通过苹果提供的[链接](https://developer.apple.com/enroll/duns-lookup/#/search "Look up your D-U-N-S Number")查看，如果找不到结果则可以选择一步提交申请，一般在两到三个工作日内就会接到电话回访，按照提交的信息确认，并说明是为了App Store上线软件就可以免费获得邓氏编码了。
-
-![Look up your D-U-N-S Number](https://github.com/yeegr/SingularJS/blob/master/blog/img/XCode_DUNS_Lookup.png?raw=true "Look up your D-U-N-S Number")
-
-有了邓氏编码就可以完成企业账号的注册。
-
-1. 和个人信息一样，需要准备好企业的英文信息，包括名称、地址等。
-2. 需要向苹果提供企业网址、座机和工作邮箱（不能使用类似gmail.com或hotmail.com之类的邮箱，不过163和126的邮箱是可以通过检验的，不过不建议使用）。
-3. 企业账号的年费用为299美刀。
-
-![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/XCode_Developer_Enrollment_Organization.png?raw=true "Apple Developer Program Enrollment")
-
 #### 第三方服务
-
-##### 支付宝
 
 ##### 微信
 
 ###### 微信公众号
 
 ###### 微信支付
+
+##### 支付宝
 
 #### 软件
 
