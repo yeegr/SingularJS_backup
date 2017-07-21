@@ -307,7 +307,7 @@ App Store是唯一的苹果官方软件下载渠道，上架一款软件首先�
 
 如果不确定企业是否已经有邓氏编码，可以先通过苹果提供的[链接](https://developer.apple.com/enroll/duns-lookup/#/search "Look up your D-U-N-S Number")查看，如果找不到结果则可以选择一步提交申请，一般在两到三个工作日内就会接到电话回访，按照提交的信息确认，并说明是为了App Store上线软件就可以免费获得邓氏编码了。
 
-![Look up your D-U-N-S Number](https://github.com/yeegr/SingularJS/blob/master/blog/img/Xcode_DUNS_Lookup.png?raw=true "Look up your D-U-N-S Number")
+![Look up your D-U-N-S Number](https://github.com/yeegr/SingularJS/blob/master/blog/img/xcode_duns_lookup.png?raw=true "Look up your D-U-N-S Number")
 
 有了邓氏编码就可以完成企业账号的注册。
 
@@ -315,11 +315,11 @@ App Store是唯一的苹果官方软件下载渠道，上架一款软件首先�
 2. 需要向苹果提供企业网址、座机和工作邮箱（不能使用类似gmail.com或hotmail.com之类的邮箱，虽然163和126的邮箱是可以通过检验的，不过不建议使用）。
 3. 企业账号的年费用为299美刀。
 
-![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/Xcode_Developer_Enrollment_Organization.png?raw=true "Apple Developer Program Enrollment")
+![Apple Developer Program Enrollment](https://github.com/yeegr/SingularJS/blob/master/blog/img/xcode_developer_enrollment_organization.png?raw=true "Apple Developer Program Enrollment")
 
 通过企业开发者账号提交的App，才能在“开发商”栏显示企业的名称，而不是个人的英文名。
 
-![微信iTunes下载页](https://github.com/yeegr/SingularJS/blob/master/blog/img/iTunes_WeChat.png?raw=true "A微信iTunes下载页")
+![微信iTunes下载页](https://github.com/yeegr/SingularJS/blob/master/blog/img/itunes_wechat.png?raw=true "A微信iTunes下载页")
 
 ##### 版本控制
 
@@ -428,21 +428,35 @@ $ git diff
 
 然而我想主要介绍一下[Teambition](https://www.teambition.com/zh/ "Teambition")，一款可以和Asana、JIRA等业界大头相提并论的国产项目管理服务。和Asana、JIRA类似，Teambition的客户端包括了网站、移动网站、Windows和macOS桌面软件、iOS和Android手机、平台软件，可谓是全方位覆盖。Teambition提供了Asana和JIRA的绝大部分主要功能，而且不仅10人（包括）之内免费，10人以上的收费也是对手的1/3甚至更低。
 
-![项目列表](https://github.com/yeegr/SingularJS/blob/master/blog/img/Teambition_mac_home.png?raw=true "Teambition项目列表")
+![项目列表](https://github.com/yeegr/SingularJS/blob/master/blog/img/teambition_mac_home.png?raw=true "Teambition项目列表")
 
-![项目首页](https://github.com/yeegr/SingularJS/blob/master/blog/img/Teambition_mac_project.png?raw=true "Teambition项目首页")
+![项目首页](https://github.com/yeegr/SingularJS/blob/master/blog/img/teambition_mac_project.png?raw=true "Teambition项目首页")
 
 了解更多Teambition的功能，可以[点击这里](https://www.teambition.com/zh/tour "Teambition功能展示")
 
 #### 第三方服务
 
-##### 微信
+##### 微信公众号
 
-###### 微信公众号
+[微信公众平台](https://mp.weixin.qq.com "微信公众平台")目前提供三种不同的公众号，服务号、订阅号和企业号，点击[这里](https://kf.qq.com/faq/120911VrYVrA130805byM32u.html)了解其中的区别。
 
-###### 微信支付
+![微信公众号功能区别](http://file.service.qq.com/user-files/uploads/201612/cc31a8aa962694ea6a2b2ee08bdc4632.jpg "微信公众号功能区别")
+
+公众号注册流程可参见[微信公众平台注册流程指引](https://kf.qq.com/product/weixinmp.html#hid=87 "微信公众平台注册流程指引")。
+
+目前，微信的各种公众号中服务号的用途最为广泛，而只有认证的服务号才能完美支持微信支付。微信认证需每年支付300元审核费，认证后可开通微信支付权限，即在App和网页中支持微信支付功能。
+
+认证流程可参见[微信公众号认证流程指引](https://kf.qq.com/product/weixinmp.html#hid=99 "微信公众号认证流程指引")，注意需要大量的影印件。
+
+##### 微信支付
+
+微信服务号认证成功之后，就能进一步开通[微信支付](https://pay.weixin.qq.com/ "微信支付平台")功能。微信支付又分为多个“场景”，其中“公众号支付”和“APP支付”的唯一区别就是是否和现有的认证公众号绑定。所以，如果已经有了认证公众号，则应选择公众号支付，否则将会在你的商家账户中产生一个不跟公众号向关联的支付账号。***注***：支付渠道（网站、APP等）将在程序中加以区分。
+
+支付申请流程可见[公众号支付接入方法指引](http://kf.qq.com/faq/170116ZFBRRf170116AVV3Er.html "公众号支付接入方法指引")，注意要和公司财会沟通好，以便及时获得腾讯打给公司银行账户的小额资金数额（一般在1元之内），通过微信商户平台输入，才能正式开通支付功能。
 
 ##### 支付宝
+
+##### 阿里大于
 
 #### 软件
 
@@ -751,27 +765,27 @@ editor
 
 SingularJS components
 
-singular-textview
-singular-h1 ... h6
-singular-gridview ()
-singular-tileview (1-by-1, 1-by-4, gutter)
-singular-listview (ol/ul)
-singular-webview
-singular-popup
-singular-glyph
+* singular-textview
+* singular-h1 ... h6
+* singular-gridview ()
+* singular-tileview (1-by-1, 1-by-4, gutter)
+* singular-listview (ol/ul)
+* singular-webview
+* singular-popup
+* singular-glyph
 
-singular-tag
-singular-avatar (circle, square, rounded)
-singular-input
-singular-range
-singular-rating
-singular-selectview (singular-gridview)
+* singular-tag
+* singular-avatar (circle, square, rounded)
+* singular-input
+* singular-range
+* singular-rating
+* singular-selectview (singular-gridview)
 
-singular-rte
-singular-icon (top-right indicator)
-singular-search (search page: history (clear) / suggestions)
-singular-jumplistview (singular-listview x 2)
-singular-editable-list
+* singular-rte
+* singular-icon (top-right indicator)
+* singular-search (search page: history (clear) / suggestions)
+* singular-jumplistview (singular-listview x 2)
+* singular-editable-list
 
-singular-list-item (icon? | title (indicator) / view | value? | arrow? / control)
-singular-table: singular-order-item (title / unit / price)
+* singular-list-item (icon? | title (indicator) / view | value? | arrow? / control)
+* singular-table: singular-order-item (title / unit / price)
