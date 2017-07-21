@@ -456,6 +456,10 @@ $ git diff
 
 ##### 支付宝
 
+注册支付宝企业账户
+
+![注册支付宝企业账户](https://github.com/yeegr/SingularJS/blob/master/blog/img/alipay_signup.png?raw=true "注册支付宝企业账户")
+
 ##### 阿里大于
 
 #### 软件
