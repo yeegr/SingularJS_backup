@@ -1,20 +1,31 @@
+const webpack = require('webpack')
+const path = require('path')
+
 module.exports = {
-  entry: './root.ts',
+  devtool: 'source-map',
+  target: 'node',
+  entry: './src/index.ts',
   output: {
-    filename: 'api.js',
-    path: __dirname
+    filename: 'root.js',
+    path: path.resolve(__dirname, 'dev')
+  },
+  resolve: {
+    extensions: ['.ts', '.js', '.json']
   },
   module: {
     rules: [
       {
         test: /\.ts?$/,
-        exclude: /node_modules/,
-        use: ['source-map-loader', 'babel-loader', 'ts-loader']
+        use: ['ts-loader']
       }
     ]
   },
-  resolve: {
-    extensions: [".ts", ".js"]
-  },
-  devtool: 'inline-source-map'
+  plugins: [
+    new webpack.IgnorePlugin(/vertx/),
+    // new webpack.optimize.UglifyJsPlugin({
+    //   output: {
+    //     comments: false
+    //   }
+    // })
+  ]
 }

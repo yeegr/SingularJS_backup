@@ -1,0 +1,36 @@
+version: '2'
+
+services:
+  mongo:
+    container_name: ${APP_TITLE}-${DB_NAME}
+    image: ${APP_TITLE}/mongo
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/${NODE_ENV}/mongo.dockerfile
+    labels:
+      com.singularjs.db: ${DB_NAME}
+    expose:
+      - "27017"
+    volumes:
+      - /data/${DB_PATH}:/data/${DB_NAME}:rw
+    command: --auth
+
+  api:
+    container_name: ${APP_TITLE}-api
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/${NODE_ENV}/api.dockerfile
+    image: ${APP_TITLE}/api
+    depends_on:
+      - mongo
+    #expose:
+    #  - "3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./api/dev/root.js:/usr/app/root.js"
+    env_file:
+      - ./docker/env/${NODE_ENV}/api.env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    tty: true

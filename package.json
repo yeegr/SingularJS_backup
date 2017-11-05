@@ -2,7 +2,20 @@
   "name": "singularjs",
   "version": "1.0.0",
   "description": "",
+  "config": {
+    "init": ". ./docker/env/development/init.sh",
+    "registry": "registry.cn-hangzhou.aliyuncs.com"
+  },
   "scripts": {
+    "setup": "$npm_package_config_init && ./devops/setup.sh",
+    "mongo": "docker exec -it singular-db mongo db -u user -p UserPassWord",
+    "remove": "docker rmi -f $(docker images -qf since=singular/mongo)",
+    "api": "cd api && webpack",
+    "build": "$npm_package_config_init && docker-compose build",
+    "start": "$npm_package_config_init && docker-compose up -d",
+    "down": "$npm_package_config_init && docker-compose down",
+    "logs": "$npm_package_config_init && docker-compose logs",
+    "reset": "npm run down && npm run remove && npm run build && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,5 +24,9 @@
   },
   "keywords": [],
   "author": "Stone Chen",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "debug": "^3.1.0"
+  },
+  "dependencies": {}
 }

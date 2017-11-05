@@ -434,6 +434,8 @@ $ git diff
 
 了解更多Teambition的功能，可以[点击这里](https://www.teambition.com/zh/tour "Teambition功能展示")
 
+###### Microsoft Planner
+
 #### 第三方服务
 
 ##### 微信公众号
@@ -556,6 +558,8 @@ SingularJS将会开发、使用以下几个容器
 | 文件处理 | file.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、PDF等 |
 | 用户文件 | uploads.domain.com | Nginx | 负责host处理过的用户文件 |
 
+signup to docker image
+
 ##### Postman
 
 [Postman](https://www.getpostman.com/ "Postman")专为开发API而生，在API开发的过程中我感觉是不可或缺的。简而言之，Postman就是个REST GUI，专门用于测试API端点。
@@ -664,17 +668,6 @@ SingularJS
 │ ├───dist
 │ └───src
 │
-├─┬─file            // 后端服务，用以处理用户上传的文件
-│ ├───dev
-│ ├───dist
-│ └───src
-│
-├─┬─uploads         // 静态文件夹，用以保存用户上传的文件
-│ ├───events
-│ ├───products
-│ ├───...
-│ └───users
-│
 ├─┬─assets          // 静态文件夹，用以保存各级服务共享的资源
 │ ├───alipay
 │ ├───...
@@ -689,23 +682,34 @@ SingularJS
 │ ├───...
 │ └───util          // 共享的函数
 │
-├─┬─docker          // 静态文件夹，用以保存Docker镜像所需文件
-│ ├─┬─config
-│ │ ├───development
-│ │ ├───staging
-│ │ └───production
-│ ├─┬─dockerfiles
-│ │ ├───development
-│ │ ├───staging
-│ │ └───production
-│ └─┬─env
-│   ├───development
-│   ├───staging
-│   └───production
-│
 ├─┬─devops          // 静态文件夹，用以保存服务器脚本
 │ ├───staging
 │ └───production
+│
+├─┬─docker          // 静态文件夹，用以保存Docker镜像所需文件
+│ ├─┬─config
+│ │ ├───development
+│ │ ├───production
+│ │ └───staging
+│ ├─┬─dockerfiles
+│ │ ├───development
+│ │ ├───production
+│ │ └───staging
+│ └─┬─env
+│   ├───development
+│   ├───production
+│   └───staging
+│
+├─┬─file            // 后端服务，用以处理用户上传的文件
+│ ├───dev
+│ ├───dist
+│ └───src
+│
+├─┬─uploads         // 静态文件夹，用以保存用户上传的文件
+│ ├───events
+│ ├───products
+│ ├───...
+│ └───users
 │
 ├─┬─consumer        // 消费者用户APP
 │ ├─┬─app
@@ -743,6 +747,17 @@ SingularJS
 * 各级web工程下都有dev、dist和src三个文件夹，分别用以保存开发环境代码、生产环境代码和源代码
 
 #### MongoDB
+
+1. 生成文件夹
+2. 用docker interface加入至file sharing
+3. 在terminal跑init (db) scripts - create docker image, run, enter, add user, exit image, stop, remove
+    1. 生成docker镜像
+    2. 启动docker镜像
+    3. 进入docker镜像
+    4. 添加数据库用户
+    5. 退出docker镜像
+    6. 停止docker镜像
+4. 在terminal跑npm run init (build+start)
 
 #### Express
 

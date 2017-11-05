@@ -1,5 +1,5 @@
 {
-	"name": "consumer",
+	"name": "singular-consumer",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {

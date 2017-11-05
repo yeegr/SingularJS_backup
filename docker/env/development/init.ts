@@ -1,0 +1,8 @@
+export const NODE_ENV:string = "development"
+export const APP_TITLE:string = "singular"
+export const HOST:string = "singular-db"
+export const PORT:string = "27017"
+export const DB_PATH:string = "db2"
+export const DB_NAME:string = "db"
+export const USER_NAME:string = "user"
+export const USER_PASSWORD:string = "UserPassWord"
