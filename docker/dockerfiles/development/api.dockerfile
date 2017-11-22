@@ -1,9 +1,12 @@
 # Set node base image
-FROM node:6.9.2
+FROM node:8.9.0
 
 # File author / maintainer
 LABEL "maintainer"="Stone Chen"
 LABEL "email"="dev@singularjs.com"
+
+# Set NPM registry
+RUN npm config set registry https://registry.npm.taobao.org
 
 # Install nodemon
 RUN npm install -g nodemon
@@ -13,12 +16,10 @@ RUN npm install -g nodemon
 # COPY ./assets/Alipay/rsa_private_key.pem /usr/app/alipay_private_key.pem
 # COPY ./assets/Alipay/sha1_public_key.pem /usr/app/alipay_public_key.pem
 
-# RUN npm config set registry https://registry.npm.taobao.org
-# RUN npm install
 
 # Internal port
 EXPOSE 3000
 
 # Run app using node/nodemon
 WORKDIR /usr/app
-CMD ["nodemon", "--debug=5858", "root.js"]
+CMD ["nodemon", "root.js"]

@@ -6,20 +6,25 @@ import {
 import * as bcrypt from 'bcrypt-nodejs'
 import * as moment from 'moment'
 
-import * as CONST from '../../../common/values/constants.json'
+import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
 import IConsumer from '../interfaces/IConsumer'
+
+import Pointer from './PointerModel'
+import IPointer from '../interfaces/IPointer'
+
+import Logger from '../routers/_Logger'
 
 let ConsumerSchema: Schema = new Schema({
   // user handle or user name
   handle: {
     type: String,
-    default: () => 'Consumer_' + UTIL.getTimestamp(),
+    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
     required: true,
     unique: true,
-    minlength: (<any>CONST).LIMITS.MIN_HANDLE_LENGTH,
-    maxlength: (<any>CONST).LIMITS.MAX_HANDLE_LENGTH,
+    minlength: CONST.INPUT_LIMITS.MIN_HANDLE_LENGTH,
+    maxlength: CONST.INPUT_LIMITS.MAX_HANDLE_LENGTH,
     trim: true,
     index: true
   },
@@ -27,28 +32,25 @@ let ConsumerSchema: Schema = new Schema({
   password: {
     type: String,
     default: '',
-    minlength: (<any>CONST).LIMITS.MIN_PASSWORD_LENGTH,
-    maxlength: (<any>CONST).LIMITS.MAX_PASSWORD_LENGTH,
     trim: true
   },
   // user actual name
   name: {
     type: String,
     default: '',
-    maxlength: (<any>CONST).LIMITS.MAX_NAME_LENGTH,
+    maxlength: CONST.INPUT_LIMITS.MAX_NAME_LENGTH,
     trim: true
   },
 // user gender / sex
   gender: {
     type: Number,
-    validate: (val:number) => (val > -1)
+    validate: (val: number) => (val > -1)
   },
 // Chinese personal id number
   pid: {
     type: String,
     default: '',
-    match: new RegExp((<any>CONST).VALIDATORS.PID),
-    validation: (value: String) => (value.length === (<any>CONST).VALIDATORS.PID_LENGTH),
+    validation: (val: string) => UTIL.validatePid(val),
     trim: true
   },
 // user self introduction
@@ -67,9 +69,9 @@ let ConsumerSchema: Schema = new Schema({
   email: {
     type: String,
     default: '',
-    match: new RegExp((<any>CONST).VALIDATORS.EMAIL),
     lowercase: true,
-    trim: true
+    trim: true,
+    validation: (val: string) => UTIL.validateEmail(val)
   },
   // user avatar url
   avatar: {
@@ -86,8 +88,8 @@ let ConsumerSchema: Schema = new Schema({
     type: String,
     minlength: 2,
     maxlength: 5,
-    match: new RegExp((<any>CONST).VALIDATORS.LOCALE),
-    trim: true
+    trim: true,
+    validator: (code: string) => UTIL.validateLocale(code)
   },
   // current user location
   city: {
@@ -99,8 +101,8 @@ let ConsumerSchema: Schema = new Schema({
     type: String,
     minlength: 2,
     maxlength: 2,
-    match: new RegExp((<any>CONST).VALIDATORS.COUNTRY),
-    trim: true
+    trim: true,
+    validator: (code: string) => UTIL.validateCountry(code)
   },
   // WeChat OpenID
   wechat: {
@@ -112,17 +114,35 @@ let ConsumerSchema: Schema = new Schema({
   updated: {
     type: Number,
     required: true,
-    default: () => moment().valueOf()
+    default: () => UTIL.getTimestamp()
+  },
+  // user type
+  type: {
+    type: String,
+    default: CONST.USER_TYPES.CONSUMER,
+    enum: [CONST.USER_TYPES.CONSUMER],
+    required: true
   },
   // user roles
   roles: {
     type: [String],
     required: true,
-    default: [(<any>CONST).USER_ROLES.CONSUMER[0]]
+    default: [CONST.USER_ROLES.CONSUMER.MEMBER]
   },
-  // user's verification status
-  verification: {
-    type: String
+  // current user status
+  status: {
+    type: String,
+    enum: CONST.USER_STATUSES_ENUM,
+    default: CONST.STATUSES.USER.ACTIVE
+  },
+  // user verification
+  verified: {
+    type: Schema.Types.ObjectId,
+    ref: 'Log'
+  },
+  // user verification expiration time
+  expires: {
+    type: Number
   },
   // other users 
   contacts: [{
@@ -150,25 +170,15 @@ let ConsumerSchema: Schema = new Schema({
     ref: 'Comment'
   }],
   // contents liked (voted up) by user
-  likes: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Log'
-  }],
+  likes: [Pointer],
   // contents liked (voted down) by user
-  dislikes: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Log'
-  }],
+  dislikes: [Pointer],
   // contents saved by user
-  saves: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Log'
-  }],
+  saves: [Pointer],
   // contents shared by user
-  shares: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Log'
-  }],
+  shares: [Pointer],
+  // contents downloaded by user
+  downloads: [Pointer],
   // other users being followed by user
   followings: [{
     type: Schema.Types.ObjectId,
@@ -178,6 +188,11 @@ let ConsumerSchema: Schema = new Schema({
   followers: [{
     type: Schema.Types.ObjectId,
     ref: 'Consumer'
+  }],
+  // other users following user
+  feedbacks: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Feedback'
   }],
   // user points
   points: {
@@ -194,7 +209,7 @@ let ConsumerSchema: Schema = new Schema({
     default: 0
   },
   // user information retrieved
-  viewCount: {
+  totalViews: {
     type: Number,
     default: 0,
     validation: (value: number) => (value > -1)
@@ -209,7 +224,7 @@ let ConsumerSchema: Schema = new Schema({
 })
 
 /**
- * add order to user order list
+ * Adds an item to specified list
  *
  * @class ConsumerSchema
  * @method addToList
@@ -217,17 +232,12 @@ let ConsumerSchema: Schema = new Schema({
  * @param {Schema.Types.ObjectId} id
  * @return void
  */
-ConsumerSchema.methods.addToList = function(key: string, id: Schema.Types.ObjectId): void {
-  let arr = this[key]
-
-  if (arr.indexOf(id) < 0) {
-    arr.push(id)
-    this.save()
-  }
+ConsumerSchema.methods.addToList = function(key: string, id: Schema.Types.ObjectId, callback?: Function): void {
+  UTIL.addToList(this, key, id, callback)
 }
 
 /**
- * delete specific order from user order list
+ * Removes an item from specified list
  *
  * @class ConsumerSchema
  * @method removeFromList
@@ -235,17 +245,87 @@ ConsumerSchema.methods.addToList = function(key: string, id: Schema.Types.Object
  * @param {Schema.Types.ObjectId} id
  * @returns void
  */
-ConsumerSchema.methods.removeFromList = function(key: string, id: Schema.Types.ObjectId): void {
-  let arr = this[key]
+ConsumerSchema.methods.removeFromList = function(key: string, id: Schema.Types.ObjectId, callback?: Function): void {
+  UTIL.removeFromList(this, key, id, callback)
+}
+
+ConsumerSchema.methods.addToArray = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function): void {
+  let arr = this[key],
+    index = arr.findIndex((e: IPointer) => (e.ref.toString() == ref.toString() && e.target === target))
+
+  if (index < 0) {
+    arr.push({ref, target})
+
+    this
+    .save()
+    .then((user: IConsumer) => {
+      this.saveCountToTarget(key, target, ref, callback)
+    })
+    .catch((err: Error) => {
+      console.log(err)
+    })
+  } else if (key === 'shares' || key === 'downloads') {
+    this.saveCountToTarget(key, target, ref, callback)
+  } else if (callback) {
+    callback()
+  }
+}
+
+ConsumerSchema.methods.saveCountToTarget = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function, step: number = 1): void {
+  let TargetModel = UTIL.selectDataModel(target)
   
-  if (arr.indexOf(id) > -1) {
-    arr.splice(arr.indexOf(id), 1)
-    this.save()
+  TargetModel
+  .findById(ref)
+  .then((data: any) => {
+    switch (key) {
+      case 'likes':
+        data.addCount('totalLikes', callback, step)
+      break
+
+      case 'dislikes':
+        data.addCount('totalDislikes', callback, step)
+      break
+
+      case 'saves':
+        data.addCount('totalSaves', callback, step)
+      break
+
+      case 'shares':
+        data.addCount('totalShares', callback, step)
+      break
+
+      case 'downloads':
+        data.addCount('totalDownloads', callback, step)
+      break
+    }
+  })
+  .catch((err: Error) => {
+    console.log(err)
+  })
+}
+
+ConsumerSchema.methods.removeFromArray = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function): void {
+  let arr = this[key],
+    index = arr.findIndex((e: IPointer) => (e.ref.toString() == ref.toString() && e.target === target))
+  
+  if (index > -1) {
+    arr.splice(index, 1)
+
+    this
+    .save()
+    .then((user: IConsumer) => {
+      this.saveCountToTarget(key, target, ref, callback, -1)
+    })
+    .catch((err: Error) => {
+      console.log(err)
+    })
+  } else if (callback) {
+    callback()
   }
 }
 
 /**
- * balancing user account
+ * Balances user account
  * 
  * @class ConsumerSchema
  * @method addToBalance
@@ -260,7 +340,8 @@ ConsumerSchema.methods.addToBalance = function(subTotal: number): number {
 }
 
 /**
- * balancing user account
+ * Hash incoming password with and 
+ * compare it to stored password hash
  * 
  * @class ConsumerSchema
  * @method comparePassword
@@ -302,5 +383,6 @@ ConsumerSchema.pre('save', function(next: Function): void {
     next()
   }
 })
+
 
 export default model<IConsumer>('Consumer', ConsumerSchema)

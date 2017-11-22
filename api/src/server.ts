@@ -11,14 +11,18 @@ import * as path from 'path'
 
 import _HelperRouter from './routers/_HelperRouter'
 
+import ActionRouter from './routers/ActionRouter'
 import ConsumerRouter from './routers/ConsumerRouter'
 import PostRouter from './routers/PostRouter'
+import CommentRouter from './routers/CommentRouter'
 
 import * as PassportConfig from './config/passport'
 
 import {
   USER_NAME, USER_PASSWORD, HOST, PORT, DB_NAME
 } from '../../docker/env/development/init'
+
+import * as CONFIG from '../../common/options/config'
 
 /**
  * Server class
@@ -70,7 +74,7 @@ class Server {
     this.app.use(bodyParser.json())
 
     // mount cookie parker
-    this.app.use(cookieParser("SECRET_GOES_HERE"))
+    this.app.use(cookieParser())
 
     // mount logger
     this.app.use(logger("dev"))
@@ -90,12 +94,13 @@ class Server {
     // cors
     // this.app.use((req, res, next) => {
     //   res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
-    //   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PURGE')
+    //   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, PURGE')
     //   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials')
     //   res.header('Access-Control-Allow-Credentials', 'true')
     //   next()
     // })
   }
+
 
   /**
    * Configures routes
@@ -143,6 +148,12 @@ class Server {
 
     // validation router
     // this.app.use('/api/v1/validates', ValidateRouter)
+
+    // action router
+    this.app.use('/api/v1/actions', ActionRouter)
+
+    // comment router
+    this.app.use('/api/v1/comments', CommentRouter)
   }
 }
 

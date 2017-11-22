@@ -18,7 +18,7 @@ export default interface IEvent extends Document {
   status: string
   updated: number
   publish: number
-  viewCount: number
+  totalViews: number
   totalRating: number,
   comments: [Schema.Types.ObjectId]
   likes: [Schema.Types.ObjectId]
@@ -34,7 +34,6 @@ export default interface IEvent extends Document {
   wasNew: boolean
 
   // methods
-  addView: Function
   addToList: Function
   removeFromList: Function
 }

@@ -2,9 +2,11 @@ import LogModel from '../models/LogModel'
 import ILog from '../interfaces/ILog'
 
 class Logger {
-  constructor(obj: object) {
-    let log = new LogModel(obj)
-    log.save()
+  constructor(obj: any) {
+    let log: ILog = new LogModel(obj)
+    log.save((err: Error) => {
+      console.log(err)
+    })
   }
 }
 

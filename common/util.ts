@@ -1,18 +1,25 @@
-import {
-  Schema,
-  Document
-} from 'mongoose'
+import * as CONST from './options/constants'
 
-import * as CONST from './values/constants.json'
+export * from '../api/src/modules/util'
 
 /**
- * Check if object is NOT undefined, null, or empty string
+ * Capitalizes first letter of the string 
+ * 
+ * @param {string} str 
+ * @returns {string}
+ */
+export function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+/**
+ * Check if input is NOT undefined, null, or empty string
  * 
  * @export
- * @param {object} input 
+ * @param {any} input 
  * @returns {boolean} 
  */
-export function isNotUndefinedNullEmpty(input: object): boolean {
+export function isNotUndefinedNullEmpty(input: any): boolean {
   return (input !== undefined) && (input !== null) && (input.toString().length > 0) 
 }
 
@@ -28,76 +35,151 @@ export function getTimestamp(isUnix: boolean = true): number {
 }
 
 /**
- * Returns the timestamp from MongoDB ObjectId
+ * Check if email address is formatted correctly
  * 
- * @param {string} id
- * @param {boolean} [isUnix=true] 
- * @return {number} 
+ * @param {string} email 
+ * @returns {boolean}
  */
-export function getTimeFromObjectId(id: string, isUnix: boolean = true): number {
-  return parseInt(id.substring(0, 8), 16) * (isUnix ? 1 : 1000)
+export function validateEmail(email: string): boolean {
+  let rx = new RegExp(CONST.INPUT_VALIDATORS.EMAIL)
+  return rx.test(email)
 }
 
 /**
- * Set updated timestamp
+ * Check if mobile number is formatted correctly
  * 
- * @export
- * @param {Document} doc 
- * @param {[string]} keys 
+ * @param {string} mobile 
+ * @returns {boolean}
  */
-export function setUpdateTime(doc: Document, keys: [string]): void {
-  let toUpdate = false
-
-  keys.map((key) => {
-    toUpdate = (doc.isModified(key)) ? true : toUpdate
-  })
-
-  if (toUpdate) {
-    (<any>doc).updated = this.getTimestamp()
-  }
+export function validateMobile(mobile: string): boolean {
+  let rx = new RegExp(RegExp(CONST.INPUT_VALIDATORS.MOBILE))
+  return rx.test(mobile)
 }
 
 /**
- * Adds a comment to the document comment list
+ * Normalizes mobile number,
+ * remove all non-digital characters
  * 
- * @export
- * @param {[Schema.Types.ObjectId]} arr 
- * @param {number} total 
- * @param {Schema.Types.ObjectId} id 
- * @param {number} rating 
- * @returns {[[Schema.Types.ObjectId], number]} 
+ * @param {string} mobile 
+ * @returns {string}
  */
-export function addComment(arr: [Schema.Types.ObjectId], total: number, id: Schema.Types.ObjectId, rating: number): [[Schema.Types.ObjectId], number] {
-  if (arr && arr.indexOf(id) < 0) {
-    arr.push(id)
-    total += rating
-  }
-
-  return [arr, total]
+export function normalizeMobile(mobile: string): string {
+  return mobile.replace(/\D/g,'')
 }
 
 /**
- * Removes a comment to the document comment list
+ * Check if number is within the specified range
  * 
- * @export
- * @param {[Schema.Types.ObjectId]} arr 
- * @param {number} total 
- * @param {Schema.Types.ObjectId} id 
- * @param {number} rating 
- * @returns {[[Schema.Types.ObjectId], number]} 
+ * @param {number} value 
+ * @param {number} min 
+ * @param {number} max 
+ * @returns {boolean}
  */
-export function removeComment(arr: [Schema.Types.ObjectId], total: number, id: Schema.Types.ObjectId, rating: number): [[Schema.Types.ObjectId], number] {
-  if (arr && arr.indexOf(id) > -1) {
-    arr.splice(arr.indexOf(id), 1)
-    total -= rating
-  }
+export function validateRange(value: number, min: number, max: number): boolean {
+  let left = min - 1,
+    right = max + 1
 
-  return [arr, total]
+  return (value > left && value < right)
+}
+
+/**
+ * Check if user handle is formatted correctly
+ * 
+ * @param {string} handle 
+ * @returns {boolean}
+ */
+export function validateHandle(handle: string): boolean {
+  return validateRange(handle.length, CONST.INPUT_LIMITS.MIN_HANDLE_LENGTH, CONST.INPUT_LIMITS.MAX_HANDLE_LENGTH)
+}
+
+/**
+ * Check if user password is formatted correctly
+ * 
+ * @param {string} password 
+ * @returns {boolean}
+ */
+export function validatePassword(password: string): boolean {
+  return validateRange(password.length, CONST.INPUT_LIMITS.MIN_PASSWORD_LENGTH, CONST.INPUT_LIMITS.MAX_PASSWORD_LENGTH)
+}
+
+/**
+ * Check if china personal id number is formatted correctly
+ * 
+ * @param {string} pid
+ * @returns {boolean}
+ */
+export function validatePid(pid: string): boolean {
+  let rx = new RegExp(CONST.INPUT_VALIDATORS.PID)
+  return rx.test(pid)
+}
+
+/**
+ * Check if locale code is formatted correctly
+ * 
+ * @param {string} code 
+ * @returns {boolean}
+ */
+export function validateLocale(code: string): boolean {
+  let rx = new RegExp(CONST.INPUT_VALIDATORS.LOCALE)
+  return rx.test(code)
+}
+
+/**
+ * Check if country code is formatted correctly
+ * 
+ * @param {string} code 
+ * @returns {boolean}
+ */
+export function validateCountry(code: string): boolean {
+  let rx = new RegExp(CONST.INPUT_VALIDATORS.COUNTRY)
+  return rx.test(code)
 }
 
 /****************************
  * General purpose functions
  ****************************/
+
+/**
+ * Converts object properties to Mongoose enum (string array)
+ * 
+ * @param {any} obj
+ * @returns {string[]}
+ */
+export function obj2enum(obj: any): string[] {
+  let arr = []
+
+  for (let key in obj) {
+    arr.push(obj[key])
+  }
+
+  return arr
+}
+
+/**
+ * Converts a key-value-pair object to a tuple
+ * 
+ * @param {any} obj
+ * @returns {any[]}
+ */
+export function kvp2tuple(obj: any): any[] {
+  let arr = [],
+    tmp = {}
+
+  for (let key in obj) {
+    arr.push({
+      key,
+      value: obj[key]
+    })
+  }
+
+  let key: string = arr[0].key,
+    value: any = arr[0].value
+
+  return [
+    key,
+    value
+  ]
+}
 
 /**
  * Normalizes number

@@ -9,11 +9,12 @@ import * as debug from 'debug'
 import * as mongoose from 'mongoose'
 
 import * as UTIL from '../../../common/util'
-import * as CONST from '../../../common/values/constants.json'
-import * as JWT from 'jsonwebtoken'
 
 import Log from '../models/LogModel'
 import ILog from '../interfaces/ILog'
+
+import Totp from '../models/TotpModel'
+import ITotp from '../interfaces/ITotp'
 
 /**
  * HelperRouter class
@@ -73,7 +74,6 @@ class HelperRouter {
         }
 
         message += breaker
-        console.log(message)
         res.status(204).send()           
       }
     })
@@ -89,26 +89,48 @@ class HelperRouter {
    * @returns {void}
    */
   public logs = (req: Request, res: Response): void => {
-    let query: object = {},
-      page: number = (req.query.hasOwnProperty('page')) ? parseInt(req.query.page, 10) : 0,
-      count: number = (req.query.hasOwnProperty('count')) ? parseInt(req.query.count, 10) : (<any>CONST).DEFAULT_PAGE_COUNT
-
+    const query = {},
+      page: number = UTIL.getListPageIndex(req),
+      count: number = UTIL.getListCountPerPage(req)
+    
     Log
     .find(query)
-    .limit((<any>CONST).DEFAULT_PAGE_COUNT)
+    .skip(page * count)
+    .limit(count)
     .sort({_id: -1})
     .exec()
     .then((data) => {
       res.status(200).json(data)
     })
     .catch((err) => {
-      res.status(res.statusCode).json(err)
+      res.status(res.statusCode).json({err})
+    })
+  }
+
+  public totp = (req: Request, res: Response): void => {
+    const query = {},
+      page: number = UTIL.getListPageIndex(req),
+      count: number = UTIL.getListCountPerPage(req),
+      match: string = (req.query.hasOwnProperty('match')) ? req.query.match : null
+
+    Totp
+    .find(query)
+    .skip(page * count)
+    .limit(count)
+    .sort({_id: -1})
+    .exec()
+    .then((data) => {
+      res.status(200).json(data)
+    })
+    .catch((err) => {
+      res.status(res.statusCode).json({err})
     })
   }
 
   routes() {
     this.router.purge('/drop/:table', this.drop)
     this.router.get('/logs', this.logs)
+    this.router.get('/totp', this.totp)
   }
 }
 

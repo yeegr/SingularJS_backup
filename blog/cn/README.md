@@ -462,8 +462,6 @@ $ git diff
 
 ![注册支付宝企业账户](https://github.com/yeegr/SingularJS/blob/master/blog/img/alipay_signup.png?raw=true "注册支付宝企业账户")
 
-##### 阿里大于
-
 #### 软件
 
 软件是开发的核心工具。如果说硬件是开发者手中的宝剑，那么软件则是剑法秘笈。没有合适的、趁手的软件，硬件再好也无用武之地。
@@ -679,6 +677,9 @@ SingularJS
 │ ├─┬─modules       // 共享的模块
 │ │ ├───app
 │ │ └───web
+│ ├─┬─options       // 项目设置
+│ │ ├───config      // 项目变量
+│ │ └───constants   // 共享的常量
 │ ├───...
 │ └───util          // 共享的函数
 │
@@ -721,7 +722,7 @@ SingularJS
 │ │ └───src
 │ └───redux
 │
-├─┬─provider        // 服务商用户APP
+├─┬─supplier        // 服务商用户APP
 │ ├─┬─app
 │ │ ├───android
 │ │ └───ios
@@ -731,7 +732,7 @@ SingularJS
 │ │ └───src
 │ └───redux
 │
-└─┬─admin           // 管理员用户APP
+└─┬─platform           // 管理员用户APP
   ├─┬─app
   │ ├───android
   │ └───ios
@@ -742,7 +743,7 @@ SingularJS
   └───redux
 ```
 
-* consumer、provider和admin文件夹下都有redux文件夹，用以统一处理app导航
+* consumer、supplier和platform文件夹下都有redux文件夹，用以统一处理app导航
 * 各级app工程下都有android和ios两个文件夹，用以分别保存Android和iOS代码
 * 各级web工程下都有dev、dist和src三个文件夹，分别用以保存开发环境代码、生产环境代码和源代码
 
@@ -761,6 +762,8 @@ SingularJS
 
 #### Express
 
+##### Restify
+
 #### Mongoose
 
 #### TypeScript
@@ -769,18 +772,19 @@ SingularJS
 
 ACL
 
-consumers
+consumer
 guest
 member
 
-providers
+supplier
 staff
+editor
+supervisor
 manager
 
+platform
 admin
-moderator
-editor
-
+super
 
 SingularJS components
 
@@ -808,3 +812,8 @@ SingularJS components
 
 * singular-list-item (icon? | title (indicator) / view | value? | arrow? / control)
 * singular-table: singular-order-item (title / unit / price)
+
+
+## roadmap
+
+* Replace Express with Restify for the API server

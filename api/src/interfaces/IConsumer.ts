@@ -14,13 +14,17 @@ export default interface IConsumer extends Document {
   mobile: string
   email: string
   avatar: string
+  background: string
   locale?: string
   city?: string
   country?: string
   wechat: string
   updated: number
+  type: string
   roles: [string]
-  verification?: string
+  status: string
+  verified?: Schema.Types.ObjectId
+  expires?: number
   contacts: [Schema.Types.ObjectId]
   posts: [Schema.Types.ObjectId]
   events: [Schema.Types.ObjectId]
@@ -36,16 +40,17 @@ export default interface IConsumer extends Document {
   level?: number
   balance: number
 
-  viewCount: number
+  totalViews: number
   
   // document status
   isNew: boolean
   wasNew: boolean
 
   // methods
-  comparePassword: Function
+  addToArray: Function
+  removeFromArray: Function
   addToList: Function
   removeFromList: Function
   addToBalance: Function
-  loggedIn: Function
+  comparePassword: Function
 }

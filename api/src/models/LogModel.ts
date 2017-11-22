@@ -3,37 +3,42 @@ import {
   model
 } from 'mongoose'
 
-import * as CONST from '../../../common/values/constants.json'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../common/options/constants'
 
 import ILog from '../interfaces/ILog'
 
 let LogSchema: Schema = new Schema({
+  // user id
   creator: {
     type: Schema.Types.ObjectId,
     required: true
   },
+  // user type
   type: {
     type: String,
-    enum: (<any>CONST).USER_TYPES,
+    enum: CONST.USER_TYPES_ENUM,
     required: true
   },
+  // user action
   action: {
     type: String,
-    enum: (<any>CONST).ACTIONS,
     required: true
   },
-  info: {
+  // additional action information
+  misc: {
     type: String,
     default: ''
   },
+  // action target
   target: {
     type: String,
-    enum: (<any>CONST).TARGETS
+    enum: CONST.ACTION_TARGETS_ENUM
   },
+  // target id
   ref: {
     type: Schema.Types.ObjectId
   },
+  // user login device info
   device: {
     type: Object
   }

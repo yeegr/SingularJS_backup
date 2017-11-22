@@ -5,7 +5,7 @@ import {
 
 export default interface IPost extends Document {
   _id: Schema.Types.ObjectId
-  author: Schema.Types.ObjectId
+  creator: Schema.Types.ObjectId
   title: string
   slug: string
   content: string
@@ -14,8 +14,8 @@ export default interface IPost extends Document {
   tags: [string],
   status: string
   updated: number
-  publish: number
-  viewCount: number
+  publish?: number
+  totalViews: number
   totalRating: number,
   comments: [Schema.Types.ObjectId]
   likes: [Schema.Types.ObjectId]
@@ -31,7 +31,8 @@ export default interface IPost extends Document {
   wasNew: boolean
 
   // methods
-  addView: Function
   addToList: Function
   removeFromList: Function
+  addComment: Function
+  removeComment: Function
 }

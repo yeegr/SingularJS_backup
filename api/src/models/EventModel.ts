@@ -3,7 +3,7 @@ import {
   model
 } from 'mongoose'
 
-import * as CONST from '../../../common/values/constants.json'
+import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
 import Consumer from './ConsumerModel'
@@ -21,8 +21,8 @@ let EventSchema: Schema = new Schema({
   ref: {
     type: String,
     required: true,
-    enum: (<any>CONST).USER_TYPES,
-    default: (<any>CONST).USER_TYPES[0]
+    enum: CONST.USER_TYPES_ENUM,
+    default: CONST.USER_TYPES.CONSUMER
   },
   // event title
   title: {
@@ -70,19 +70,19 @@ let EventSchema: Schema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: (<any>CONST).STATUSES.EVENT,
-    default: (<any>CONST).STATUSES.EVENT[0]
+    enum: CONST.EVENT_STATUSES_ENUM,
+    default: CONST.STATUSES.EVENT.EDITING
   },
   // last modified time
   updated: {
     type: Number,
     required: true,
-    default: UTIL.getTimestamp()
+    default: () => UTIL.getTimestamp()
   },
   // publish time
   publish: Number,
   // total number of views
-  viewCount: {
+  totalViews: {
     type: Number,
     default: 0,
     validate: (val:Number) => (val > -1)
@@ -131,19 +131,12 @@ EventSchema.virtual('averageRating').get(function() {
   return Math.round(this.totalRating / this.comments.length * 2) / 2
 })
 
-EventSchema.methods.addView = function() {
-  this.totalRating += 1
-  this.save()
-}
-
 EventSchema.methods.addComment = function(id: Schema.Types.ObjectId, rating: number) {
-  UTIL.addComment(this.comments, this.ratingTotal, id, rating)
-  this.save()
+  UTIL.addComment(this, id, rating)
 }
 
 EventSchema.methods.removeComment = function(id: Schema.Types.ObjectId, rating: number) {
-  UTIL.removeComment(this.comments, this.ratingTotal, id, rating)
-  this.save()
+  UTIL.removeComment(this, id, rating)
 }
 
 EventSchema.pre('save', function(next):void {

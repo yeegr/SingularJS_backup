@@ -3,4 +3,4 @@ declare module "*.json" {
   export default value;
 }
 
-declare module 'passport-totp'
+declare module "@alicloud/sms-sdk"

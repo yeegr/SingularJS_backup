@@ -2,16 +2,15 @@ import * as passport from 'passport'
 import { ExtractJwt, Strategy as JwtStrategy}  from 'passport-jwt'
 import * as passportOAuth2 from 'passport-oauth2'
 import { Strategy as LocalStrategy } from 'passport-local'
-import { Strategy as TotpStrategy } from 'passport-totp'
 
-import * as CONST from '../../../common/values/constants.json'
+import * as CONFIG from '../../../common/options/config'
 
 import Consumer from '../models/ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
 
 passport.use(new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-    secretOrKey: (<any>CONST).JWT_SECRET
+    secretOrKey: CONFIG.JWT_SECRET
   }, (payload, done: Function) => {
     Consumer
     .findById(payload.sub)
@@ -49,7 +48,3 @@ passport.use(new LocalStrategy({
     })
   })
 )
-
-passport.use(new TotpStrategy((user: IConsumer, done: Function) => {
-  
-}))

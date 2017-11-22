@@ -8,8 +8,8 @@ export default interface ILog extends Document {
   creator: Schema.Types.ObjectId
   type: string
   action: string
-  info: string
+  misc?: string
   target?: string
   ref?: Schema.Types.ObjectId
-  device: object
+  device: any
 }
