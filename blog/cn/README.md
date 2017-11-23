@@ -732,7 +732,7 @@ SingularJS
 │ │ └───src
 │ └───redux
 │
-└─┬─platform           // 管理员用户APP
+└─┬─platform        // 管理员用户APP
   ├─┬─app
   │ ├───android
   │ └───ios
@@ -743,7 +743,7 @@ SingularJS
   └───redux
 ```
 
-* consumer、supplier和platform文件夹下都有redux文件夹，用以统一处理app导航
+* consumer、supplier和platform文件夹下都有各自的redux文件夹，用以统一处理app逻辑
 * 各级app工程下都有android和ios两个文件夹，用以分别保存Android和iOS代码
 * 各级web工程下都有dev、dist和src三个文件夹，分别用以保存开发环境代码、生产环境代码和源代码
 

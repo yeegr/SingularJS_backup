@@ -13,6 +13,7 @@ import _HelperRouter from './routers/_HelperRouter'
 
 import ActionRouter from './routers/ActionRouter'
 import ConsumerRouter from './routers/ConsumerRouter'
+import EventRouter from './routers/EventRouter'
 import PostRouter from './routers/PostRouter'
 import CommentRouter from './routers/CommentRouter'
 
@@ -128,14 +129,14 @@ class Server {
     // platform administrator router
     // this.app.use('/api/v1/admin', AdminRouter)
 
-    // service / product supplier router
-    // this.app.use('/api/v1/stores', StoreRouter)
-
     // post router
     this.app.use('/api/v1/posts', PostRouter)
 
     // event router
-    // this.app.use('/api/v1/events', EventRouter)
+    this.app.use('/api/v1/events', EventRouter)
+
+    // store router
+    // this.app.use('/api/v1/stores', StoreRouter)
 
     // product category router
     // this.app.use('/api/v1/categories', CategoryRouter)

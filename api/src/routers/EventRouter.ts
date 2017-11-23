@@ -17,24 +17,24 @@ import Logger from './_Logger'
 import Consumer from '../models/ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
 
-import Post from '../models/PostModel'
-import IPost from '../interfaces/IPost'
+import Event from '../models/EventModel'
+import IEvent from '../interfaces/IEvent'
 
 import CommentRouter from './CommentRouter'
 import IRequest from '../interfaces/IRequest'
 
 /**
- * PostRouter class
+ * EventRouter class
  *
- * @class PostRouter
+ * @class EventRouter
  */
-class PostRouter {
+class EventRouter {
   router: Router
 
   /**
    * Constructor
    *
-   * @class PostRouter
+   * @class EventRouter
    * @constructor
    */
   constructor() {
@@ -45,7 +45,7 @@ class PostRouter {
   /**
    * List search results
    *
-   * @class PostRouter
+   * @class EventRouter
    * @method list
    * @param {Request} req
    * @param {Response} res
@@ -61,7 +61,7 @@ class PostRouter {
       query = Object.assign({}, query, UTIL.getListArray(req, 'in'))
     }
 
-    Post
+    Event
     .find(query)
     .skip(page * count)
     .limit(count)
@@ -83,7 +83,7 @@ class PostRouter {
   /**
    * Gets single entry by param of 'slug'
    *
-   * @class PostRouter
+   * @class EventRouter
    * @method get
    * @param {Request} req
    * @param {Response} res
@@ -92,12 +92,12 @@ class PostRouter {
   public get(req: Request, res: Response): void {
     const slug: string = req.params.slug
     
-    Post
+    Event
     .findOneAndUpdate({slug}, {$inc: {totalViews: 1}}, {new: true})
     .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
-    .then((post: IPost) => {
-      if (post) {
-        res.status(200).json({post})        
+    .then((evt: IEvent) => {
+      if (evt) {
+        res.status(200).json({evt})        
       } else {
         res.status(404).send()
       }
@@ -120,7 +120,7 @@ class PostRouter {
     let slug: string = req.body.slug
 
     if (slug.length > 0) {
-      Post
+      Event
       .findOne({slug})
       .then((data) => {
         let isAvailable: boolean = !(data)
@@ -130,14 +130,14 @@ class PostRouter {
         res.status(res.statusCode).json({err})
       })
     } else {
-      res.status(200).json({ message: 'POST_SLUG_REQUIRED' })
+      res.status(200).json({ message: 'EVENT_SLUG_REQUIRED' })
     }
   }
 
   /**
    * Creates single new entry
    *
-   * @class PostRouter
+   * @class EventRouter
    * @method create
    * @param {Request} req
    * @param {Response} res
@@ -145,32 +145,34 @@ class PostRouter {
    */
   public create(req: Request, res: Response): void {
     const creator: string = req.user._id,
+      ref: string = req.user.type,
       title: string = req.body.title,
       slug: string = req.body.slug,
-      content: string = req.body.content,
+      description: string = req.body.description,
       device: any = req.body.device
 
     if (!title) {
-      res.status(422).json({ message: 'POST_TITLE_REQUIRED' })
+      res.status(422).json({ message: 'EVENT_TITLE_REQUIRED' })
     } else if (!slug) {
-      res.status(422).json({ message: 'POST_SLUG_REQUIRED' })
-    } else if (!content) {
-      res.status(422).json({ message: 'POST_CONTENT_REQUIRED' })
+      res.status(422).json({ message: 'EVENT_SLUG_REQUIRED' })
+    } else if (!description) {
+      res.status(422).json({ message: 'EVENT_DESCRIPTION_REQUIRED' })
     } else {
-      const post = new Post(Object.assign({
-        creator
+      const evt = new Event(Object.assign({
+        creator,
+        ref
       }, req.body))
 
-      post
+      evt
       .save()
-      .then((data: IPost) => {
+      .then((data: IEvent) => {
         res.status(201).json({data})
         
         new Logger({
           creator,
           type: 'CONSUMER',
           action: 'CREATE',
-          target: 'POST',
+          target: 'EVENT',
           ref: data._id,
           device
         })
@@ -184,7 +186,7 @@ class PostRouter {
   /**
    * Updates entry by params of 'slug'
    *
-   * @class PostRouter
+   * @class EventRouter
    * @method update
    * @param {Request} req
    * @param {Response} res
@@ -196,9 +198,9 @@ class PostRouter {
       slug: string = req.params.slug,
       device: any = req.body.device
     
-    Post
+    Event
     .findOneAndUpdate({creator, slug}, req.body, {new: true})
-    .then((data: IPost) => {
+    .then((data: IEvent) => {
       if (data) {
         res.status(200).json({data})
         
@@ -206,7 +208,7 @@ class PostRouter {
           creator: user._id,
           type: 'CONSUMER',
           action: 'UPDATE',
-          target: 'POST',
+          target: 'EVENT',
           ref: data._id,
           device
         })
@@ -222,7 +224,7 @@ class PostRouter {
   /**
    * Deletes entry by params of 'slug'
    *
-   * @class PostRouter
+   * @class EventRouter
    * @method delete
    * @param {Request} req
    * @param {Response} res
@@ -234,9 +236,9 @@ class PostRouter {
       slug: string = req.params.slug,
       device: any = req.body.device
 
-    Post
+    Event
     .findOneAndRemove({creator, slug})
-    .then((data: IPost) => {
+    .then((data: IEvent) => {
       if (data) {
         res.status(204).end()
         
@@ -244,7 +246,7 @@ class PostRouter {
           creator: user._id,
           type: 'CONSUMER',
           action: 'DELETE',
-          target: 'POST',
+          target: 'EVENT',
           ref: data._id,
           device
         })        
@@ -267,13 +269,13 @@ class PostRouter {
   public attach(req: IRequest, res: Response, next: NextFunction): void {
     const slug: string = req.params.slug
     
-    Post
+    Event
     .findOne({slug})
     .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
-    .then((post: IPost) => {
+    .then((evt: IEvent) => {
       req.ref = {
-        type: 'POST',
-        data: post
+        type: 'EVENT',
+        data: evt
       }
 
       next()
@@ -322,8 +324,8 @@ class PostRouter {
 }
 
 // export
-const postRouter = new PostRouter()
-postRouter.routes()
-const thisRouter = postRouter.router
+const eventRouter = new EventRouter()
+eventRouter.routes()
+const thisRouter = eventRouter.router
 
 export default thisRouter

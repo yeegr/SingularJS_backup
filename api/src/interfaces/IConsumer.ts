@@ -9,10 +9,10 @@ export default interface IConsumer extends Document {
   password: string
   name: string
   gender?: number
-  pid?: string
-  intro?: string
   mobile: string
   email: string
+  pid?: string
+  intro?: string
   avatar: string
   background: string
   locale?: string

@@ -1,5 +1,7 @@
 export const PROJECT_TITLE: string = 'SingularJS'
 
+export const DEFAULT_COUNTRY_CODE: string = 'CN'
+
 export const COOKIE_SECRET: string = 'cookie_secret'
 export const JWT_SECRET: string = 'jwt_secret_key'
 

@@ -69,13 +69,13 @@ let PostSchema: Schema = new Schema({
   totalViews: {
     type: Number,
     default: 0,
-    validate: (value: Number) => (value > -1)
+    validate: (val: Number) => (val > -1)
   },
   // total rating
   totalRating: {
     type: Number,
     default: 0,
-    validate: (value: Number) => (value > -1)
+    validate: (val: Number) => (val > -1)
   },
   // user comments
   comments: [{
@@ -102,6 +102,7 @@ let PostSchema: Schema = new Schema({
     type: Number,
     default: 0
   },
+  // total number of downloads by user
   totalDownloads: {
     type: Number,
     default: 0
@@ -149,7 +150,7 @@ PostSchema.methods.removeFromList = function(key: string, id: Schema.Types.Objec
 }
 
 /**
- * Adds a comment to the post
+ * Adds a comment to post
  *
  * @class PostSchema
  * @method addComment
@@ -162,7 +163,7 @@ PostSchema.methods.addComment = function(id: Schema.Types.ObjectId, rating: numb
 }
 
 /**
- * Removes a comment to the post
+ * Removes a comment from post
  *
  * @class PostSchema
  * @method removeComment
@@ -204,7 +205,7 @@ PostSchema.post('save', function(doc: IPost) {
         user.addToList('posts', doc._id)
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       console.log(err)
     })
   }

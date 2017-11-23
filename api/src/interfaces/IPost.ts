@@ -18,10 +18,11 @@ export default interface IPost extends Document {
   totalViews: number
   totalRating: number,
   comments: [Schema.Types.ObjectId]
-  likes: [Schema.Types.ObjectId]
-  dislikes: [Schema.Types.ObjectId]
-  saves: [Schema.Types.ObjectId]
-  shares: [Schema.Types.ObjectId]
+  totalLikes: number
+  totalDislikes: number
+  totalSaves: number
+  totalShares: number
+  totalDownloads: number
 
   // virtual fields
   averageRating: number
@@ -35,4 +36,5 @@ export default interface IPost extends Document {
   removeFromList: Function
   addComment: Function
   removeComment: Function
+  addCount: Function
 }

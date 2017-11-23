@@ -1,7 +1,8 @@
 
 /**
  * Converts object properties to Mongoose enum (string array)
- * 
+ *
+ *
  * @param {any} obj
  * @returns {string[]}
  */
@@ -48,7 +49,7 @@ interface IInputValidators {
   LOCALE: string
   MOBILE: string
   PID: string
-  PID_LENGTH: number  
+  PID_LENGTH: number
 }
 
 export const INPUT_VALIDATORS: IInputValidators = {
@@ -267,8 +268,32 @@ interface IStatuses {
     PENDING: string
     APPROVED: string
     PUBLISHED: string
+    CONCLUDED: string
     SUSPENDED: string
     EXPIRED: string
+  },
+  SET: {
+    ACCEPTING: string
+    FILLED: string
+    PASTDUE: string
+    CONCLUDED: string
+    SUSPENDED: string
+  },
+  SIGNUP: {
+    PENDING: string
+    APPROVED: string
+    REJECTED: string
+  }
+  PAYMENT: {
+    PENDING: string
+    PROCESSING: string
+    SUCCESS: string
+    VERIFIED: string
+    FAILED: string
+    CANCELED: string
+    DUPLICATED: string
+    NETWORK: string
+    UNKNOWN: string
   }
 }
 
@@ -290,14 +315,58 @@ export const STATUSES: IStatuses = {
     PENDING: 'pending',
     APPROVED: 'approved',
     PUBLISHED: 'published',
+    CONCLUDED: 'concluded',
     SUSPENDED: 'suspended',
     EXPIRED: 'expired'
+  },
+  SET: {
+    ACCEPTING: 'accepting',
+    FILLED: 'filled',
+    PASTDUE: 'pastdue',
+    CONCLUDED: 'concluded',
+    SUSPENDED: 'suspended'
+  },
+  SIGNUP: {
+    PENDING: 'pending',
+    APPROVED: 'approved',
+    REJECTED: 'rejected',
+  },
+  PAYMENT: {
+    PENDING: 'pending',
+    PROCESSING: 'processing',
+    SUCCESS: 'success',
+    VERIFIED: 'verified',
+    FAILED: 'failed',
+    CANCELED: 'canceled',
+    DUPLICATED: 'duplicated',
+    NETWORK: 'network connection error',
+    UNKNOWN: 'unknown'
   }
 }
 
 export const USER_STATUSES_ENUM = obj2enum(STATUSES.USER)
 export const POST_STATUSES_ENUM = obj2enum(STATUSES.POST)
 export const EVENT_STATUSES_ENUM = obj2enum(STATUSES.EVENT)
+export const SET_STATUSES_ENUM = obj2enum(STATUSES.SET)
+export const SIGNUP_STATUSES_ENUM = obj2enum(STATUSES.SIGNUP)
+export const PAYMENT_STATUSES_ENUM = obj2enum(STATUSES.PAYMENT)
+
+/**
+ * Payment methods
+ */
+interface IPaymentMethods {
+  CASH: string
+  ALIPAY: string
+  WECHAT: string
+}
+
+export const PAYMENT_METHODS: IPaymentMethods = {
+  CASH: 'cash',
+  ALIPAY: 'Alipay',
+  WECHAT: 'WeChat_Pay'
+}
+
+export const PAYMENT_METHODS_ENUM = obj2enum(PAYMENT_METHODS)
 
 /**
  * Consumer user default handle prefix
@@ -305,7 +374,7 @@ export const EVENT_STATUSES_ENUM = obj2enum(STATUSES.EVENT)
 export const CONSUMER_HANDLE_PREFIX: string = 'User_'
 
 /**
- * Default number of list items per page 
+ * Default number of list items per page
  */
 export const DEFAULT_PAGE_COUNT: number = 10
 

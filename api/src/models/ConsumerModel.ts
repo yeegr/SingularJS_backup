@@ -6,6 +6,7 @@ import {
 import * as bcrypt from 'bcrypt-nodejs'
 import * as moment from 'moment'
 
+import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
@@ -41,29 +42,17 @@ let ConsumerSchema: Schema = new Schema({
     maxlength: CONST.INPUT_LIMITS.MAX_NAME_LENGTH,
     trim: true
   },
-// user gender / sex
+  // user gender / sex
   gender: {
     type: Number,
     validate: (val: number) => (val > -1)
   },
-// Chinese personal id number
-  pid: {
-    type: String,
-    default: '',
-    validation: (val: string) => UTIL.validatePid(val),
-    trim: true
-  },
-// user self introduction
-  intro: {
-    type: String,
-    minlength: 2,
-    trim: true
-  },
-// mobile phone number
+  // mobile phone number
   mobile: {
     type: String,
     default: '',
-    trim: true
+    trim: true,
+    validation: (val: string) => UTIL.validateMobile(val)
   },
   // user email address
   email: {
@@ -72,6 +61,19 @@ let ConsumerSchema: Schema = new Schema({
     lowercase: true,
     trim: true,
     validation: (val: string) => UTIL.validateEmail(val)
+  },
+  // Chinese personal id number
+  pid: {
+    type: String,
+    default: '',
+    trim: true,
+    validation: (val: string) => UTIL.validatePid(val)
+  },
+  // user self introduction
+  intro: {
+    type: String,
+    minlength: 2,
+    trim: true
   },
   // user avatar url
   avatar: {
@@ -99,6 +101,7 @@ let ConsumerSchema: Schema = new Schema({
   // current user location
   country: {
     type: String,
+    default: CONFIG.DEFAULT_COUNTRY_CODE,
     minlength: 2,
     maxlength: 2,
     trim: true,
@@ -144,7 +147,7 @@ let ConsumerSchema: Schema = new Schema({
   expires: {
     type: Number
   },
-  // other users 
+  // other users
   contacts: [{
     type: Schema.Types.ObjectId,
     ref: 'Consumer'
@@ -212,7 +215,7 @@ let ConsumerSchema: Schema = new Schema({
   totalViews: {
     type: Number,
     default: 0,
-    validation: (value: number) => (value > -1)
+    validation: (val: number) => (val > -1)
   }
 }, {
   toObject: {
@@ -273,7 +276,7 @@ ConsumerSchema.methods.addToArray = function(key: string, target: string, ref: S
 
 ConsumerSchema.methods.saveCountToTarget = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function, step: number = 1): void {
   let TargetModel = UTIL.selectDataModel(target)
-  
+
   TargetModel
   .findById(ref)
   .then((data: any) => {
@@ -307,7 +310,7 @@ ConsumerSchema.methods.saveCountToTarget = function(key: string, target: string,
 ConsumerSchema.methods.removeFromArray = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function): void {
   let arr = this[key],
     index = arr.findIndex((e: IPointer) => (e.ref.toString() == ref.toString() && e.target === target))
-  
+
   if (index > -1) {
     arr.splice(index, 1)
 
@@ -326,7 +329,8 @@ ConsumerSchema.methods.removeFromArray = function(key: string, target: string, r
 
 /**
  * Balances user account
- * 
+\*
+ *
  * @class ConsumerSchema
  * @method addToBalance
  * @param {number} subTotal
@@ -340,9 +344,10 @@ ConsumerSchema.methods.addToBalance = function(subTotal: number): number {
 }
 
 /**
- * Hash incoming password with and 
+ * Hash incoming password with and
  * compare it to stored password hash
- * 
+ *
+ *
  * @class ConsumerSchema
  * @method comparePassword
  * @param {string} candidatePassword
@@ -365,17 +370,17 @@ ConsumerSchema.pre('save', function(next: Function): void {
     bcrypt
     .genSalt(10, (err: Error, salt: string) => {
       if (err) { return next(err) }
-      
+
       // encrypt password with salt
       bcrypt.hash(user.password, salt, null, (err, hash) => {
         if (err) { return next(err) }
-  
+
         // overwrite plain text password with encrypted password
         user.password = hash
 
         next()
       })
-    })  
+    })
   } else {
     UTIL.setUpdateTime(user, ['handle', 'password', 'name', 'gender', 'intro', 'email', 'mobile', 'avatar', 'background'])
     user.wasNew = user.isNew
