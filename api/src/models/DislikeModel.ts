@@ -40,6 +40,15 @@ let DislikeSchema: Schema = new Schema({
   }
 })
 
+DislikeSchema.index({ 
+  creator: 1,
+  ref: 1,
+  type: 1,
+  target: 1
+}, {
+  unique: true
+})
+
 DislikeSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
@@ -52,15 +61,6 @@ DislikeSchema.virtual('TargetModel', {
   localField: 'target',
   foreignField: '_id',
   justOne: true
-})
-
-DislikeSchema.index({ 
-  creator: 1,
-  ref: 1,
-  type: 1,
-  target: 1
-}, {
-  unique: true
 })
 
 DislikeSchema.post('save', function(action: IAction) {

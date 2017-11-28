@@ -1,10 +1,8 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
+
+import Point from './PointModel'
 
 import IAgenda from '../interfaces/IAgenda'
-import Point from './PointModel'
 
 let AgendaSchema: Schema = new Schema({
   day: {

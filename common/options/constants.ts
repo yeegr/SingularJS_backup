@@ -6,61 +6,14 @@
  * @param {any} obj
  * @returns {string[]}
  */
-export function obj2enum(obj: any): string[] {
-  let arr = []
+function obj2enum(obj: any): string[] {
+  let arr: string[] = []
 
   for (let key in obj) {
     arr.push(obj[key])
   }
 
   return arr
-}
-
-
-/**
- * Form input limits
- */
-interface IInputLimits {
-  MIN_HANDLE_LENGTH: number
-  MAX_HANDLE_LENGTH: number
-  MIN_PASSWORD_LENGTH: number
-  MAX_PASSWORD_LENGTH: number
-  MIN_NAME_LENGTH: number
-  MAX_NAME_LENGTH: number
-}
-
-export const INPUT_LIMITS: IInputLimits = {
-  MIN_HANDLE_LENGTH: 2,
-  MAX_HANDLE_LENGTH: 20,
-  MIN_PASSWORD_LENGTH: 6,
-  MAX_PASSWORD_LENGTH: 16,
-  MIN_NAME_LENGTH: 0,
-  MAX_NAME_LENGTH: 50
-}
-
-/**
- * Form input validators
- */
-interface IInputValidators {
-  COUNTRY: string
-  CURRENCY: string
-  EMAIL: string
-  IP_ADDRESS: string
-  LOCALE: string
-  MOBILE: string
-  PID: string
-  PID_LENGTH: number
-}
-
-export const INPUT_VALIDATORS: IInputValidators = {
-  COUNTRY: '^[A-Z]{2}$',
-  CURRENCY: '\\d{0,10}.\\d{0,2}',
-  EMAIL: '^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}$',
-  IP_ADDRESS: '\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b',
-  LOCALE: '^[a-z]{2}(_[A-Z]{2})?$',
-  MOBILE: '^[\\d]{7,15}$',
-  PID: '^(\\d{17})+(\\d|X)$',
-  PID_LENGTH: 18
 }
 
 /**

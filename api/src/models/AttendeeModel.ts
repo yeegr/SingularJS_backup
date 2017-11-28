@@ -1,8 +1,7 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
+import * as validator from 'validator'
 
+import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
@@ -38,7 +37,7 @@ let AttendeeSchema: Schema = new Schema({
     type: String,
     default: '',
     trim: true,
-    validation: (val: string) => UTIL.validateMobile(val)
+    validation: (val: string) => validator.isMobilePhone(val, CONFIG.DEFAULT_LOCALE)
   },
   // user email address
   email: {
@@ -46,19 +45,19 @@ let AttendeeSchema: Schema = new Schema({
     default: '',
     lowercase: true,
     trim: true,
-    validation: (val: string) => UTIL.validateEmail(val)
+    validation: (val: string) => validator.isEmail(val)
   },
   // Chinese personal id number
   pid: {
     type: String,
     default: '',
     trim: true,
-    validation: (val: string) => UTIL.validatePid(val)
+    validation: (val: string) => UTIL.isChinaPid(val)
   },
   // signup cost
   cost: {
     type: Number,
-    validation: (val: number) => UTIL.validateCurrency(val)
+    validation: (val: number) => validator.isCurrency(val.toString())
   },
   // user signup status
   status: {

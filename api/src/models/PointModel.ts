@@ -1,10 +1,6 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
 import IPoint from '../interfaces/IPoint'
@@ -43,7 +39,7 @@ let PointSchema: Schema = new Schema({
     minlength: 2,
     maxlength: 2,
     trim: true,
-    validator: (code: string) => UTIL.validateCountry(code)
+    validator: (code: string) => UTIL.isCountryCode(code)
   }
 }, {
   _id: false

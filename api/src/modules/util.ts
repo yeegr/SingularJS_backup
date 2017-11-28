@@ -1,14 +1,8 @@
-import {
-  Document,
-  Schema,
-  NativeError
-} from 'mongoose'
-
-import {
-  Request
-} from 'express'
+import { Document, Schema, NativeError } from 'mongoose'
+import { Request } from 'express'
 
 import * as CONST from '../../../common/options/constants'
+import * as ERR from '../../../common/options/errors'
 
 import IConsumer from '../interfaces/IConsumer'
 import Consumer from '../models/ConsumerModel'
@@ -16,6 +10,19 @@ import Consumer from '../models/ConsumerModel'
 import Post from '../models/PostModel'
 import Event from '../models/EventModel'
 
+import Like from '../models/LikeModel'
+import Dislike from '../models/DislikeModel'
+import Save from '../models/SaveModel'
+import Follow from '../models/FollowModel'
+import Share from '../models/ShareModel'
+import Download from '../models/DownloadModel'
+
+/**
+ * Formats MongoDB native error to string
+ * 
+ * @param {NativeError} err 
+ * @param {string} action 
+ */
 export function formatError(err: NativeError, action: string): any {
   let message = ''
 
@@ -25,7 +32,7 @@ export function formatError(err: NativeError, action: string): any {
       case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
       case CONST.USER_ACTIONS.CONSUMER.SAVE:
       case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
-        message = 'ACTION_DUPLICATED'
+        message = ERR.ACTION.DUPLICATED_ACTION
       break
     }
   }
@@ -34,9 +41,52 @@ export function formatError(err: NativeError, action: string): any {
 }
 
 /**
- * Returns a data model object by its name
+ * Returns data model from action
+ * 
+ * @param {string} action
+ * @returns {any}
+ */
+export function getModelFromAction(action: string): any {
+  let model: any = null
+
+  switch (action.toUpperCase()) {
+    case CONST.USER_ACTIONS.CONSUMER.LIKE:
+    case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
+      model = Like
+    break
+
+    case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
+    case CONST.USER_ACTIONS.CONSUMER.UNDO_DISLIKE:
+      model = Dislike
+    break
+
+    case CONST.USER_ACTIONS.CONSUMER.SAVE:
+    case CONST.USER_ACTIONS.CONSUMER.UNDO_SAVE:
+      model = Save
+    break
+
+    case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
+    case CONST.USER_ACTIONS.CONSUMER.UNFOLLOW:
+      model = Follow
+    break
+
+    case CONST.USER_ACTIONS.CONSUMER.SHARE:
+      model = Share
+    break
+
+    case CONST.USER_ACTIONS.CONSUMER.DOWNLOAD:
+      model = Download
+    break
+  }
+
+  return model
+}
+
+/**
+ * Returns data model from name
  * 
  * @param {string} key 
+ * @returns {any}
  */
 export function getModelFromKey(key: string): any {
   let modelName = key.toLowerCase(),
@@ -71,6 +121,12 @@ export function getModelFromKey(key: string): any {
   return dataModel
 }
 
+/**
+ * Returns data model name from object key
+ * 
+ * @param {string} path
+ * @returns {string}
+ */
 export function getModelFromPath(path: string): string {
   let key = path.toLowerCase(),
     model = ''
@@ -99,6 +155,10 @@ export function getModelFromPath(path: string): string {
 
   return model
 }
+
+/***********************************
+ * Universal functions for comments
+ ***********************************/
 
 /**
  * Adds a comment to the document comment list
@@ -148,6 +208,33 @@ export function removeComment(doc: any, rating: number): void {
  * Generic functions to retrieve 
  * values from HTTP request
  *******************************/
+
+/**
+ * Sanitize user input to ensure 
+ * certain fields can only be updated via program
+ * 
+ * @export
+ * @param {Document} doc 
+ * @param {string[]]} keys 
+ */
+export function sanitizeInput(model: string, body: any): any {
+  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount,device',
+    keyArray: string[] = []
+  
+  switch (model) {
+    case CONST.ACTION_TARGETS.POST:
+      keyArray = keyList.split(',')
+    break
+  }
+
+  keyArray.forEach((key: string) => {
+    if (body.hasOwnProperty(key)) {
+      delete body[key]
+    }
+  })
+
+  return body
+}
 
 /**
  * Gets value by key
@@ -337,7 +424,22 @@ export function assembleKeywordRx(str: string, type: string = 'AND'): RegExp {
   }
 }
 
-export function assembleSearchParams(req: Request, query: any = {}, keyFields?: string): any {
+/**
+ * Assembles search parameters
+ * 
+ * @param {Request} req 
+ * @param {any} query 
+ * @param {string} [keyFields]
+ * @returns {ISearchParams} 
+ */
+interface ISearchParams {
+  query: any      // search query
+  skip: number    // page index
+  limit: number   // items per list page
+  sort: any       // sort key and order
+}
+
+export function assembleSearchParams(req: Request, query: any = {}, keyFields?: string): ISearchParams {
   let page: number = getListPageIndex(req),
     count: number = getListCountPerPage(req),
     sort: any = getListSort(req)
@@ -353,6 +455,10 @@ export function assembleSearchParams(req: Request, query: any = {}, keyFields?: 
     sort
   }
 }
+
+/*******************************
+ * Miscellaneous functions 
+ *******************************/
 
 /**
  * Returns the timestamp from MongoDB ObjectId
@@ -382,31 +488,4 @@ export function setUpdateTime(doc: Document, keys: string[]): void {
   if (toUpdate) {
     (<any>doc).updated = this.getTimestamp()
   }
-}
-
-/**
- * Sanitize user input to ensure 
- * certain fields can only be updated via program
- * 
- * @export
- * @param {Document} doc 
- * @param {string[]]} keys 
- */
-export function sanitizeInput(model: string, body: any): any {
-  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount,device',
-    keyArray: string[] = []
-  
-  switch (model) {
-    case CONST.ACTION_TARGETS.POST:
-      keyArray = keyList.split(',')
-    break
-  }
-
-  keyArray.forEach((key: string) => {
-    if (body.hasOwnProperty(key)) {
-      delete body[key]
-    }
-  })
-
-  return body
 }

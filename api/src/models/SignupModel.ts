@@ -1,7 +1,4 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'

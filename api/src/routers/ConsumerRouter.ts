@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
 import '../config/passport'
 import * as validator from 'validator'
+import * as randomstring from 'randomstring'
 
 import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
@@ -55,7 +56,7 @@ class ConsumerRouter {
     Consumer
     .find(params.query)
     .skip(params.skip)
-    .limit(params.count)
+    .limit(params.limit)
     .sort(params.sort)
     .select(CONST.PUBLIC_CONSUMER_INFO_LIST)
     .exec()
@@ -166,10 +167,10 @@ class ConsumerRouter {
         break
   
         case 'mobile':
-          // value = UTIL.normalizeMobile(value)
+          value = UTIL.normalizeMobile(value)
 
           // validate mobile phone number
-          if (validator.isMobilePhone(value, 'any')) {
+          if (validator.isMobilePhone(value, CONFIG.DEFAULT_LOCALE)) {
             query = {mobile: value}
           }
         break
@@ -428,7 +429,10 @@ class ConsumerRouter {
   public initTotp = (req: Request, res: Response, next: NextFunction): void => {
     let totp: ITotp = new Totp((<any>Object).assign({
       action: CONST.USER_ACTIONS.CONSUMER.LOGIN,
-      code: UTIL.getRandomNumericString(4)
+      code: randomstring.generate({
+        length: CONFIG.TOTP_CODE_LENGTH,
+        charset: CONFIG.TOTP_CODE_CHARSET
+      })
     }, req.body))
 
     totp

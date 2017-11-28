@@ -18,13 +18,6 @@ import IAction from '../interfaces/IAction'
 import Log from '../models/LogModel'
 import ILog from '../interfaces/ILog'
 
-import Like from '../models/LikeModel'
-import Dislike from '../models/DislikeModel'
-import Save from '../models/SaveModel'
-import Follow from '../models/FollowModel'
-import Share from '../models/ShareModel'
-import Download from '../models/DownloadModel'
-
 /**
  * ActionRouter class
  *
@@ -56,7 +49,7 @@ class ActionRouter {
   public create = (req: IRequest, res: Response) => {
     const creator: Schema.Types.ObjectId = req.user._id,
       ref: string = req.user.ref,
-      type: string = UTIL.capitalizeFirstLetter(req.body.type.toLowerCase()),
+      type: string = UTIL.capitalizeFirstLetter(req.body.type),
       target: Schema.Types.ObjectId = req.body.target,
       action: string = req.body.action,
       device: any = req.body.device
@@ -69,10 +62,10 @@ class ActionRouter {
       res.status(400).json({ message: ERR.ACTION.ACTION_TARGET_NOT_FOUND })
     } else if (!action) {
       res.status(422).json({ message: ERR.ACTION.ACTION_TYPE_REQUIRED })
-    } else if (CONST.CONSUMER_USER_ACTIONS_ENUM.indexOf(action) < 0) {
+    } else if (ref === CONST.USER_TYPES.CONSUMER && CONST.CONSUMER_USER_ACTIONS_ENUM.indexOf(action) < 0) {
       res.status(400).json({ message: ERR.ACTION.ACTION_TYPE_NOT_FOUND })
     } else {
-      let ActionModel = this.getModelFromAction(action),
+      let ActionModel = UTIL.getModelFromAction(action),
         TargetModel = UTIL.getModelFromKey(type),
         query = {
           creator,
@@ -154,7 +147,7 @@ class ActionRouter {
                     this.logger(log)
                   })
                   .catch((err: Error) => {
-                    res.status(422).json(UTIL.formatError(err, action))
+                    res.status(res.statusCode).json(UTIL.formatError(err, action))
                   })
                 break
 
@@ -177,48 +170,6 @@ class ActionRouter {
 
   private logger = (log: any) => {
     new Logger(log)
-  }
-
-  /**
-   * Gets document store key from action
-   * 
-   * @param {string} action
-   * @returns {any}
-   */
-  private getModelFromAction(action: string): any {
-    let model: any = null
-
-    switch (action.toUpperCase()) {
-      case CONST.USER_ACTIONS.CONSUMER.LIKE:
-      case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
-        model = Like
-      break
-
-      case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
-      case CONST.USER_ACTIONS.CONSUMER.UNDO_DISLIKE:
-        model = Dislike
-      break
-
-      case CONST.USER_ACTIONS.CONSUMER.SAVE:
-      case CONST.USER_ACTIONS.CONSUMER.UNDO_SAVE:
-        model = Save
-      break
-
-      case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
-      case CONST.USER_ACTIONS.CONSUMER.UNFOLLOW:
-        model = Follow
-      break
-
-      case CONST.USER_ACTIONS.CONSUMER.SHARE:
-        model = Share
-      break
-
-      case CONST.USER_ACTIONS.CONSUMER.DOWNLOAD:
-        model = Download
-      break
-    }
-
-    return model
   }
 
   routes() {

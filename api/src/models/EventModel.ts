@@ -1,7 +1,5 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
+import * as validator from 'validator'
 
 import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
@@ -10,12 +8,13 @@ import * as UTIL from '../../../common/util'
 import Consumer from './ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
 
-import IEvent from '../interfaces/IEvent'
-
 import Agenda from './AgendaModel'
+import Attendee from './AttendeeModel'
 import Photo from './PhotoModel'
 import Point from './PointModel'
-import Attendee from './AttendeeModel'
+import Subset from './SubsetModel'
+
+import IEvent from '../interfaces/IEvent'
 
 let EventSchema: Schema = new Schema({
   // organizer id
@@ -97,7 +96,7 @@ let EventSchema: Schema = new Schema({
     minlength: 2,
     maxlength: 2,
     trim: true,
-    validator: (code: string) => UTIL.validateCountry(code)
+    validator: (code: string) => UTIL.isCountryCode(code)
   },
   // set wether event is opened to public signup
   isPublic: {
@@ -150,50 +149,20 @@ let EventSchema: Schema = new Schema({
       type: String,
       default: '',
       trim: true,
-      validation: (val: string) => UTIL.validateMobile(val)
+      validation: (val: string) => validator.isMobilePhone(val, CONFIG.DEFAULT_LOCALE)
     },
     email: {
       type: String,
       default: '',
       lowercase: true,
       trim: true,
-      validation: (val: string) => UTIL.validateEmail(val)
+      validation: (val: string) => validator.isEmail(val)
     }
   }],
   // event schedule
   schedule: [Agenda],
   // repeating groups
-  subsets: [{
-    _id: false,
-    title: {
-      type: String
-    },
-    misc: {
-      type: String
-    },
-    startDate: {
-      type: Number,
-      required: true
-    },
-    deadline: {
-      type: Number
-    },
-    // rally location
-    rallyPoint: Point,
-    // rally time in minutes
-    rallyTime: {
-      type: Number,
-      min: 0,
-      max: 1439
-    },
-    status: {
-      type: String,
-      enum: CONST.SET_STATUSES_ENUM,
-      default: CONST.STATUSES.SET.ACCEPTING
-    },
-    // attendees | participants
-    // attendees: [Attendee]
-  }],
+  subsets: [Subset],
   // publish time
   publish: {
     type: Number

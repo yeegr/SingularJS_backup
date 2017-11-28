@@ -40,6 +40,15 @@ let LikeSchema: Schema = new Schema({
   }
 })
 
+LikeSchema.index({ 
+  creator: 1,
+  ref: 1,
+  type: 1,
+  target: 1
+}, {
+  unique: true
+})
+
 LikeSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
@@ -52,15 +61,6 @@ LikeSchema.virtual('TargetModel', {
   localField: 'target',
   foreignField: '_id',
   justOne: true
-})
-
-LikeSchema.index({ 
-  creator: 1,
-  ref: 1,
-  type: 1,
-  target: 1
-}, {
-  unique: true
 })
 
 LikeSchema.post('save', function(action: IAction) {

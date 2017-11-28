@@ -1,7 +1,4 @@
-import {
-  Document,
-  Schema
-} from 'mongoose'
+import { Document, Schema } from 'mongoose'
 
 export default interface ILog extends Document {
   _id: Schema.Types.ObjectId

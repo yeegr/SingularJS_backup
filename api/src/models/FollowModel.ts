@@ -40,6 +40,15 @@ let FollowSchema: Schema = new Schema({
   }
 })
 
+FollowSchema.index({ 
+  creator: 1,
+  ref: 1,
+  type: 1,
+  target: 1
+}, {
+  unique: true
+})
+
 FollowSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',

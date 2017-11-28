@@ -1,16 +1,12 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
-import Logger from '../modules/logger'
-import IPost from '../interfaces/IPost'
-
 import Consumer from './ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
+
+import IPost from '../interfaces/IPost'
 
 let PostSchema: Schema = new Schema({
   // creator

@@ -1,7 +1,4 @@
-import {
-  Document,
-  Schema
-} from 'mongoose'
+import { Document, Schema } from 'mongoose'
 
 import IAttendee from './IAttendee'
 

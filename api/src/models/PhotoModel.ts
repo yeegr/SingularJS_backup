@@ -1,7 +1,4 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
+import { Schema, model } from 'mongoose'
 
 import IPhoto from '../interfaces/IPhoto'
 

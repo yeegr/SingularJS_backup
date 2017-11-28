@@ -29,6 +29,7 @@
     "@types/passport-jwt": "^3.0.0",
     "@types/passport-local": "^1.0.32",
     "@types/passport-oauth2": "^1.4.2",
+    "@types/randomstring": "^1.1.6",
     "@types/validator": "^6.3.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
@@ -66,6 +67,7 @@
     "passport-oauth2": "^1.4.0",
     "passport-wechat": "^2.0.4",
     "path": "^0.12.7",
+    "randomstring": "^1.1.5",
     "request": "^2.83.0",
     "validator": "^9.1.2"
   }

@@ -1,10 +1,7 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
-
+import { Schema, model } from 'mongoose'
 import * as bcrypt from 'bcrypt-nodejs'
 import * as moment from 'moment'
+import * as validator from 'validator'
 
 import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
@@ -19,8 +16,8 @@ let ConsumerSchema: Schema = new Schema({
     default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
     required: true,
     unique: true,
-    minlength: CONST.INPUT_LIMITS.MIN_HANDLE_LENGTH,
-    maxlength: CONST.INPUT_LIMITS.MAX_HANDLE_LENGTH,
+    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
     trim: true,
     index: true
   },
@@ -34,7 +31,7 @@ let ConsumerSchema: Schema = new Schema({
   name: {
     type: String,
     default: '',
-    maxlength: CONST.INPUT_LIMITS.MAX_NAME_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_NAME_LENGTH,
     trim: true
   },
   // user gender / sex
@@ -47,7 +44,7 @@ let ConsumerSchema: Schema = new Schema({
     type: String,
     default: '',
     trim: true,
-    validation: (val: string) => UTIL.validateMobile(val)
+    validation: (val: string) => validator.isMobilePhone(val, CONFIG.DEFAULT_LOCALE)
   },
   // user email address
   email: {
@@ -55,14 +52,14 @@ let ConsumerSchema: Schema = new Schema({
     default: '',
     lowercase: true,
     trim: true,
-    validation: (val: string) => UTIL.validateEmail(val)
+    validation: (val: string) => validator.isEmail(val)
   },
   // Chinese personal id number
   pid: {
     type: String,
     default: '',
     trim: true,
-    validation: (val: string) => UTIL.validatePid(val)
+    validation: (val: string) => UTIL.isChinaPid(val)
   },
   // user self introduction
   intro: {
@@ -86,7 +83,7 @@ let ConsumerSchema: Schema = new Schema({
     minlength: 2,
     maxlength: 5,
     trim: true,
-    validator: (code: string) => UTIL.validateLocale(code)
+    validator: (code: string) => UTIL.isLocaleCode(code)
   },
   // current user location
   city: {
@@ -100,7 +97,7 @@ let ConsumerSchema: Schema = new Schema({
     minlength: 2,
     maxlength: 2,
     trim: true,
-    validator: (code: string) => UTIL.validateCountry(code)
+    validator: (code: string) => UTIL.isCountryCode(code)
   },
   // WeChat OpenID
   wechat: {

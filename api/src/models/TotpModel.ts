@@ -1,9 +1,6 @@
-import {
-  Schema,
-  model
-} from 'mongoose'
-
+import { Schema, model } from 'mongoose'
 import * as moment from 'moment'
+import * as validator from 'validator'
 
 import * as CONST from '../../../common/options/constants'
 
@@ -42,7 +39,7 @@ let TotpSchema: Schema = new Schema({
     type: String,
     trim: true,
     default: '',
-    match: CONST.INPUT_VALIDATORS.IP_ADDRESS
+    match: (val: string) => validator.isIP(val)
   }
 })
 

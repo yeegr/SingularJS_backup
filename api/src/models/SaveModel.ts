@@ -40,6 +40,15 @@ let SaveSchema: Schema = new Schema({
   }
 })
 
+SaveSchema.index({ 
+  creator: 1,
+  ref: 1,
+  type: 1,
+  target: 1
+}, {
+  unique: true
+})
+
 SaveSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
@@ -52,15 +61,6 @@ SaveSchema.virtual('TargetModel', {
   localField: 'target',
   foreignField: '_id',
   justOne: true
-})
-
-SaveSchema.index({ 
-  creator: 1,
-  ref: 1,
-  type: 1,
-  target: 1
-}, {
-  unique: true
 })
 
 SaveSchema.post('save', function(action: IAction) {

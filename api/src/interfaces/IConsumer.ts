@@ -1,7 +1,4 @@
-import {
-  Document,
-  Schema
-} from 'mongoose'
+import { Document, Schema } from 'mongoose'
 
 export default interface IConsumer extends Document {
   [key: string]: any
