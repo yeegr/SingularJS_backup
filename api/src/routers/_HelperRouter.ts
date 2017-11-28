@@ -103,7 +103,8 @@ class HelperRouter {
       res.status(200).json(data)
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
 
@@ -123,7 +124,8 @@ class HelperRouter {
       res.status(200).json(data)
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
 

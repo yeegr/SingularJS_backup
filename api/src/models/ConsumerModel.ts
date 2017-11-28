@@ -12,11 +12,6 @@ import * as UTIL from '../../../common/util'
 
 import IConsumer from '../interfaces/IConsumer'
 
-import Pointer from './PointerModel'
-import IPointer from '../interfaces/IPointer'
-
-import Logger from '../routers/_Logger'
-
 let ConsumerSchema: Schema = new Schema({
   // user handle or user name
   handle: {
@@ -120,7 +115,7 @@ let ConsumerSchema: Schema = new Schema({
     default: () => UTIL.getTimestamp()
   },
   // user type
-  type: {
+  ref: {
     type: String,
     default: CONST.USER_TYPES.CONSUMER,
     enum: [CONST.USER_TYPES.CONSUMER],
@@ -152,51 +147,41 @@ let ConsumerSchema: Schema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Consumer'
   }],
-  // posts authored by user
-  posts: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Post'
-  }],
-  // events authored by user
-  events: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Event'
-  }],
-  // orders placed by user
-  orders: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Order'
-  }],
-  // comments written by user
-  comments: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Comment'
-  }],
-  // contents liked (voted up) by user
-  likes: [Pointer],
-  // contents liked (voted down) by user
-  dislikes: [Pointer],
-  // contents saved by user
-  saves: [Pointer],
-  // contents shared by user
-  shares: [Pointer],
-  // contents downloaded by user
-  downloads: [Pointer],
-  // other users being followed by user
-  followings: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Consumer'
-  }],
-  // other users following user
-  followers: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Consumer'
-  }],
-  // other users following user
-  feedbacks: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Feedback'
-  }],
+  // number of posts authored by user
+  postCount: {
+    type: Number,
+    default: 0
+  },
+  // number of events created by user
+  eventCount: {
+    type: Number,
+    default: 0
+  },
+  // number events signuped by user
+  signupCount: {
+    type: Number,
+    default: 0
+  },
+  // number of orders placed by user
+  orderCount: {
+    type: Number,
+    default: 0
+  },
+  // number of comments posted by user
+  commentCount: {
+    type: Number,
+    default: 0
+  },
+  // number of followers | fans
+  totalFollowers: {
+    type: Number,
+    default: 0
+  },
+  // number of followings
+  totalFollowings: {
+    type: Number,
+    default: 0
+  },
   // user points
   points: {
     type: Number,
@@ -212,7 +197,7 @@ let ConsumerSchema: Schema = new Schema({
     default: 0
   },
   // user information retrieved
-  totalViews: {
+  viewCount: {
     type: Number,
     default: 0,
     validation: (val: number) => (val > -1)
@@ -227,109 +212,126 @@ let ConsumerSchema: Schema = new Schema({
 })
 
 /**
- * Adds an item to specified list
- *
- * @class ConsumerSchema
- * @method addToList
- * @param {string} key
- * @param {Schema.Types.ObjectId} id
- * @return void
+ * Posts authored by user
  */
-ConsumerSchema.methods.addToList = function(key: string, id: Schema.Types.ObjectId, callback?: Function): void {
-  UTIL.addToList(this, key, id, callback)
-}
+ConsumerSchema.virtual('posts', {
+  ref: 'Post',
+  localField: '_id',
+  foreignField: 'creator'
+})
 
 /**
- * Removes an item from specified list
- *
- * @class ConsumerSchema
- * @method removeFromList
- * @param {string} key
- * @param {Schema.Types.ObjectId} id
- * @returns void
+ * Events created by user
  */
-ConsumerSchema.methods.removeFromList = function(key: string, id: Schema.Types.ObjectId, callback?: Function): void {
-  UTIL.removeFromList(this, key, id, callback)
-}
+ConsumerSchema.virtual('events', {
+  ref: 'Event',
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-ConsumerSchema.methods.addToArray = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function): void {
-  let arr = this[key],
-    index = arr.findIndex((e: IPointer) => (e.ref.toString() == ref.toString() && e.target === target))
+/**
+ * Events signuped by user
+ */
+ConsumerSchema.virtual('signups', {
+  ref: 'Signup',
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-  if (index < 0) {
-    arr.push({ref, target})
+/**
+ * Orders placed by user
+ */
+ConsumerSchema.virtual('orders', {
+  ref: 'Order',
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-    this
-    .save()
-    .then((user: IConsumer) => {
-      this.saveCountToTarget(key, target, ref, callback)
-    })
-    .catch((err: Error) => {
-      console.log(err)
-    })
-  } else if (key === 'shares' || key === 'downloads') {
-    this.saveCountToTarget(key, target, ref, callback)
-  } else if (callback) {
-    callback()
-  }
-}
+/**
+ * Comments posted by user
+ */
+ConsumerSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-ConsumerSchema.methods.saveCountToTarget = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function, step: number = 1): void {
-  let TargetModel = UTIL.selectDataModel(target)
+/**
+ * Likes
+ */
+ConsumerSchema.virtual('likes', {
+  ref: CONST.ACTION_MODELS.LIKE,
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-  TargetModel
-  .findById(ref)
-  .then((data: any) => {
-    switch (key) {
-      case 'likes':
-        data.addCount('totalLikes', callback, step)
-      break
+/**
+ * Dislikes
+ */
+ConsumerSchema.virtual('dislikes', {
+  ref: CONST.ACTION_MODELS.DISLIKE,
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-      case 'dislikes':
-        data.addCount('totalDislikes', callback, step)
-      break
+/**
+ * Saves
+ */
+ConsumerSchema.virtual('saves', {
+  ref: CONST.ACTION_MODELS.SAVE,
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-      case 'saves':
-        data.addCount('totalSaves', callback, step)
-      break
+/**
+ * Dislikes
+ */
+ConsumerSchema.virtual('shares', {
+  ref: CONST.ACTION_MODELS.SHARE,
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-      case 'shares':
-        data.addCount('totalShares', callback, step)
-      break
+/**
+ * Downloads
+ */
+ConsumerSchema.virtual('downloads', {
+  ref: CONST.ACTION_MODELS.DOWNLOAD,
+  localField: '_id',
+  foreignField: 'creator',
+  justOne: false
+})
 
-      case 'downloads':
-        data.addCount('totalDownloads', callback, step)
-      break
-    }
-  })
-  .catch((err: Error) => {
-    console.log(err)
-  })
-}
+/**
+ * Followers
+ */
+ConsumerSchema.virtual('followers', {
+  ref: CONST.ACTION_MODELS.FOLLOW,
+  localField: '_id',
+  foreignField: 'following',
+  justOne: false
+})
 
-ConsumerSchema.methods.removeFromArray = function(key: string, target: string, ref: Schema.Types.ObjectId, callback?: Function): void {
-  let arr = this[key],
-    index = arr.findIndex((e: IPointer) => (e.ref.toString() == ref.toString() && e.target === target))
-
-  if (index > -1) {
-    arr.splice(index, 1)
-
-    this
-    .save()
-    .then((user: IConsumer) => {
-      this.saveCountToTarget(key, target, ref, callback, -1)
-    })
-    .catch((err: Error) => {
-      console.log(err)
-    })
-  } else if (callback) {
-    callback()
-  }
-}
+/**
+ * Followings
+ */
+ConsumerSchema.virtual('followings', {
+  ref: CONST.ACTION_MODELS.FOLLOW,
+  localField: '_id',
+  foreignField: 'follower',
+  justOne: false
+})
 
 /**
  * Balances user account
-\*
  *
  * @class ConsumerSchema
  * @method addToBalance
@@ -346,7 +348,6 @@ ConsumerSchema.methods.addToBalance = function(subTotal: number): number {
 /**
  * Hash incoming password with and
  * compare it to stored password hash
- *
  *
  * @class ConsumerSchema
  * @method comparePassword

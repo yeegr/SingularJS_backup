@@ -6,17 +6,25 @@ import {
 import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
 
+import Logger from '../modules/logger'
+import IPost from '../interfaces/IPost'
+
 import Consumer from './ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
-
-import IPost from '../interfaces/IPost'
 
 let PostSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
-    ref: 'Consumer',
+    ref: CONST.USER_TYPES.CONSUMER,
     required: true
+  },
+  // post slug
+  slug: {
+    type: String,
+    default: '',
+    unique: true,
+    lowercase: true
   },
   // post title
   title: {
@@ -24,19 +32,10 @@ let PostSchema: Schema = new Schema({
     default: '',
     required: true
   },
-  // post slug
-  slug: {
-    type: String,
-    default: '',
-    required: true,
-    unique: true,
-    lowercase: true
-  },
   // post content
   content: {
     type: String,
-    default: '',
-    required: true
+    default: ''
   },
   // post excerpt
   excerpt: {
@@ -50,6 +49,10 @@ let PostSchema: Schema = new Schema({
   },
   // post tags
   tags: [String],
+  // publish date
+  publish: {
+    type: Number
+  },
   // post status
   status: {
     type: String,
@@ -63,47 +66,45 @@ let PostSchema: Schema = new Schema({
     required: true,
     default: () => UTIL.getTimestamp()
   },
-  // publish time
-  publish: Number,
-  // total number of views
-  totalViews: {
-    type: Number,
-    default: 0,
-    validate: (val: Number) => (val > -1)
-  },
   // total rating
   totalRating: {
     type: Number,
     default: 0,
     validate: (val: Number) => (val > -1)
   },
-  // user comments
-  comments: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Comment'
-  }],
+  // total number of comments
+  commentCount: {
+    type: Number,
+    default: 0
+  },
+  // total number of views
+  viewCount: {
+    type: Number,
+    default: 0,
+    validate: (val: Number) => (val > -1)
+  },
   // total number of likes (voted up)
-  totalLikes: {
+  likeCount: {
     type: Number,
     default: 0
   },
   // total number of dislikes (voted down)
-  totalDislikes: {
+  dislikeCount: {
     type: Number,
     default: 0
   },
   // total number of saves by other users
-  totalSaves: {
+  saveCount: {
     type: Number,
     default: 0
   },
   // total number of shares by users
-  totalShares: {
+  shareCount: {
     type: Number,
     default: 0
   },
   // total number of downloads by user
-  totalDownloads: {
+  downloadCount: {
     type: Number,
     default: 0
   }
@@ -117,98 +118,72 @@ let PostSchema: Schema = new Schema({
 })
 
 /**
+ * Comments posted by users
+ */
+PostSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Likes submitted by users
+ */
+PostSchema.virtual('likes', {
+  ref: CONST.ACTION_MODELS.LIKE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Disikes submitted by users
+ */
+PostSchema.virtual('dislikes', {
+  ref: CONST.ACTION_MODELS.DISLIKE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Instances of savings by users
+ */
+PostSchema.virtual('saves', {
+  ref: CONST.ACTION_MODELS.SAVE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Instances of sharings by users
+ */
+PostSchema.virtual('shares', {
+  ref: CONST.ACTION_MODELS.SHARE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Instances of downloads by users
+ */
+PostSchema.virtual('downloads', {
+  ref: CONST.ACTION_MODELS.DOWNLOAD,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
  * Creates a virtual 'averageRating' property
  */
 PostSchema.virtual('averageRating').get(function() {
-  return Math.round(this.totalRating / this.comments.length * 2) / 2
+  return (this.commentCount > 0) ? Math.round(this.totalRating / this.commentCount * 2) / 2 : null
 })
 
-/**
- * add item to list
- *
- * @class ConsumerSchema
- * @method addToList
- * @param {string} key
- * @param {Schema.Types.ObjectId} id
- * @return void
- */
-PostSchema.methods.addToList = function(key: string, id: Schema.Types.ObjectId): void {
-  UTIL.addToList(this, key, id)
-}
-
-/**
- * delete item from list
- *
- * @class ConsumerSchema
- * @method removeFromList
- * @param {string} key
- * @param {Schema.Types.ObjectId} id
- * @returns void
- */
-PostSchema.methods.removeFromList = function(key: string, id: Schema.Types.ObjectId): void {
-  UTIL.removeFromList(this, key, id)
-}
-
-/**
- * Adds a comment to post
- *
- * @class PostSchema
- * @method addComment
- * @param {Schema.Types.ObjectId} id
- * @param {number} rating
- * @returns {void}
- */
-PostSchema.methods.addComment = function(id: Schema.Types.ObjectId, rating: number) {
-  UTIL.addComment(this, id, rating)
-}
-
-/**
- * Removes a comment from post
- *
- * @class PostSchema
- * @method removeComment
- * @param {Schema.Types.ObjectId} id
- * @param {number} rating
- * @returns {void}
- */
-PostSchema.methods.removeComment = function(id: Schema.Types.ObjectId, rating: number) {
-  UTIL.removeComment(this, id, rating)
-}
-
-/**
- * Adds 1 (or -1) to counter
- *
- * @class PostSchema
- * @method addCount
- * @param {string} key
- * @param {Function} [callback]
- * @param {number} [step = 1]
- * @returns {void}
- */
-PostSchema.methods.addCount = function(key: string, callback?: Function, step: number = 1) {
-  UTIL.addCount(this, key, callback, step)
-}
-
 PostSchema.pre('save', function(next: Function): void {
-  UTIL.setUpdateTime(this, ['title', 'content', 'excerpt', 'hero', 'tags'])
+  // Set last modified time when values of only following props are changed
+  UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish'])
   this.wasNew = this.isNew
 
   next()
-})
-
-PostSchema.post('save', function(doc: IPost) {
-  if (doc.isNew) {
-    Consumer
-    .findById(doc.creator)
-    .then((user: IConsumer) => {
-      if (user) {
-        user.addToList('posts', doc._id)
-      }
-    })
-    .catch((err: Error) => {
-      console.log(err)
-    })
-  }
 })
 
 export default model<IPost>('Post', PostSchema)

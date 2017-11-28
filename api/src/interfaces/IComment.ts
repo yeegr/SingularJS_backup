@@ -1,17 +1,9 @@
-import {
-  Document,
-  Schema
-} from 'mongoose'
+import IAction from './IAction'
 
-export default interface IComment extends Document {
-  _id: Schema.Types.ObjectId
-  creator: Schema.Types.ObjectId
-  type: string
-  target: string
-  ref: string
+export default interface IComment extends IAction {
   rating?: number
+  diff?: number
   content: string
 
-  isNew: boolean
   wasNew: boolean
 }

@@ -4,7 +4,8 @@ import ILog from '../interfaces/ILog'
 class Logger {
   constructor(obj: any) {
     let log: ILog = new LogModel(obj)
-    log.save((err: Error) => {
+
+    log.save().then().catch((err: Error) => {
       console.log(err)
     })
   }

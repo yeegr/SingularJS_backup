@@ -1,6 +1,7 @@
 import {
   Document,
-  Schema
+  Schema,
+  NativeError
 } from 'mongoose'
 
 import {
@@ -15,12 +16,29 @@ import Consumer from '../models/ConsumerModel'
 import Post from '../models/PostModel'
 import Event from '../models/EventModel'
 
+export function formatError(err: NativeError, action: string): any {
+  let message = ''
+
+  if (err.hasOwnProperty('code') && (<any>err).code === 11000) {
+    switch (action) {
+      case CONST.USER_ACTIONS.CONSUMER.LIKE:
+      case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
+      case CONST.USER_ACTIONS.CONSUMER.SAVE:
+      case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
+        message = 'ACTION_DUPLICATED'
+      break
+    }
+  }
+
+  return {message}
+}
+
 /**
  * Returns a data model object by its name
  * 
  * @param {string} key 
  */
-export function selectDataModel(key: string): any {
+export function getModelFromKey(key: string): any {
   let modelName = key.toLowerCase(),
     dataModel = null
 
@@ -36,123 +54,50 @@ export function selectDataModel(key: string): any {
     case 'event':
       dataModel = Event
     break
-  }
+
+    case 'signup':
+      // dataModel = Signup
+    break
+
+    case 'order':
+      // dataModel = Order
+    break
+
+    case 'comment':
+      dataModel = Comment
+    break
+}
 
   return dataModel
 }
 
-/**
- * Gets document store key from action
- * 
- * @param {string} action
- * @returns {string}
- */
-export function getKeyFromAction(action: string): string {
-  let key: string = null
+export function getModelFromPath(path: string): string {
+  let key = path.toLowerCase(),
+    model = ''
 
-  switch (action) {
-    case CONST.USER_ACTIONS.CONSUMER.LIKE:
-    case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
-      key = 'likes'
+  switch (key) {
+    case 'posts':
+      model = 'Post'
     break
 
-    case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
-    case CONST.USER_ACTIONS.CONSUMER.UNDO_DISLIKE:
-      key = 'dislikes'
+    case 'events':
+      model = 'Event'
     break
 
-    case CONST.USER_ACTIONS.CONSUMER.SAVE:
-    case CONST.USER_ACTIONS.CONSUMER.UNDO_SAVE:
-      key = 'saves'
+    case 'signups':
+      model = 'Signup'
     break
 
-    case CONST.USER_ACTIONS.CONSUMER.SHARE:
-      key = 'shares'
+    case 'orders':
+      model = 'Order'
     break
 
-    case CONST.USER_ACTIONS.CONSUMER.DOWNLOAD:
-      key = 'downloads'
-    break
-
-    case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
-    case CONST.USER_ACTIONS.CONSUMER.UNFOLLOW:
-      key = 'followings'
+    case 'comments':
+      model = 'Comment'
     break
   }
 
-  return key
-}
-
-/**
- * Adds a ObjectId to list
- * 
- * @param {any} doc 
- * @param {string} key 
- * @param {Schema.Types.ObjectId} id 
- * @param {Function} [callback]
- * @returns {void} 
- */
-export function addToList(doc: any, key: string, id: Schema.Types.ObjectId, callback?: Function): void {
-  let arr = doc[key]
-
-  if (arr && arr.indexOf(id) < 0) {
-    arr.push(id.toString())
-
-    doc
-    .save()
-    .then((data: any) => {
-      if (key === 'followings') {
-        Consumer
-        .findById(id)
-        .then((user: IConsumer) => {
-          user.addToList('followers', doc._id, callback)
-        })
-      } else if (callback) {
-        callback(true)        
-      }
-    })
-    .catch((err: Error) => {
-      console.log(err)
-    })
-  } else if (callback) {
-    callback()
-  }
-}
-
-/**
- * Removes a ObjectId from list
- * 
- * @param {any} doc 
- * @param {string} key 
- * @param {Schema.Types.ObjectId} id 
- * @param {Function} [callback]
- * @returns {void} 
- */
-export function removeFromList(doc: any, key: string, id: Schema.Types.ObjectId, callback?: Function): void {
-  let arr = doc[key]
-
-  if (arr && arr.indexOf(id) > -1) {
-    arr.splice(arr.indexOf(id), 1)
-
-    doc
-    .save()
-    .then((data: any) => {
-      if (key === 'followings') {
-        Consumer
-        .findById(id)
-        .then((user: IConsumer) => {
-          user.removeFromList('followers', doc._id, callback)
-        })
-      } else if (callback) {
-        callback(true)        
-      }
-    })
-    .catch((err: Error) => {
-      console.log(err)
-    })
-  } else if (callback) {
-    callback()
-  }
+  return model
 }
 
 /**
@@ -164,12 +109,22 @@ export function removeFromList(doc: any, key: string, id: Schema.Types.ObjectId,
  * @param {number} rating 
  * @returns {void} 
  */
-export function addComment(doc: any, id: Schema.Types.ObjectId, rating: number): void {
-  let arr = doc.comments
+export function addComment(doc: any, rating: number): void {
+  doc.totalRating += rating
+  doc.commentCount++
+  doc.save()
+}
 
-  if (arr && arr.indexOf(id) < 0) {
-    arr.push(id)
-    doc.totalRating += rating
+/**
+ * Updates total rating when a comment is updated 
+ * 
+ * @param {any} doc 
+ * @param {number} diff 
+ * @returns {void}
+ */
+export function updateComment(doc: any, diff: number): void {
+  if (diff !== 0) {
+    doc.totalRating += diff
     doc.save()
   }
 }
@@ -183,37 +138,10 @@ export function addComment(doc: any, id: Schema.Types.ObjectId, rating: number):
  * @param {number} rating 
  * @returns {void} 
  */
-export function removeComment(doc: any, id: Schema.Types.ObjectId, rating: number): void {
-  let arr = doc.comments
-
-  if (arr && arr.indexOf(id) > -1) {
-    arr.splice(arr.indexOf(id), 1)
-    doc.totalRating -= rating
-    doc.save()
-  }
-}
-
-/**
- * Adds 1 (or -1) to document counter
- * 
- * @param {any} doc 
- * @param {string} key 
- * @param {Function} [callback] 
- * @param {number} [step = 1]
- */
-export function addCount(doc: any, key: string, callback?: Function, step: number = 1) {
-  doc[key] += step
-
-  doc
-  .save()
-  .then((data: any) => {
-    if (callback) {
-      callback(true)
-    }
-  })
-  .catch((err: Error) => {
-    console.log(err)
-  })
+export function removeComment(doc: any, rating: number): void {
+  doc.totalRating -= rating
+  doc.commentCount--
+  doc.save()
 }
 
 /*******************************
@@ -275,10 +203,10 @@ export function getListSort(req: Request, key: string = 'sortOn'): any {
     prop = getRequestParam(req, key)
 
   if (prop && prop.length > 0) {
-    sort[prop] = this.getListSortOrder(req)
+    sort[prop] = getListSortOrder(req)
   } else {
-    // descending order by object id
-    sort = {_id: -1}
+    // descending order by default sort order
+    sort = CONST.DEFAULT_SORT_ORDER
   }
 
   return sort
@@ -323,8 +251,8 @@ export function getListSortOrder(req: Request, key: string = 'orderBy'): number 
  */
 export function getListArray(req: Request, field: string): any {
   let query: any = {},
-    key: string = this.getPropKey(field),
-    list: string = this.getRequestParam(req, key).replace(/\, /g, ',')
+    key: string = getPropKey(field),
+    list: string = getRequestParam(req, key).replace(/\, /g, ',')
 
   if (list && list.length > 0) {
     query[key] = {}
@@ -364,23 +292,23 @@ export function getPropKey(input: string): string {
  * @returns {any} 
  */
 export function getListKeywordQuery(req: Request, fields: string): any {
-  let query: any = {},
-    keywords = this.getRequestParam(req, 'keywords')
+  let keywords = getRequestParam(req, 'keywords')
 
   if (keywords && keywords.length > 0) {
-    let rx = this.assembleKeywordRx(keywords),
+    let rx = assembleKeywordRx(keywords),
+      $or: any[] = [],
       arr: string[] = fields.trim().split(',')
 
-    query.$or = []
-    
     arr.forEach(key => {
       let tmp: any = {}
       tmp[key.trim()] = rx
-      query.$or.push(tmp)
+      $or.push(tmp)
     })
+
+    return $or
   }
 
-  return query
+  return null
 }
 
 /**
@@ -405,10 +333,26 @@ export function assembleKeywordRx(str: string, type: string = 'AND'): RegExp {
 
     rx += '.*$'
 
-    return new RegExp(rx)    
+    return new RegExp(rx)
   }
 }
 
+export function assembleSearchParams(req: Request, query: any = {}, keyFields?: string): any {
+  let page: number = getListPageIndex(req),
+    count: number = getListCountPerPage(req),
+    sort: any = getListSort(req)
+
+  if (this.isNotUndefinedNullEmpty(keyFields) && this.isNotUndefinedNullEmpty(getRequestParam(req, 'keywords'))) {
+    query.$or = getListKeywordQuery(req, keyFields)
+  }
+
+  return {
+    query,
+    skip: page * count,
+    limit: count,
+    sort
+  }
+}
 
 /**
  * Returns the timestamp from MongoDB ObjectId
@@ -426,16 +370,43 @@ export function getTimeFromObjectId(id: string, isUnix: boolean = true): number 
  * 
  * @export
  * @param {Document} doc 
- * @param {[string]} keys 
+ * @param {string[]]} keys 
  */
-export function setUpdateTime(doc: Document, keys: [string]): void {
+export function setUpdateTime(doc: Document, keys: string[]): void {
   let toUpdate = false
 
-  keys.map((key) => {
+  keys.map((key: string) => {
     toUpdate = (doc.isModified(key)) ? true : toUpdate
   })
 
   if (toUpdate) {
     (<any>doc).updated = this.getTimestamp()
   }
+}
+
+/**
+ * Sanitize user input to ensure 
+ * certain fields can only be updated via program
+ * 
+ * @export
+ * @param {Document} doc 
+ * @param {string[]]} keys 
+ */
+export function sanitizeInput(model: string, body: any): any {
+  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount,device',
+    keyArray: string[] = []
+  
+  switch (model) {
+    case CONST.ACTION_TARGETS.POST:
+      keyArray = keyList.split(',')
+    break
+  }
+
+  keyArray.forEach((key: string) => {
+    if (body.hasOwnProperty(key)) {
+      delete body[key]
+    }
+  })
+
+  return body
 }

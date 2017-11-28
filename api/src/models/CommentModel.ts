@@ -1,16 +1,7 @@
-import {
-  NativeError,
-  Schema,
-  model
-} from 'mongoose'
+import { NativeError, Schema, model } from 'mongoose'
 
 import * as CONST from '../../../common/options/constants'
 import * as UTIL from '../../../common/util'
-
-import Consumer from './ConsumerModel'
-import IConsumer from '../interfaces/IConsumer'
-import Post from './PostModel'
-import IPost from '../interfaces/IPost'
 
 import IComment from '../interfaces/IComment'
 
@@ -18,31 +9,37 @@ let CommentSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
-    ref: 'Consumer',
+    refPath: 'ref',
     required: true
   },
-  // creator user type
-  type: {
+  // user type
+  ref: {
     type: String,
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER,
     required: true
   },
-  // comment target
-  target: {
+  // target model type
+  type: {
     type: String,
     enum: CONST.ACTION_TARGETS_ENUM,
     required: true
   },
-  // comment target reference slug
-  ref: {
-    type: String,
+  // target id
+  target: {
+    type: Schema.Types.ObjectId,
+    refPath: 'type',
     required: true
   },
   // comment rating
   rating: {
     type: Number,
     required: false
+  },
+  // store diff between original and updated ratings
+  diff: {
+    type: Number,
+    default: 0
   },
   // comment content
   content: {
@@ -58,55 +55,66 @@ let CommentSchema: Schema = new Schema({
   }
 })
 
+CommentSchema.virtual('UserModel', {
+  ref: (doc: IComment) => doc.ref,
+  localField: 'creator',
+  foreignField: '_id',
+  justOne: true
+})
+
+CommentSchema.virtual('TargetModel', {
+  ref: (doc: IComment) => doc.type,
+  localField: 'target',
+  foreignField: '_id',
+  justOne: true
+})
 
 CommentSchema.pre('save', function(next: Function) {
-  this.wasNew = this.isNew
-
+  this.wasNew = this.isNew  
   next()
 })
 
-CommentSchema.post('save', function(doc: IComment) {
-  if (doc.wasNew) {
-    let UserModel = UTIL.selectDataModel(doc.type),
-      TargetModel = UTIL.selectDataModel(doc.target)
+CommentSchema.post('save', function(comment: IComment) {
+  let UserModel = UTIL.getModelFromKey(comment.ref),
+    TargetModel = UTIL.getModelFromKey(comment.type),
+    wasNew = this.wasNew
 
-    UserModel
-    .findById(doc.creator)
-    .then((user: any) => {
-      user.addToList('comments', doc._id)
-    })
-    .catch((err: NativeError) => {
-      console.log(err)
-    })
+  TargetModel
+  .findById(comment.target)
+  .then((doc: any) => {
+    if (wasNew) {
+      UTIL.addComment(doc, comment.rating)      
 
-    TargetModel
-    .findById(doc.ref)
-    .then((data: any) => {
-      data.addComment(doc._id, doc.rating)
-    })
-    .catch((err: NativeError) => {
-      console.log(err)
-    })
-  }
-})
-
-CommentSchema.post('remove', function(doc: IComment) {
-  let UserModel = UTIL.selectDataModel(doc.type),
-    TargetModel = UTIL.selectDataModel(doc.target)
-
-  UserModel
-  .findById(doc.creator)
-  .then((user: any) => {
-    user.removeFromList('comments', doc._id)
+      UserModel
+      .findByIdAndUpdate(comment.creator, {$inc: {commentCount: 1}})
+      .then()
+      .catch((err: NativeError) => {
+        console.log(err)
+      })
+    } else {
+      UTIL.updateComment(doc, comment.diff)
+    }
   })
   .catch((err: NativeError) => {
     console.log(err)
   })
+})
 
+CommentSchema.post('findOneAndRemove', function(comment: IComment) {
+  let UserModel = UTIL.getModelFromKey(comment.ref),
+    TargetModel = UTIL.getModelFromKey(comment.type)
+  
   TargetModel
-  .findById(doc.ref)
-  .then((data: any) => {
-    data.removeComment(doc._id, doc.rating)
+  .findById(comment.target)
+  .then((doc: any) => {
+    UTIL.removeComment(doc, comment.rating)
+
+    UserModel
+    .findByIdAndUpdate(comment.creator, {$inc: {commentCount: -1}})
+    .then()
+    .catch((err: NativeError) => {
+      console.log(err)
+    })  
   })
   .catch((err: NativeError) => {
     console.log(err)

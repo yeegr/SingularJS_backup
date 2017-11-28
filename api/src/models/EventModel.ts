@@ -30,12 +30,6 @@ let EventSchema: Schema = new Schema({
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER
   },
-  // event title
-  title: {
-    type: String,
-    default: '',
-    required: true
-  },
   // event slug
   slug: {
     type: String,
@@ -43,6 +37,12 @@ let EventSchema: Schema = new Schema({
     required: true,
     unique: true,
     lowercase: true
+  },
+  // event title
+  title: {
+    type: String,
+    default: '',
+    required: true
   },
   // event description
   description: {
@@ -194,6 +194,10 @@ let EventSchema: Schema = new Schema({
     // attendees | participants
     // attendees: [Attendee]
   }],
+  // publish time
+  publish: {
+    type: Number
+  },
   // current event status
   status: {
     type: String,
@@ -207,47 +211,45 @@ let EventSchema: Schema = new Schema({
     required: true,
     default: () => UTIL.getTimestamp()
   },
-  // publish time
-  publish: Number,
-  // total number of views
-  totalViews: {
-    type: Number,
-    default: 0,
-    validate: (val: Number) => (val > -1)
-  },
   // total rating
   totalRating: {
     type: Number,
     default: 0,
     validate: (val: Number) => (val > -1)
   },
-  // user comments
-  comments: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Comment'
-  }],
+  // total number of comments
+  commentCount: {
+    type: Number,
+    default: 0
+  },
+  // total number of views
+  viewCount: {
+    type: Number,
+    default: 0,
+    validate: (val: Number) => (val > -1)
+  },
   // total number of likes (voted up)
-  totalLikes: {
+  likeCount: {
     type: Number,
     default: 0
   },
   // total number of dislikes (voted down)
-  totalDislikes: {
+  dislikeCount: {
     type: Number,
     default: 0
   },
   // total number of saves by other users
-  totalSaves: {
+  saveCount: {
     type: Number,
     default: 0
   },
   // total number of shares by users
-  totalShares: {
+  shareCount: {
     type: Number,
     default: 0
   },
   // total number of downloads by user
-  totalDownloads: {
+  downloadCount: {
     type: Number,
     default: 0
   }
@@ -261,74 +263,72 @@ let EventSchema: Schema = new Schema({
 })
 
 /**
+ * Comments posted by users
+ */
+EventSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Likes submitted by users
+ */
+EventSchema.virtual('likes', {
+  ref: CONST.ACTION_MODELS.LIKE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Disikes submitted by users
+ */
+EventSchema.virtual('dislikes', {
+  ref: CONST.ACTION_MODELS.DISLIKE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Instances of savings by users
+ */
+EventSchema.virtual('saves', {
+  ref: CONST.ACTION_MODELS.SAVE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Instances of sharings by users
+ */
+EventSchema.virtual('shares', {
+  ref: CONST.ACTION_MODELS.SHARE,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
+ * Instances of downloads by users
+ */
+EventSchema.virtual('downloads', {
+  ref: CONST.ACTION_MODELS.DOWNLOAD,
+  localField: '_id',
+  foreignField: 'target'
+})
+
+/**
  * Creates a virtual 'averageRating' property
  */
 EventSchema.virtual('averageRating').get(function() {
-  return Math.round(this.totalRating / this.comments.length * 2) / 2
+  return (this.commentCount > 0) ? Math.round(this.totalRating / this.commentCount * 2) / 2 : null
 })
 
-/**
- * Adds a comment to event
- *
- * @class PostSchema
- * @method addComment
- * @param {Schema.Types.ObjectId} id
- * @param {number} rating
- * @returns {void}
- */
-EventSchema.methods.addComment = function(id: Schema.Types.ObjectId, rating: number) {
-  UTIL.addComment(this, id, rating)
-}
-
-/**
- * Removes a comment from event
- *
- * @class EventSchema
- * @method removeComment
- * @param {Schema.Types.ObjectId} id
- * @param {number} rating
- * @returns {void}
- */
-EventSchema.methods.removeComment = function(id: Schema.Types.ObjectId, rating: number) {
-  UTIL.removeComment(this, id, rating)
-}
-
-/**
- * Adds 1 (or -1) to counter
- *
- * @class EventSchema
- * @method addCount
- * @param {string} key
- * @param {Function} [callback]
- * @param {number} [step = 1]
- * @returns {void}
- */
-EventSchema.methods.addCount = function(key: string, callback?: Function, step: number = 1) {
-  UTIL.addCount(this, key, callback, step)
-}
-
-EventSchema.pre('save', function(next):void {
-  UTIL.setUpdateTime(this, ['title', 'description', 'excerpt', 'hero', 'tags'])
+EventSchema.pre('save', function(next: Function): void {
+  // Set last modified time when values of only following props are changed
+  UTIL.setUpdateTime(this, ['slug', 'title', 'description', 'excerpt', 'hero', 'location', 'destination', 'notes', 'gears', 'tags', 'city', 'country', 'expenses', 'contacts', 'schedule', 'subsets', 'publish'])
   this.wasNew = this.isNew
 
   next()
-})
-
-EventSchema.post('save', function(doc: IEvent) {
-  if (doc.isNew) {
-    let UserModel = UTIL.selectDataModel(doc.ref)
-
-    UserModel
-    .findById(doc.creator)
-    .then((user: any) => {
-      if (user) {
-        user.addToList('events', doc._id)
-      }
-    })
-    .catch((err: Error) => {
-      console.log(err)
-    })
-  }
 })
 
 export default model<IEvent>('Event', EventSchema)

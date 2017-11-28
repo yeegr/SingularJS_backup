@@ -1,26 +1,29 @@
-import {
-  NextFunction,
-  Request,
-  Response,
-  Router
-} from 'express'
-
+import { NextFunction, Request, Response, Router } from 'express'
 import { Schema, NativeError } from 'mongoose'
 
 import * as passport from 'passport'
 import '../config/passport'
 
 import * as CONST from '../../../common/options/constants'
+import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
-import Logger from './_Logger'
+import Logger from '../modules/logger'
+import IRequest from '../interfaces/IRequest'
 
 import Consumer from '../models/ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
 
+import IAction from '../interfaces/IAction'
+
 import Log from '../models/LogModel'
 import ILog from '../interfaces/ILog'
 
-import IRequest from '../interfaces/IRequest'
+import Like from '../models/LikeModel'
+import Dislike from '../models/DislikeModel'
+import Save from '../models/SaveModel'
+import Follow from '../models/FollowModel'
+import Share from '../models/ShareModel'
+import Download from '../models/DownloadModel'
 
 /**
  * ActionRouter class
@@ -42,76 +45,6 @@ class ActionRouter {
   }
 
   /**
-   * List search results
-   *
-   * @class ActionRouter
-   * @method list
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public list(req: IRequest, res: Response): void {
-    let query: any = {},
-      page: number = UTIL.getListPageIndex(req),
-      count: number = UTIL.getListCountPerPage(req),
-      sort: any = UTIL.getListSort(req),
-      fields: string = UTIL.getRequestParam(req, 'on') || 'content'
-
-    if (UTIL.isNotUndefinedNullEmpty(UTIL.getRequestParam(req, 'in'))) {
-      query = Object.assign(query, UTIL.getListArray(req, 'in'))      
-    }
-      
-    if (UTIL.isNotUndefinedNullEmpty(UTIL.getRequestParam(req, 'keywords'))) {
-      query = Object.assign(query, UTIL.getListKeywordQuery(req, fields))
-    }
-    
-    Log
-    .find(query)
-    .skip(page * count)
-    .limit(count)
-    .sort(sort)
-    .populate('creator', CONST.PUBLIC_CONSUMER_INFO_LIST)
-    .exec()
-    .then((arr) => {
-      if (arr) {
-        res.status(200).json(arr)        
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err) => {
-      res.status(res.statusCode).json({err})
-    })
-  }
-
-  /**
-   * Gets single entry by param of 'slug'
-   *
-   * @class ActionRouter
-   * @method get
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public get(req: Request, res: Response): void {
-    const id: string = req.params.id
-    
-    Log
-    .findById(id)
-    .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
-    .then((log: ILog) => {
-      if (log) {
-        res.status(200).json({log})        
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err) => {
-      res.status(res.statusCode).json({err})
-    })
-  }
-
-  /**
    * Creates single new entry
    *
    * @class ActionRouter
@@ -120,83 +53,175 @@ class ActionRouter {
    * @param {Response} res
    * @return {void}
    */
-  public create(req: IRequest, res: Response) {
-    const creator: string = req.user._id,
-      type: string = req.user.type,
-      target: string = UTIL.capitalizeFirstLetter(req.body.target.toLocaleLowerCase()),
-      ref: Schema.Types.ObjectId = req.body.ref,
+  public create = (req: IRequest, res: Response) => {
+    const creator: Schema.Types.ObjectId = req.user._id,
+      ref: string = req.user.ref,
+      type: string = UTIL.capitalizeFirstLetter(req.body.type.toLowerCase()),
+      target: Schema.Types.ObjectId = req.body.target,
       action: string = req.body.action,
       device: any = req.body.device
 
-    if (!creator || !type) {
-      res.status(422).json({ message: 'ACTION_CREATOR_REQUIRED' })
-    } else if (!type || !ref) {
-      res.status(422).json({ message: 'ACTION_TARGET_REQUIRED' })
+    if (!creator || !ref) {
+      res.status(422).json({ message: ERR.ACTION.ACTION_CREATOR_REQUIRED })
+    } else if (!type || !target) {
+      res.status(422).json({ message: ERR.ACTION.ACTION_TARGET_NOT_SPECIFIED })
+    } else if (CONST.ACTION_TARGETS_ENUM.indexOf(type) < 0) {
+      res.status(400).json({ message: ERR.ACTION.ACTION_TARGET_NOT_FOUND })
     } else if (!action) {
-      res.status(422).json({ message: 'ACTION_NAME_REQUIRED' })
+      res.status(422).json({ message: ERR.ACTION.ACTION_TYPE_REQUIRED })
+    } else if (CONST.CONSUMER_USER_ACTIONS_ENUM.indexOf(action) < 0) {
+      res.status(400).json({ message: ERR.ACTION.ACTION_TYPE_NOT_FOUND })
     } else {
-      let logger: Function = (good2go: boolean = false) => {
-        if (good2go) {
-          let log: ILog = new Log({
-            creator,
-            type,
-            target,
-            ref,
-            action,
-            device
-          })
+      let ActionModel = this.getModelFromAction(action),
+        TargetModel = UTIL.getModelFromKey(type),
+        query = {
+          creator,
+          ref,
+          type,
+          target
+        },
+        log = {
+          creator,
+          ref,
+          type,
+          target,
+          action,
+          device
+        },
+        data = new ActionModel(query)
+
+      /**
+       * Duplidates of 
+       * LIKE, UNDO_LIKE, 
+       * DISLIKE, UNDO_DISLIKE, 
+       * SAVE, UNDO_SAVE, 
+       * FOLLOW, UNFOLLOW
+       * are ignored
+       * 
+       * Duplicates of 
+       * SHARE, Download
+       * are permitted
+       */
+      if (action === CONST.USER_ACTIONS.CONSUMER.SHARE || action === CONST.USER_ACTIONS.CONSUMER.DOWNLOAD) {
+        data
+        .save()
+        .then((act: IAction) => {
+          res.status(res.statusCode).send()
+          this.logger(log)
+        })
+        .catch((err: Error) => {
+          res.status(res.statusCode).send()
+          console.log(err)
+        })
+      } else {
+        TargetModel
+        .findById(target)
+        .select('creator')
+        .then((doc: any) => {
+          if (doc) {
+            if ((<any>creator).equals(doc.creator)) {
+              res.status(422).json({ message: ERR.ACTION.ACTION_NOT_AUTHORIZED})
+            } else {
+              switch (action) {
+                case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
+                case CONST.USER_ACTIONS.CONSUMER.UNDO_DISLIKE:
+                case CONST.USER_ACTIONS.CONSUMER.UNDO_SAVE:
+                case CONST.USER_ACTIONS.CONSUMER.UNFOLLOW:
+                  ActionModel
+                  .findOneAndRemove(query)
+                  .then((act: IAction) => {
+                    if (!act) {
+                      res.status(404).json({ message: ERR.ACTION.CANNOT_UNDO_NON_ACTION })
+                    } else {
+                      res.status(res.statusCode).send()                      
+                      this.logger(log)
+                    }
+                  })
+                  .catch((err: Error) => {
+                    res.status(res.statusCode).send()
+                    console.log(err)
+                  })
+                break
   
-          log
-          .save()
-          .then((data: ILog) => {
-            res.status(201).json({log: data})
-          })
-        } else {
-          res.status(422).json({ message: 'DUPLICATED_ACTION' })
-        }
+                case CONST.USER_ACTIONS.CONSUMER.LIKE:
+                case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
+                case CONST.USER_ACTIONS.CONSUMER.SAVE:
+                case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
+                  data
+                  .save()
+                  .then((act: IAction) => {
+                    res.status(201).send()
+                    this.logger(log)
+                  })
+                  .catch((err: Error) => {
+                    res.status(422).json(UTIL.formatError(err, action))
+                  })
+                break
+
+                default:
+                  res.status(422).json({ message: ERR.ACTION.UNABLE_TO_PERFORM_ACTION })
+                break
+              }
+            }
+          } else {
+            res.status(404).json({ message: ERR.ACTION.ACTION_TARGET_NOT_FOUND })
+          }
+        })
+        .catch((err: Error) => {
+          res.status(404).send()
+          console.log(err)
+        })
       }
-        
-      let CreatorModel = UTIL.selectDataModel(type),
-        key = UTIL.getKeyFromAction(action)
-
-      CreatorModel
-      .findById(creator)
-      .then((user: any) => {
-        switch (action) {
-          case CONST.USER_ACTIONS.CONSUMER.LIKE:
-          case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
-          case CONST.USER_ACTIONS.CONSUMER.SAVE:
-          case CONST.USER_ACTIONS.CONSUMER.SHARE:
-          case CONST.USER_ACTIONS.CONSUMER.DOWNLOAD:
-            user.addToArray(key, target, ref, logger)
-          break
-
-          case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
-          case CONST.USER_ACTIONS.CONSUMER.UNDO_DISLIKE:
-          case CONST.USER_ACTIONS.CONSUMER.UNDO_SAVE:
-            user.removeFromArray(key, target, ref, logger)
-          break
-
-          case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
-            user.addToList(key, ref, logger)
-          break
-
-          case CONST.USER_ACTIONS.CONSUMER.UNFOLLOW:
-            user.removeFromList(key, ref, logger)
-          break
-        }
-      })
-      .catch((err: NativeError) => {
-        console.log(err)
-      })
     }
   }
 
+  private logger = (log: any) => {
+    new Logger(log)
+  }
+
+  /**
+   * Gets document store key from action
+   * 
+   * @param {string} action
+   * @returns {any}
+   */
+  private getModelFromAction(action: string): any {
+    let model: any = null
+
+    switch (action.toUpperCase()) {
+      case CONST.USER_ACTIONS.CONSUMER.LIKE:
+      case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
+        model = Like
+      break
+
+      case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
+      case CONST.USER_ACTIONS.CONSUMER.UNDO_DISLIKE:
+        model = Dislike
+      break
+
+      case CONST.USER_ACTIONS.CONSUMER.SAVE:
+      case CONST.USER_ACTIONS.CONSUMER.UNDO_SAVE:
+        model = Save
+      break
+
+      case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
+      case CONST.USER_ACTIONS.CONSUMER.UNFOLLOW:
+        model = Follow
+      break
+
+      case CONST.USER_ACTIONS.CONSUMER.SHARE:
+        model = Share
+      break
+
+      case CONST.USER_ACTIONS.CONSUMER.DOWNLOAD:
+        model = Download
+      break
+    }
+
+    return model
+  }
 
   routes() {
-    this.router.get('/', this.list)
-    this.router.get('/:id', this.get)
-
     // create route
     this.router.post('/', passport.authenticate('jwt', {
       session: false

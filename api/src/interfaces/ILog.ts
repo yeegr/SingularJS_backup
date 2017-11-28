@@ -6,10 +6,10 @@ import {
 export default interface ILog extends Document {
   _id: Schema.Types.ObjectId
   creator: Schema.Types.ObjectId
-  type: string
+  ref: string
+  type?: string
+  target?: Schema.Types.ObjectId
   action: string
   misc?: string
-  target?: string
-  ref?: Schema.Types.ObjectId
   device: any
 }

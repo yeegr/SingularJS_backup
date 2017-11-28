@@ -1,8 +1,8 @@
 import { Request } from 'express'
 
 export default interface IRequest extends Request {
-  ref: {
+  referrer: {
     type: string
-    data: any
+    slug: string
   }
 }

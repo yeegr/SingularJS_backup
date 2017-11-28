@@ -72,10 +72,11 @@ interface IUserTypes {
   PLATFORM: string
 }
 
+// Use model names for referencing
 export const USER_TYPES: IUserTypes = {
-  CONSUMER: 'CONSUMER',
-  SUPPLIER: 'SUPPLIER',
-  PLATFORM: 'PLATFORM'
+  CONSUMER: 'Consumer',
+  SUPPLIER: 'Supplier',
+  PLATFORM: 'Platform'
 }
 
 export const USER_TYPES_ENUM: string[] = obj2enum(USER_TYPES)
@@ -129,6 +130,11 @@ export const PLATFORM_USER_ROLES_ENUM: string[] = obj2enum(USER_ROLES.PLATFORM)
  * User action types
  */
 interface IUserActions {
+  ALL: {
+    CREATE: string
+    UPDATE: string
+    DELETE: string
+  }
   CONSUMER: {
     CREATE: string
     UPDATE: string
@@ -174,6 +180,11 @@ interface IUserActions {
 }
 
 export const USER_ACTIONS: IUserActions = {
+  ALL: {
+    CREATE: 'CREATE',
+    UPDATE: 'UPDATE',
+    DELETE: 'DELETE'    
+  },
   CONSUMER: {
     CREATE: 'CREATE',
     UPDATE: 'UPDATE',
@@ -226,6 +237,7 @@ export const PLATFORM_USER_ACTIONS_ENUM: string[] = obj2enum(USER_ACTIONS.PLATFO
  * User action targets
  */
 interface IActionTargets {
+  [key: string]: string
   CONSUMER: string
   SUPPLIER: string
   PLATFORM: string
@@ -233,6 +245,7 @@ interface IActionTargets {
   EVENT: string
   PRODUCT: string
   ORDER: string
+  COMMENT: string
 }
 
 export const ACTION_TARGETS: IActionTargets = {
@@ -242,10 +255,35 @@ export const ACTION_TARGETS: IActionTargets = {
   POST: 'Post',
   EVENT: 'Event',
   PRODUCT: 'Product',
-  ORDER: 'Order'
+  ORDER: 'Order',
+  COMMENT: 'Comment'
 }
 
 export const ACTION_TARGETS_ENUM: string[] = obj2enum(ACTION_TARGETS)
+
+/**
+ * Action models
+ */
+interface IActionModels {
+  [key: string]: string
+  LIKE: string
+  DISLIKE: string
+  SAVE: string
+  SHARE: string
+  DOWNLOAD: string
+  FOLLOW: string
+}
+
+export const ACTION_MODELS: IActionModels = {
+  LIKE: 'Like',
+  DISLIKE: 'Dislike',
+  SAVE: 'Save',
+  SHARE: 'Share',
+  DOWNLOAD: 'Download',
+  FOLLOW: 'Follow'
+}
+
+export const ACTION_MODELS_ENUM: string[] = obj2enum(ACTION_MODELS)
 
 /**
  * Object statuses
@@ -259,7 +297,6 @@ interface IStatuses {
     EDITING: string
     PENDING: string
     APPROVED: string
-    PUBLISHED: string
     SUSPENDED: string
     EXPIRED: string
   }
@@ -267,7 +304,6 @@ interface IStatuses {
     EDITING: string
     PENDING: string
     APPROVED: string
-    PUBLISHED: string
     CONCLUDED: string
     SUSPENDED: string
     EXPIRED: string
@@ -306,7 +342,6 @@ export const STATUSES: IStatuses = {
     EDITING: 'editing',
     PENDING: 'pending',
     APPROVED: 'approved',
-    PUBLISHED: 'published',
     SUSPENDED: 'suspended',
     EXPIRED: 'expired'
   },
@@ -314,7 +349,6 @@ export const STATUSES: IStatuses = {
     EDITING: 'editing',
     PENDING: 'pending',
     APPROVED: 'approved',
-    PUBLISHED: 'published',
     CONCLUDED: 'concluded',
     SUSPENDED: 'suspended',
     EXPIRED: 'expired'
@@ -374,21 +408,44 @@ export const PAYMENT_METHODS_ENUM = obj2enum(PAYMENT_METHODS)
 export const CONSUMER_HANDLE_PREFIX: string = 'User_'
 
 /**
+ * Default expiration time for user token
+ */
+export const USER_TOKEN_EXPIRATION_DURATION: [any, number] = ['days', 90]
+
+/**
  * Default number of list items per page
  */
-export const DEFAULT_PAGE_COUNT: number = 10
+export const DEFAULT_PAGE_COUNT: number = 20
 
 /**
  * Default number of comments to showcase
  */
-export const DEFAULT_COMMENT_COUNT: number = 3
+export const COMMENT_SHOWCASE_COUNT: number = 3
 
 /**
  * Consumer information opened to the public
  */
-export const PUBLIC_CONSUMER_INFO: string = '-_id handle gender avatar status posts events comments likes dislikes saves shares followers followings points level totalViews'
+export const PUBLIC_CONSUMER_INFO: string = 'handle gender avatar status postCount eventCount commentCount likes dislikes saves shares followers followings points level viewCount'
 
 /**
  * Consumer information embeded in lists
  */
-export const PUBLIC_CONSUMER_INFO_LIST: string = '-_id handle gender avatar status followers points level totalViews'
+export const PUBLIC_CONSUMER_INFO_LIST: string = '-_id handle gender avatar status postCount eventCount commentCount points level totalFollowers viewCount'
+
+export const CONSUMER_POST_SHOWCASE_COUNT: number = 3
+
+export const CONSUMER_POST_SHOWCASE_KEYS: string = 'slug title excerpt hero tags'
+
+export const CONSUMER_EVENT_SHOWCASE_COUNT: number = 3
+
+export const CONSUMER_EVENT_SHOWCASE_KEYS: string = 'slug title excerpt hero tags'
+
+export const DEFAULT_SORT_ORDER: any = {
+  'viewCount': -1,
+  '_id': -1
+}
+
+export const COMMENT_PARENT_FIELD_LIST: string = 'creator slug title excerpt comments commentCount totalRating averageRating'
+export const LIKE_PARENT_FIELD_LIST: string = 'creator slug title excerpt likes likeCount'
+
+export const SUBLISTS: string[] = ['likes', 'dislikes', 'saves', 'shares', 'downloads']

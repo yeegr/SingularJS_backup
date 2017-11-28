@@ -1,27 +1,23 @@
-import {
-  NextFunction,
-  Request,
-  Response,
-  Router
-} from 'express'
-
+import { NextFunction, Request, Response, Router } from 'express'
 import { Schema, Types } from 'mongoose'
 
+import * as validator from 'validator'
 import * as passport from 'passport'
 import '../config/passport'
 
+import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
+import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
-import Logger from './_Logger'
+import Logger from '../modules/logger'
+import IRequest from '../interfaces/IRequest'
 
 import Consumer from '../models/ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
 
 import Event from '../models/EventModel'
 import IEvent from '../interfaces/IEvent'
-
-import CommentRouter from './CommentRouter'
-import IRequest from '../interfaces/IRequest'
+import IComment from '../interfaces/IComment';
 
 /**
  * EventRouter class
@@ -43,7 +39,39 @@ class EventRouter {
   }
 
   /**
-   * List search results
+   * Intializes listing
+   *
+   * @class EventRouter
+   * @method search
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public list = (req: Request, res: Response): void => {
+    let handle: string = UTIL.getRequestParam(req, 'author')
+
+    if (handle.length > 0) {
+      Consumer
+      .findOne({handle})
+      .select('_id')
+      .then((user: IConsumer) => {
+        if (user) {
+          this.search(req, res, user._id)
+        } else {
+          res.status(404).json({ message: ERR.USER.USER_NOF_FOUND })
+        }
+      })
+      .catch((err: Error) => {
+        res.status(res.statusCode).send()
+        console.log(err)
+      })
+    } else {
+      this.search(req, res)
+    }
+  }
+
+  /**
+   * Returns listing results
    *
    * @class EventRouter
    * @method list
@@ -51,34 +79,39 @@ class EventRouter {
    * @param {Response} res
    * @return {void}
    */
-  public list(req: Request, res: Response): void {
-    let query: any = {},
-      page: number = UTIL.getListPageIndex(req),
-      count: number = UTIL.getListCountPerPage(req),
-      sort: any = UTIL.getListSort(req)
+  private search = (req: Request, res: Response, creator?: Schema.Types.ObjectId) => {
+    let params = UTIL.assembleSearchParams(req, {
+        status: CONST.STATUSES.EVENT.APPROVED
+      }, 'title excerpt content')
 
-    if (UTIL.isNotUndefinedNullEmpty(UTIL.getRequestParam(req, 'in'))) {
-      query = Object.assign({}, query, UTIL.getListArray(req, 'in'))
+    if (creator) {
+      params.query.creator = creator
     }
 
     Event
-    .find(query)
-    .skip(page * count)
-    .limit(count)
-    .sort(sort)
-    .populate('creator', CONST.PUBLIC_CONSUMER_INFO_LIST)
+    .find(params.query)
+    .skip(params.skip)
+    .limit(params.limit)
+    .sort(params.sort)
+    .populate({
+      path: 'creator',
+      model: CONST.USER_TYPES.CONSUMER,
+      select: CONST.PUBLIC_CONSUMER_INFO_LIST
+    })
+    .lean()
     .exec()
-    .then((arr) => {
-      if (arr) {
-        res.status(200).json(arr)        
+    .then((data: IEvent[]) => {
+      if (data) {
+        res.status(200).json(data)        
       } else {
         res.status(404).send()
       }
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
-    })
-  }
+      res.status(res.statusCode).send()
+      console.log(err)
+    })  
+  }      
 
   /**
    * Gets single entry by param of 'slug'
@@ -89,21 +122,36 @@ class EventRouter {
    * @param {Response} res
    * @return {void}
    */
-  public get(req: Request, res: Response): void {
-    const slug: string = req.params.slug
-    
+  public get = (req: Request, res: Response): void => {
     Event
-    .findOneAndUpdate({slug}, {$inc: {totalViews: 1}}, {new: true})
+    .findOneAndUpdate({
+      slug: req.params.slug,
+      status: CONST.STATUSES.EVENT.APPROVED
+    }, {$inc: {viewCount: 1}}, {new: true})
     .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
-    .then((evt: IEvent) => {
-      if (evt) {
-        res.status(200).json({evt})        
+    .populate({
+      path: 'comments',
+      model: 'Comment',
+      limit: CONST.COMMENT_SHOWCASE_COUNT,
+      options: {
+        sort: {'_id': -1}
+      },
+      populate: {
+        path: 'creator',
+        model: 'Consumer',
+        select: CONST.PUBLIC_CONSUMER_INFO_LIST
+      }
+    })
+    .then((data: IEvent) => {
+      if (data) {
+        res.status(200).json(data)        
       } else {
         res.status(404).send()
       }
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
   
@@ -122,15 +170,16 @@ class EventRouter {
     if (slug.length > 0) {
       Event
       .findOne({slug})
-      .then((data) => {
+      .then((data: IEvent) => {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
       .catch((err) => {
-        res.status(res.statusCode).json({err})
+        res.status(res.statusCode).send()
+        console.log(err)
       })
     } else {
-      res.status(200).json({ message: 'EVENT_SLUG_REQUIRED' })
+      res.status(422).json({ message: ERR.EVENT.EVENT_SLUG_REQUIRED })
     }
   }
 
@@ -143,42 +192,40 @@ class EventRouter {
    * @param {Response} res
    * @return {void}
    */
-  public create(req: Request, res: Response): void {
-    const creator: string = req.user._id,
-      ref: string = req.user.type,
+  public create = (req: Request, res: Response): void => {
+    const user: IConsumer = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      ref: string = user.ref,
       title: string = req.body.title,
       slug: string = req.body.slug,
-      description: string = req.body.description,
       device: any = req.body.device
 
-    if (!title) {
-      res.status(422).json({ message: 'EVENT_TITLE_REQUIRED' })
-    } else if (!slug) {
-      res.status(422).json({ message: 'EVENT_SLUG_REQUIRED' })
-    } else if (!description) {
-      res.status(422).json({ message: 'EVENT_DESCRIPTION_REQUIRED' })
+    if (!creator || validator.isEmpty(ref)) {
+      res.status(422).json({ message: ERR.EVENT.EVENT_AUTHOR_REQUIRED })
+    } else if (!title || validator.isEmpty(title)) {
+      res.status(422).json({ message: ERR.EVENT.EVENT_TITLE_REQUIRED })
     } else {
-      const evt = new Event(Object.assign({
-        creator,
-        ref
-      }, req.body))
+      const evt = new Event(Object.assign({}, {
+        creator
+      }, UTIL.sanitizeInput(CONST.ACTION_TARGETS.EVENT, req.body)))
 
       evt
       .save()
       .then((data: IEvent) => {
-        res.status(201).json({data})
+        res.status(201).json(data)
         
         new Logger({
           creator,
-          type: 'CONSUMER',
-          action: 'CREATE',
-          target: 'EVENT',
-          ref: data._id,
+          ref,
+          action: CONST.USER_ACTIONS.CONSUMER.CREATE,
+          type: CONST.ACTION_TARGETS.EVENT,
+          target: data._id,
           device
         })
       })
       .catch((err) => {
-        res.status(res.statusCode).json({err})
+        res.status(res.statusCode).send()
+        console.log(err)
       })
     }
   }
@@ -192,35 +239,153 @@ class EventRouter {
    * @param {Response} res
    * @return {void}
    */
-  public update(req: Request, res: Response): void {
+  public update = (req: Request, res: Response): void => {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
+      ref: string = user.ref,
+      slug: string = req.params.slug,
+      title: string = req.body.title,
+      device: any = req.body.device,
+      body: any = UTIL.sanitizeInput(CONST.ACTION_TARGETS.EVENT, req.body)
+
+    if (!creator || validator.isEmpty(ref)) {
+      res.status(422).json({ message: ERR.EVENT.EVENT_AUTHOR_REQUIRED })
+    } else if (title && validator.isEmpty(title)) {
+      res.status(422).json({ message: ERR.EVENT.EVENT_TITLE_REQUIRED })
+    } else {
+      Event
+      .findOneAndUpdate({creator, slug}, body, {new: true})
+      .then((data: IEvent) => {
+        if (data) {
+          res.status(200).json(data)
+          
+          new Logger({
+            creator: user._id,
+            ref: CONST.USER_TYPES.CONSUMER,
+            action: CONST.USER_ACTIONS.CONSUMER.UPDATE,
+            type: CONST.ACTION_TARGETS.EVENT,
+            target: data._id,
+            device
+          })
+        } else {
+          res.status(404).send()
+        }
+      })
+      .catch((err) => {
+        res.status(res.statusCode).send()
+        console.log(err)
+      })
+    }
+  }
+  
+  /**
+   * Submit entry by params of 'slug'
+   *
+   * @class EventRouter
+   * @method submit
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public submit = (req: Request, res: Response): void => {
+    const user: IConsumer = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      ref: string = user.ref,
       slug: string = req.params.slug,
       device: any = req.body.device
-    
+
     Event
-    .findOneAndUpdate({creator, slug}, req.body, {new: true})
+    .findOne({creator, slug})
     .then((data: IEvent) => {
-      if (data) {
-        res.status(200).json({data})
-        
-        new Logger({
-          creator: user._id,
-          type: 'CONSUMER',
-          action: 'UPDATE',
-          target: 'EVENT',
-          ref: data._id,
-          device
-        })
+      if (data.status === CONST.STATUSES.EVENT.PENDING || data.status === CONST.STATUSES.EVENT.APPROVED) {
+        res.status(422).json({ message: ERR.EVENT.EVENT_ALREADY_SUMMITED })
+      } else if (validator.isEmpty(data.slug)) {
+        res.status(422).json({ message: ERR.EVENT.EVENT_TITLE_REQUIRED })
+      } else if (validator.isEmpty(data.slug)) {
+        res.status(422).json({ message: ERR.EVENT.EVENT_SLUG_REQUIRED })
+      } else if (validator.isEmpty(data.content)) {
+        res.status(422).json({ message: ERR.EVENT.EVENT_CONTENT_REQUIRED })
       } else {
-        res.status(404).send()
+        // isPublic ? pending : approved
+        data.status = data.isPublic ? CONST.STATUSES.EVENT.PENDING : CONST.STATUSES.EVENT.APPROVED
+
+        data
+        .save()
+        .then((evt: IEvent) => {
+          res.status(200).json(evt)
+          
+          new Logger({
+            creator,
+            ref,
+            action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
+            type: CONST.ACTION_TARGETS.EVENT,
+            target: evt._id,
+            device
+          })
+        })
+        .catch((err: Error) => {
+          res.status(res.statusCode).send()
+          console.log(err)
+        })
       }
     })
-    .catch((err) => {
-      res.status(res.statusCode).json({err})
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
     })
-  }  
+  }
   
+  /**
+   * Retract entry by params of 'slug'
+   *
+   * @class EventRouter
+   * @method retract
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public retract = (req: Request, res: Response): void => {
+    const user: IConsumer = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      ref: string = user.ref,
+      slug: string = req.params.slug,
+      device: any = req.body.device
+
+    Event
+    .findOne({creator, slug})
+    .then((data: IEvent) => {
+      if (data.status === CONST.STATUSES.EVENT.EDITING) {
+        res.status(422).json({ message: ERR.EVENT.EVENT_CANNOT_BE_RETRACTED })
+      } else {
+        // approval ? pending : approved
+        data.status = CONST.STATUSES.EVENT.EDITING
+
+        data
+        .save()
+        .then((evt: IEvent) => {
+          res.status(200).json(evt)
+          
+          new Logger({
+            creator,
+            ref,
+            action: CONST.USER_ACTIONS.CONSUMER.RETRACT,
+            type: CONST.ACTION_TARGETS.EVENT,
+            target: evt._id,
+            device
+          })
+        })
+        .catch((err: Error) => {
+          res.status(res.statusCode).send()
+          console.log(err)
+        })
+      }
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
   /**
    * Deletes entry by params of 'slug'
    *
@@ -230,7 +395,7 @@ class EventRouter {
    * @param {Response} res
    * @return {void}
    */
-  public delete(req: Request, res: Response): void {
+  public delete = (req: Request, res: Response): void => {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
       slug: string = req.params.slug,
@@ -244,10 +409,10 @@ class EventRouter {
         
         new Logger({
           creator: user._id,
-          type: 'CONSUMER',
-          action: 'DELETE',
-          target: 'EVENT',
-          ref: data._id,
+          ref: CONST.USER_TYPES.CONSUMER,
+          action: CONST.USER_ACTIONS.CONSUMER.DELETE,
+          type: CONST.ACTION_TARGETS.EVENT,
+          target: data._id,
           device
         })        
       } else {
@@ -255,45 +420,112 @@ class EventRouter {
       }
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
-    })
-  }
-
-  /**
-   * Attaches current entry to request
-   * 
-   * @param {IRequest} req 
-   * @param {Response} res 
-   * @param {NextFunction} next 
-   */
-  public attach(req: IRequest, res: Response, next: NextFunction): void {
-    const slug: string = req.params.slug
-    
-    Event
-    .findOne({slug})
-    .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
-    .then((evt: IEvent) => {
-      req.ref = {
-        type: 'EVENT',
-        data: evt
-      }
-
-      next()
-    })
-    .catch((err) => {
+      res.status(res.statusCode).send()
       console.log(err)
     })
   }
 
   /**
-   * Detaches uri from request
+   * Gets comments on item
    * 
+   * @class EventRouter
+   * @method comments
    * @param {IRequest} req 
    * @param {Response} res 
-   * @param {NextFunction} next 
+   * @returns {void}
    */
-  public detach(req: IRequest, res: Response, next: NextFunction): void {
-    delete req.ref
+  public comments = (req: IRequest, res: Response): void => {
+    let slug: string = req.params.slug,
+      opt: any = UTIL.assembleSearchParams(req),
+      match: any = {}
+     
+    if (req.query.hasOwnProperty('keywords') && req.query.keywords.length > 0) {
+      let query: string[] = req.query.keywords.split(',')
+      match = {content: {$in: query}}
+    }
+
+    Event
+    .findOne({slug})
+    .select(CONST.COMMENT_PARENT_FIELD_LIST)
+    .populate('creator', CONST.PUBLIC_CONSUMER_INFO_LIST)
+    .populate({
+      path: 'comments',
+      model: 'Comment',
+      match,
+      options: {
+        sort: {'_id': -1},
+        limit: opt.limit,
+        skip: opt.skip
+      },
+      populate: {
+        path: 'creator',
+        model: 'Consumer',
+        select: CONST.PUBLIC_CONSUMER_INFO_LIST
+      }
+    })
+    .lean()
+    .then((data: IEvent) => {
+      if (data) {
+        res.status(200).json(data)        
+      } else {
+        res.status(404).send()
+      }
+    })
+    .catch((err) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
+  /**
+   * Gets likes, dislikes, saves, shares and downloads of item
+   * 
+   * @class EventRouter
+   * @method sublist
+   * @param {IRequest} req 
+   * @param {Response} res 
+   * @returns {void}
+   */
+  public sublist = (req: IRequest, res: Response): void => {
+    const slug: string = req.params.slug,
+      path: string = req.params.sublist,
+      opt: any = UTIL.assembleSearchParams(req)
+
+    if (CONST.SUBLISTS.indexOf(path) > -1) {
+      Event
+      .findOne({slug})
+      .select(CONST.LIKE_PARENT_FIELD_LIST)
+      .populate('creator', CONST.PUBLIC_CONSUMER_INFO_LIST)
+      .populate({
+        path,
+        model: UTIL.getModelFromPath(path),
+        group: 'type',
+        options: {
+          sort: {'_id': -1},
+          limit: opt.limit,
+          skip: opt.skip
+        },
+        populate: {
+          path: 'creator',
+          model: 'Consumer',
+          select: CONST.PUBLIC_CONSUMER_INFO_LIST
+        }
+      })
+      .lean()
+      .then((data: IEvent) => {
+        if (data) {
+          res.status(200).json(data)        
+        } else {
+          res.status(404).send()
+        }
+      })
+      .catch((err) => {
+        res.status(res.statusCode).send()
+        console.log(err)
+      })
+    } else {
+      res.status(404).json()
+    }
   }
 
   routes() {
@@ -313,13 +545,26 @@ class EventRouter {
       session: false
     }), this.update)
 
+    // submit route
+    this.router.post('/:slug/submit', passport.authenticate('jwt', {
+      session: false
+    }), this.submit)
+
+    // retract route
+    this.router.post('/:slug/retract', passport.authenticate('jwt', {
+      session: false
+    }), this.retract)
+
     // delete route
     this.router.delete('/:slug', passport.authenticate('jwt', {
       session: false
     }), this.delete)
 
     // comment route
-    this.router.use('/:slug/comments', this.attach, CommentRouter)
+    this.router.get('/:slug/comments', this.comments)
+
+    // action list route
+    this.router.get('/:slug/:sublist', this.sublist)
   }
 }
 

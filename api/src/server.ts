@@ -9,6 +9,9 @@ import * as mongoose from 'mongoose'
 import * as passport from 'passport'
 import * as path from 'path'
 
+// use native ES6 promises instead of mongoose promise library
+(<any>mongoose).Promise = global.Promise
+
 import _HelperRouter from './routers/_HelperRouter'
 
 import ActionRouter from './routers/ActionRouter'
@@ -64,7 +67,7 @@ class Server {
     logger('MONGODB_URI: ' + MONGODB_URI)
 
     // connect to mongodb via mongoose
-    mongoose.connect(MONGODB_URI || process.env.MONGODB_URI)
+    mongoose.connect(MONGODB_URI || process.env.MONGODB_URI, {useMongoClient: true})
 
     // mount query string parser
     this.app.use(bodyParser.urlencoded({

@@ -4,6 +4,7 @@ import {
 } from 'mongoose'
 
 export default interface IConsumer extends Document {
+  [key: string]: any
   _id: Schema.Types.ObjectId
   handle: string
   password: string
@@ -20,12 +21,24 @@ export default interface IConsumer extends Document {
   country?: string
   wechat: string
   updated: number
-  type: string
-  roles: [string]
+  ref: string
+  roles: string[]
   status: string
   verified?: Schema.Types.ObjectId
   expires?: number
   contacts: [Schema.Types.ObjectId]
+  postCount: number
+  eventCount: number
+  signupCount: number
+  orderCount: number
+  commentCount: number
+  points: number
+  level?: number
+  balance: number
+
+  viewCount: number
+
+  // virtual fields
   posts: [Schema.Types.ObjectId]
   events: [Schema.Types.ObjectId]
   orders: [Schema.Types.ObjectId]
@@ -36,21 +49,12 @@ export default interface IConsumer extends Document {
   shares: [Schema.Types.ObjectId]
   followings: [Schema.Types.ObjectId]
   followers: [Schema.Types.ObjectId]
-  points: number
-  level?: number
-  balance: number
 
-  totalViews: number
-  
   // document status
   isNew: boolean
   wasNew: boolean
 
   // methods
-  addToArray: Function
-  removeFromArray: Function
-  addToList: Function
-  removeFromList: Function
   addToBalance: Function
   comparePassword: Function
 }

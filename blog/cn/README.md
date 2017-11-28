@@ -817,3 +817,4 @@ SingularJS components
 ## roadmap
 
 * Replace Express with Restify for the API server
+mongoose-delete

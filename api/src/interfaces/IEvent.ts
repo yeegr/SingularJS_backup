@@ -1,19 +1,17 @@
-import {
-  Document,
-  Schema
-} from 'mongoose'
+import { Document, Schema } from 'mongoose'
 
 import IAgenda from './IAgenda'
+import IAttendee from './IAttendee'
 import IPhoto from './IPhoto'
 import IPoint from './IPoint'
-import IAttendee from './IAttendee'
 
 export default interface IEvent extends Document {
+  [key: string]: any
   _id: Schema.Types.ObjectId
   creator: Schema.Types.ObjectId
   ref: string
-  title: string
   slug: string
+  title: string
   description: string
   misc?: [{
     key: string
@@ -26,7 +24,7 @@ export default interface IEvent extends Document {
   photos: IPhoto[]
   notes: string[]
   gears: Schema.Types.Mixed[]
-  tags: [string],
+  tags: string[],
   city?: string
   country?: string
   isPublic: boolean
@@ -57,29 +55,33 @@ export default interface IEvent extends Document {
     status?: string
     attendees: IAttendee[]
   }]
+  publish: number
   status: string
   updated: number
-  publish: number
-  totalViews: number
-  totalRating: number,
-  comments: [Schema.Types.ObjectId]
-  totalLikes: number
-  totalDislikes: number
-  totalSaves: number
-  totalShares: number
-  totalDownloads: number
+  totalRating: number
+  commentCount: number
+  viewCount: number
+  likeCount: number
+  dislikeCount: number
+  saveCount: number
+  shareCount: number
+  downloadCount: number
 
   // virtual fields
   averageRating: number
+  comments: Schema.Types.ObjectId[]
+  likes: Schema.Types.ObjectId[]
+  dislikes: Schema.Types.ObjectId[]
+  saves: Schema.Types.ObjectId[]
+  shares: Schema.Types.ObjectId[]
+  downloads: Schema.Types.ObjectId[]
+  follows: Schema.Types.ObjectId[]
 
   // document status
   isNew: boolean
   wasNew: boolean
 
   // methods
-  addToList: Function
-  removeFromList: Function
   addComment: Function
   removeComment: Function
-  addCount: Function
 }

@@ -4,6 +4,7 @@ import * as passportOAuth2 from 'passport-oauth2'
 import { Strategy as LocalStrategy } from 'passport-local'
 
 import * as CONFIG from '../../../common/options/config'
+import * as ERR from '../../../common/options/errors'
 
 import Consumer from '../models/ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
@@ -36,11 +37,11 @@ passport.use(new LocalStrategy({
       if (user) {
         user.comparePassword(password, (err: Error, isMatch: boolean) => {
           if (err) { return done(err) }
-          if (!isMatch) { return done(null, false, {message: 'PASSWORD_INVALID'})}
+          if (!isMatch) { return done(null, false, {message: ERR.USER.PASSWORD_INCORRECT })}
           return done(null, user, 'local')
         })
       } else {
-        return done(null, false, {message: 'USER_NOT_FOUND'})
+        return done(null, false, { message: ERR.USER.USER_NOF_FOUND })
       }
     })
     .catch((err: Error) => {

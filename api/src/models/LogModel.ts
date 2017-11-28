@@ -14,10 +14,19 @@ let LogSchema: Schema = new Schema({
     required: true
   },
   // user type
-  type: {
+  ref: {
     type: String,
     enum: CONST.USER_TYPES_ENUM,
     required: true
+  },
+  // action target
+  type: {
+    type: String,
+    enum: CONST.ACTION_TARGETS_ENUM
+  },
+  // target id
+  target: {
+    type: Schema.Types.ObjectId
   },
   // user action
   action: {
@@ -28,15 +37,6 @@ let LogSchema: Schema = new Schema({
   misc: {
     type: String,
     default: ''
-  },
-  // action target
-  target: {
-    type: String,
-    enum: CONST.ACTION_TARGETS_ENUM
-  },
-  // target id
-  ref: {
-    type: Schema.Types.ObjectId
   },
   // user login device info
   device: {

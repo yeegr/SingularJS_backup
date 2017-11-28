@@ -1,19 +1,15 @@
-import {
-  NextFunction,
-  Request,
-  Response,
-  Router
-} from 'express'
-
+import { NextFunction, Request, Response, Router } from 'express'
 import * as moment from 'moment'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
 import '../config/passport'
+import * as validator from 'validator'
 
-import * as UTIL from '../../../common/util'
 import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
-import Logger from './_Logger'
+import * as ERR from '../../../common/options/errors'
+import * as UTIL from '../../../common/util'
+import Logger from '../modules/logger'
 
 import Consumer from '../models/ConsumerModel'
 import IConsumer from '../interfaces/IConsumer'
@@ -52,17 +48,16 @@ class ConsumerRouter {
    * @returns {void}
    */
   public list = (req: Request, res: Response): void => {
-    let query: object = {},
-      page: number = UTIL.getListPageIndex(req),
-      count: number = UTIL.getListCountPerPage(req),
-      sort: any = UTIL.getListSort(req)
+    let params = UTIL.assembleSearchParams(req, {
+        status: CONST.STATUSES.USER.ACTIVE
+      }, 'handle')
 
     Consumer
-    .find(query)
-    .skip(page * count)
-    .limit(count)
-    // .select(CONST.PUBLIC_CONSUMER_INFO_LIST)
-    .sort(sort)
+    .find(params.query)
+    .skip(params.skip)
+    .limit(params.count)
+    .sort(params.sort)
+    .select(CONST.PUBLIC_CONSUMER_INFO_LIST)
     .exec()
     .then((arr: IConsumer[]) => {
       if (arr) {
@@ -72,7 +67,8 @@ class ConsumerRouter {
       }
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
 
@@ -87,20 +83,53 @@ class ConsumerRouter {
    * @returns {void}
    */
   public get = (req: Request, res: Response): void => {
-    const handle: string = req.params.handle
-    
     Consumer
-    .findOneAndUpdate({handle}, {$inc: {totalViews: 1}}, {new: true})
+    .findOneAndUpdate({
+      handle: req.params.handle
+    }, {$inc: {viewCount: 1}}, {new: true})
     .select(CONST.PUBLIC_CONSUMER_INFO)
+    .populate({
+      path: 'posts',
+      model: CONST.ACTION_TARGETS.POST,
+      options: {
+        find: {
+          'status': CONST.STATUSES.POST.APPROVED,
+          // 'publish': {$lte: moment()}
+        },
+        sort: {
+          'viewCount': -1,
+          '_id': -1
+        },
+        limit: CONST.CONSUMER_POST_SHOWCASE_COUNT,
+        select: CONST.CONSUMER_POST_SHOWCASE_KEYS
+      },
+    })
+    .populate({
+      path: 'events',
+      model: CONST.ACTION_TARGETS.EVENT,
+      options: {
+        find: {
+          'status': CONST.STATUSES.EVENT.APPROVED,
+          // 'publish': {$lte: moment()}
+        },
+        sort: {
+          'viewCount': -1,
+          '_id': -1
+        },
+        limit: CONST.CONSUMER_EVENT_SHOWCASE_COUNT,
+        select: CONST.CONSUMER_EVENT_SHOWCASE_KEYS
+      },
+    })
     .then((user: IConsumer) => {
       if (user) {
-        res.status(200).json({user})
+        res.status(200).json(user)
       } else {
         res.status(404).send()
       }
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
   
@@ -117,9 +146,9 @@ class ConsumerRouter {
     let query = {},
       tuple: any = UTIL.kvp2tuple(req.body),
       key: string = tuple[0],
-      value: any = tuple[0]
+      value: any = tuple[1]
 
-    if (key.length > 0) {
+    if (key.length > 0 && value.length > 0) {
       switch (key) {
         case 'handle':
         default:
@@ -131,16 +160,16 @@ class ConsumerRouter {
   
         case 'email':
           // validate email address
-          if (UTIL.validateEmail(value)) {
+          if (validator.isEmail(value)) {
             query = {email: value}
           }
         break
   
         case 'mobile':
-          value = UTIL.normalizeMobile(value)
+          // value = UTIL.normalizeMobile(value)
 
           // validate mobile phone number
-          if (UTIL.validateMobile(value)) {
+          if (validator.isMobilePhone(value, 'any')) {
             query = {mobile: value}
           }
         break
@@ -148,12 +177,13 @@ class ConsumerRouter {
 
       Consumer
       .findOne(query)
-      .then((data) => {
+      .then((data: IConsumer) => {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
       .catch((err) => {
-        res.status(res.statusCode).json({err})
+        res.status(res.statusCode).send()
+        console.log(err)
       })
     }
   }
@@ -179,12 +209,10 @@ class ConsumerRouter {
         })
         this.createConsumer(user, device, res)
       } else {
-        res.status(401).json({code: 'VALID_PASSWORD_REQUIRED'})
+        res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
       }
     } else {
-      res.status(401).json({
-        code: 'LOGIN_CREDENTIALS_REQUIRED'
-      })      
+      res.status(401).json({ message: ERR.USER.MISSING_CREDENTIALS })      
     }
   }
   
@@ -207,15 +235,14 @@ class ConsumerRouter {
       .findOneAndUpdate({_id}, req.body, {new: true})
       .then((user: IConsumer) => {
         if (user) {
-          let token: string = this.signToken(user)
-          res.status(200).json({user, token})
+          res.status(200).json(this.getSignedUser(user))
   
           new Logger({
-            creator: _id,
-            type: 'CONSUMER',
-            action: 'UPDATE',
-            target: 'CONSUMER',
-            ref: user._id,
+            creator: user._id,
+            ref: CONST.USER_TYPES.CONSUMER,
+            action: CONST.USER_ACTIONS.CONSUMER.UPDATE,
+            type: CONST.ACTION_TARGETS.CONSUMER,
+            target: user._id,
             device
           })
         } else {
@@ -223,12 +250,11 @@ class ConsumerRouter {
         }
       })
       .catch((err) => {
-        res.status(res.statusCode).json({err})
+        res.status(res.statusCode).send()
+        console.log(err)
       })
     } else {
-      res.status(401).json({
-        message: 'PERMISSION_DENIED'
-      })
+      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
   
@@ -255,10 +281,10 @@ class ConsumerRouter {
           
           new Logger({
             creator: _id,
-            type: 'CONSUMER',
-            action: 'DELETE',
-            target: 'CONSUMER',
-            ref: user._id,
+            ref: CONST.USER_TYPES.CONSUMER,
+            action: CONST.USER_ACTIONS.CONSUMER.DELETE,
+            type: CONST.ACTION_TARGETS.CONSUMER,
+            target: user._id,
             device
           })        
         } else {
@@ -266,12 +292,11 @@ class ConsumerRouter {
         }
       })
       .catch((err) => {
-        res.status(res.statusCode).json({err})
+        res.status(res.statusCode).send()
+        console.log(err)
       })
     } else {
-      res.status(401).json({
-        message: 'PERMISSION_DENIED'
-      })      
+      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
 
@@ -285,15 +310,16 @@ class ConsumerRouter {
    * @returns {void}
    */
   public login = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
-      token: string = this.signToken(user)
+    const user: IConsumer = req.user
 
-    res.status(200).json({user, token})
+    res.status(200).json(this.getSignedUser(user))
 
     new Logger({
       creator: user._id,
-      type: 'CONSUMER',
-      action: 'LOGIN',
+      ref: CONST.USER_TYPES.CONSUMER,
+      action: CONST.USER_ACTIONS.CONSUMER.LOGIN,
+      type: CONST.ACTION_TARGETS.CONSUMER,
+      target: user._id,
       misc: req.authInfo,
       device: req.body.device
     })
@@ -310,18 +336,20 @@ class ConsumerRouter {
     user
     .save()
     .then((user: IConsumer) => {
-      const token: string = this.signToken(user)
-      res.status(201).json({user, token})
+      res.status(201).json(this.getSignedUser(user))
 
       new Logger({
         creator: user._id,
-        type: 'CONSUMER',
-        action: 'CREATE',
+        ref: CONST.USER_TYPES.CONSUMER,
+        action: CONST.USER_ACTIONS.CONSUMER.CREATE,
+        type: CONST.ACTION_TARGETS.CONSUMER,
+        target: user._id,
         device
       })        
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
 
@@ -331,14 +359,28 @@ class ConsumerRouter {
    * @param {IConsumer} user 
    */
   private signToken(user: IConsumer): string {
-    let now: moment.Moment = moment()
+    let now: moment.Moment = moment(),
+      duration: [moment.unitOfTime.DurationConstructor, number] = CONST.USER_TOKEN_EXPIRATION_DURATION
     
     return jwt.sign({
       iss: CONFIG.PROJECT_TITLE,
       sub: user._id,
       iat: now.valueOf(),
-      exp: now.add(90, 'days').valueOf()
+      exp: now.add(duration[0], duration[1]).valueOf()
     }, CONFIG.JWT_SECRET)
+  }
+
+  /**
+   * Gets a user with signed token
+   * 
+   * @param {IConsumer} user
+   * @returns {object} 
+   */
+  private getSignedUser(user: IConsumer): object {
+    const data: any = user.toJSON(),
+      token: string = this.signToken(data)
+
+    return Object.assign({}, data, {token})
   }
 
   /**
@@ -354,7 +396,7 @@ class ConsumerRouter {
   public local = (req: Request, res: Response, next: NextFunction): void => {
     passport.authenticate('local', {
       session: false,
-      badRequestMessage: 'MISSING_CREDENTIALS'
+      badRequestMessage: ERR.USER.MISSING_CREDENTIALS
     }, (err: Error, user: IConsumer, info: object) => {
       if (err) {
         res.status(400).send(err) 
@@ -368,6 +410,7 @@ class ConsumerRouter {
 
       req.user = user
       req.authInfo = 'local'
+
       next()
     })(req, res, next)
   }
@@ -397,7 +440,8 @@ class ConsumerRouter {
       res.status(201).send('Success')
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
 
@@ -436,7 +480,7 @@ class ConsumerRouter {
       .then((user: IConsumer) => {
         if (user) {
           let token: string = this.signToken(user)
-          res.status(200).json({user, token})
+          res.status(200).json(Object.assign({}, user.toJSON(), {token}))
         } else {
           let user: IConsumer = new Consumer(query)
           this.createConsumer(user, req.body.device, res)
@@ -444,8 +488,59 @@ class ConsumerRouter {
       })
     })
     .catch((err) => {
-      res.status(res.statusCode).json({err})
+      res.status(res.statusCode).send()
+      console.log(err)
     })
+  }
+
+  /**
+   * Gets user with populated sublist
+   *
+   * @class ConsumerRouter
+   * @method sublist
+   * @param {Request} req
+   * @param {Response} res
+   * @returns {void}
+   */
+  public sublist = (req: Request, res: Response): void => {
+    let handle = req.params.handle,
+      id: string = req.user._id,
+      path = req.params.sublist,
+      model = UTIL.getModelFromPath(path),
+      opt: any = UTIL.assembleSearchParams(req)
+
+    if (handle === req.user.handle) {
+      Consumer
+      .findOne({handle})
+      .select('_id handle')
+      .populate({
+        path,
+        model,
+        options: {
+          sort: opt.sort,
+          limit: opt.limit,
+          skip: opt.skip
+        },
+        populate: ({
+          path: 'target',
+          select: 'slug title excerpt commentCount totalRatings averageRating'
+        })
+      })
+      .exec()
+      .then((data: IConsumer) => {
+        if (data) {
+          res.status(200).json(data)
+        } else {
+          res.status(404).send()
+        }
+      })
+      .catch((err) => {
+        res.status(res.statusCode).send()
+        console.log(err)
+      })
+    } else {
+      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
+    }
   }
 
   routes() {
@@ -466,6 +561,11 @@ class ConsumerRouter {
     this.router.get('/login/token', passport.authenticate('jwt', {
       session: false
     }), this.login)
+
+    // sublist route
+    this.router.get('/:handle/:sublist', passport.authenticate('jwt', {
+      session: false
+    }), this.sublist)
 
     // update route
     this.router.patch('/:handle', passport.authenticate('jwt', {

@@ -13,17 +13,6 @@ export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-/**
- * Check if input is NOT undefined, null, or empty string
- *
- *
- * @export
- * @param {any} input
- * @returns {boolean}
- */
-export function isNotUndefinedNullEmpty(input: any): boolean {
-  return (input !== undefined) && (input !== null) && (input.toString().length > 0)
-}
 
 /**
  * Returns current timestamp
@@ -444,4 +433,16 @@ export function qs2obj(str: string): object {
   })
 
   return obj
+}
+
+/**
+ * Check if input is NOT undefined, null, or empty string
+ *
+ *
+ * @export
+ * @param {any} input
+ * @returns {boolean}
+ */
+export function isNotUndefinedNullEmpty(input: any): boolean {
+  return (input !== undefined) && (input !== null) && (input.toString().length > 0)
 }
