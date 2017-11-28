@@ -4,18 +4,18 @@ import { Request } from 'express'
 import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 
-import IConsumer from '../interfaces/IConsumer'
-import Consumer from '../models/ConsumerModel'
+import Consumer from '../models/users/ConsumerModel'
+import IConsumer from '../interfaces/users/IConsumer'
 
-import Post from '../models/PostModel'
-import Event from '../models/EventModel'
+import Post from '../models/post/PostModel'
+import Event from '../models/event/EventModel'
 
-import Like from '../models/LikeModel'
-import Dislike from '../models/DislikeModel'
-import Save from '../models/SaveModel'
-import Follow from '../models/FollowModel'
-import Share from '../models/ShareModel'
-import Download from '../models/DownloadModel'
+import Like from '../models/actions/LikeModel'
+import Dislike from '../models/actions/DislikeModel'
+import Save from '../models/actions/SaveModel'
+import Follow from '../models/actions/FollowModel'
+import Share from '../models/actions/ShareModel'
+import Download from '../models/actions/DownloadModel'
 
 /**
  * Formats MongoDB native error to string

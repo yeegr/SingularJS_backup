@@ -2,8 +2,8 @@ import { Document, Schema } from 'mongoose'
 
 import IAgenda from './IAgenda'
 import IAttendee from './IAttendee'
-import IPhoto from './IPhoto'
-import IPoint from './IPoint'
+import IPhoto from '../share/IPhoto'
+import IPoint from '../share/IPoint'
 
 export default interface IEvent extends Document {
   [key: string]: any

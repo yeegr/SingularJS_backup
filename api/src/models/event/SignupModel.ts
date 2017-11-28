@@ -1,12 +1,12 @@
 import { Schema, model } from 'mongoose'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONFIG from '../../../../common/options/config'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
 import Attendee from './AttendeeModel'
 
-import ISignup from '../interfaces/ISignup'
+import ISignup from '../../interfaces/event/ISignup'
 
 let SignupSchema: Schema = new Schema({
   // member

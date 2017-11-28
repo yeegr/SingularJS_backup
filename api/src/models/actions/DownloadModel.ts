@@ -1,11 +1,11 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IAction from '../interfaces/IAction'
+import IAction from '../../interfaces/actions/IAction'
 
-let SaveSchema: Schema = new Schema({
+let DownloadSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
@@ -40,51 +40,29 @@ let SaveSchema: Schema = new Schema({
   }
 })
 
-SaveSchema.index({ 
-  creator: 1,
-  ref: 1,
-  type: 1,
-  target: 1
-}, {
-  unique: true
-})
-
-SaveSchema.virtual('UserModel', {
+DownloadSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
-SaveSchema.virtual('TargetModel', {
+DownloadSchema.virtual('TargetModel', {
   ref: (doc: IAction) => doc.type,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
-SaveSchema.post('save', function(action: IAction) {
+DownloadSchema.post('save', function(action: IAction) {
   let TargetModel = UTIL.getModelFromKey(action.type)
 
   TargetModel
-  .findByIdAndUpdate(action.target, {$inc: {saveCount: 1}})
+  .findByIdAndUpdate(action.target, {$inc: {downloadCount: 1}})
   .then()
   .catch((err: NativeError) => {
     console.log(err)
   })
 })
 
-SaveSchema.post('findOneAndRemove', function(action: IAction) {
-  if (action) {
-    let TargetModel = UTIL.getModelFromKey(action.type)
-    
-    TargetModel
-    .findByIdAndUpdate(action.target, {$inc: {saveCount: -1}})
-    .then()
-    .catch((err: NativeError) => {
-      console.log(err)
-    })
-  }
-})
-
-export default model<IAction>('Save', SaveSchema)
+export default model<IAction>('Download', DownloadSchema)

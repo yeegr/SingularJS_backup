@@ -1,11 +1,11 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IAction from '../interfaces/IAction'
+import IAction from '../../interfaces/actions/IAction'
 
-let ShareSchema: Schema = new Schema({
+let SaveSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
@@ -40,29 +40,51 @@ let ShareSchema: Schema = new Schema({
   }
 })
 
-ShareSchema.virtual('UserModel', {
+SaveSchema.index({ 
+  creator: 1,
+  ref: 1,
+  type: 1,
+  target: 1
+}, {
+  unique: true
+})
+
+SaveSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
-ShareSchema.virtual('TargetModel', {
+SaveSchema.virtual('TargetModel', {
   ref: (doc: IAction) => doc.type,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
-ShareSchema.post('save', function(action: IAction) {
+SaveSchema.post('save', function(action: IAction) {
   let TargetModel = UTIL.getModelFromKey(action.type)
 
   TargetModel
-  .findByIdAndUpdate(action.target, {$inc: {shareCount: 1}})
+  .findByIdAndUpdate(action.target, {$inc: {saveCount: 1}})
   .then()
   .catch((err: NativeError) => {
     console.log(err)
   })
 })
 
-export default model<IAction>('Share', ShareSchema)
+SaveSchema.post('findOneAndRemove', function(action: IAction) {
+  if (action) {
+    let TargetModel = UTIL.getModelFromKey(action.type)
+    
+    TargetModel
+    .findByIdAndUpdate(action.target, {$inc: {saveCount: -1}})
+    .then()
+    .catch((err: NativeError) => {
+      console.log(err)
+    })
+  }
+})
+
+export default model<IAction>('Save', SaveSchema)

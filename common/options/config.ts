@@ -26,6 +26,9 @@ interface IInputLimits {
   MAX_PASSWORD_LENGTH: number
   MIN_NAME_LENGTH: number
   MAX_NAME_LENGTH: number
+
+  MIN_USERNAME_LENGTH: number
+  MAX_USERNAME_LENGTH: number
 }
 
 export const INPUT_LIMITS: IInputLimits = {
@@ -34,5 +37,8 @@ export const INPUT_LIMITS: IInputLimits = {
   MIN_PASSWORD_LENGTH: 6,
   MAX_PASSWORD_LENGTH: 16,
   MIN_NAME_LENGTH: 0,
-  MAX_NAME_LENGTH: 50
+  MAX_NAME_LENGTH: 50,
+
+  MIN_USERNAME_LENGTH: 6,
+  MAX_USERNAME_LENGTH: 20
 }

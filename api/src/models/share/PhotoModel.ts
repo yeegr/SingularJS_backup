@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-import IPhoto from '../interfaces/IPhoto'
+import IPhoto from '../../interfaces/share/IPhoto'
 
 let PhotoSchema: Schema = new Schema({
   url: {

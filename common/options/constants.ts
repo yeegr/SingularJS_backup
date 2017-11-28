@@ -242,7 +242,15 @@ export const ACTION_MODELS_ENUM: string[] = obj2enum(ACTION_MODELS)
  * Object statuses
  */
 interface IStatuses {
-  USER: {
+  CONSUMER: {
+    ACTIVE: string
+    SUSPENDED: string
+  }
+  SUPPLIER: {
+    ACTIVE: string
+    SUSPENDED: string
+  }
+  PLATFORM: {
     ACTIVE: string
     SUSPENDED: string
   }
@@ -287,7 +295,15 @@ interface IStatuses {
 }
 
 export const STATUSES: IStatuses = {
-  USER: {
+  CONSUMER: {
+    ACTIVE: 'active',
+    SUSPENDED: 'suspended'
+  },
+  SUPPLIER: {
+    ACTIVE: 'active',
+    SUSPENDED: 'suspended'
+  },
+  PLATFORM: {
     ACTIVE: 'active',
     SUSPENDED: 'suspended'
   },
@@ -331,7 +347,7 @@ export const STATUSES: IStatuses = {
   }
 }
 
-export const USER_STATUSES_ENUM = obj2enum(STATUSES.USER)
+export const CONSUMER_STATUSES_ENUM = obj2enum(STATUSES.CONSUMER)
 export const POST_STATUSES_ENUM = obj2enum(STATUSES.POST)
 export const EVENT_STATUSES_ENUM = obj2enum(STATUSES.EVENT)
 export const SET_STATUSES_ENUM = obj2enum(STATUSES.SET)

@@ -1,11 +1,11 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IAction from '../interfaces/IAction'
+import IAction from '../../interfaces/actions/IAction'
 
-let LikeSchema: Schema = new Schema({
+let DislikeSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ let LikeSchema: Schema = new Schema({
   }
 })
 
-LikeSchema.index({ 
+DislikeSchema.index({ 
   creator: 1,
   ref: 1,
   type: 1,
@@ -49,42 +49,42 @@ LikeSchema.index({
   unique: true
 })
 
-LikeSchema.virtual('UserModel', {
+DislikeSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
-LikeSchema.virtual('TargetModel', {
+DislikeSchema.virtual('TargetModel', {
   ref: (doc: IAction) => doc.type,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
-LikeSchema.post('save', function(action: IAction) {
+DislikeSchema.post('save', function(action: IAction) {
   let TargetModel = UTIL.getModelFromKey(action.type)
 
   TargetModel
-  .findByIdAndUpdate(action.target, {$inc: {likeCount: 1}})
+  .findByIdAndUpdate(action.target, {$inc: {dislikeCount: 1}})
   .then()
   .catch((err: NativeError) => {
     console.log(err)
   })
 })
 
-LikeSchema.post('findOneAndRemove', function(action: IAction) {
+DislikeSchema.post('findOneAndRemove', function(action: IAction) {
   if (action) {
     let TargetModel = UTIL.getModelFromKey(action.type)
     
     TargetModel
-    .findByIdAndUpdate(action.target, {$inc: {likeCount: -1}})
+    .findByIdAndUpdate(action.target, {$inc: {dislikeCount: -1}})
     .then()
     .catch((err: NativeError) => {
       console.log(err)
-    })
+    })  
   }
 })
 
-export default model<IAction>('Like', LikeSchema)
+export default model<IAction>('Dislike', DislikeSchema)

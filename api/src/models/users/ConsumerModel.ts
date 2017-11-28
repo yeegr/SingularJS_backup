@@ -3,13 +3,20 @@ import * as bcrypt from 'bcrypt-nodejs'
 import * as moment from 'moment'
 import * as validator from 'validator'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONFIG from '../../../../common/options/config'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IConsumer from '../interfaces/IConsumer'
+import IConsumer from '../../interfaces/users/IConsumer'
 
 let ConsumerSchema: Schema = new Schema({
+  // user type
+  ref: {
+    type: String,
+    default: CONST.USER_TYPES.CONSUMER,
+    enum: [CONST.USER_TYPES.CONSUMER],
+    required: true
+  },
   // user handle or user name
   handle: {
     type: String,
@@ -34,7 +41,7 @@ let ConsumerSchema: Schema = new Schema({
     maxlength: CONFIG.INPUT_LIMITS.MAX_NAME_LENGTH,
     trim: true
   },
-  // user gender / sex
+  // user gender | sex
   gender: {
     type: Number,
     validate: (val: number) => (val > -1)
@@ -54,12 +61,12 @@ let ConsumerSchema: Schema = new Schema({
     trim: true,
     validation: (val: string) => validator.isEmail(val)
   },
-  // Chinese personal id number
+  // personal id number
   pid: {
     type: String,
     default: '',
     trim: true,
-    validation: (val: string) => UTIL.isChinaPid(val)
+    validation: (val: string) => UTIL.isChinaPid(val) // check aginst Chinese PID
   },
   // user self introduction
   intro: {
@@ -111,13 +118,6 @@ let ConsumerSchema: Schema = new Schema({
     required: true,
     default: () => UTIL.getTimestamp()
   },
-  // user type
-  ref: {
-    type: String,
-    default: CONST.USER_TYPES.CONSUMER,
-    enum: [CONST.USER_TYPES.CONSUMER],
-    required: true
-  },
   // user roles
   roles: {
     type: [String],
@@ -127,8 +127,8 @@ let ConsumerSchema: Schema = new Schema({
   // current user status
   status: {
     type: String,
-    enum: CONST.USER_STATUSES_ENUM,
-    default: CONST.STATUSES.USER.ACTIVE
+    enum: CONST.CONSUMER_STATUSES_ENUM,
+    default: CONST.STATUSES.CONSUMER.ACTIVE
   },
   // user verification
   verified: {
@@ -343,7 +343,7 @@ ConsumerSchema.methods.addToBalance = function(subTotal: number): number {
 }
 
 /**
- * Hash incoming password with and
+ * Hash incoming password with salt and
  * compare it to stored password hash
  *
  * @class ConsumerSchema
@@ -380,12 +380,11 @@ ConsumerSchema.pre('save', function(next: Function): void {
       })
     })
   } else {
-    UTIL.setUpdateTime(user, ['handle', 'password', 'name', 'gender', 'intro', 'email', 'mobile', 'avatar', 'background'])
+    UTIL.setUpdateTime(user, ['handle', 'password', 'name', 'gender', 'intro', 'mobile', 'email', 'pid', 'avatar', 'background', 'locale', 'city', 'country'])
     user.wasNew = user.isNew
 
     next()
   }
 })
-
 
 export default model<IConsumer>('Consumer', ConsumerSchema)

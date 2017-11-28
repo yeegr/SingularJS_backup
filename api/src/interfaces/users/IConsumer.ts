@@ -3,6 +3,7 @@ import { Document, Schema } from 'mongoose'
 export default interface IConsumer extends Document {
   [key: string]: any
   _id: Schema.Types.ObjectId
+  ref: string
   handle: string
   password: string
   name: string
@@ -18,7 +19,6 @@ export default interface IConsumer extends Document {
   country?: string
   wechat: string
   updated: number
-  ref: string
   roles: string[]
   status: string
   verified?: Schema.Types.ObjectId

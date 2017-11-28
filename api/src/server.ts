@@ -20,8 +20,6 @@ import EventRouter from './routers/EventRouter'
 import PostRouter from './routers/PostRouter'
 import CommentRouter from './routers/CommentRouter'
 
-import * as PassportConfig from './config/passport'
-
 import {
   USER_NAME, USER_PASSWORD, HOST, PORT, DB_NAME
 } from '../../docker/env/development/init'

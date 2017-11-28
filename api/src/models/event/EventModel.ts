@@ -1,20 +1,20 @@
 import { Schema, model } from 'mongoose'
 import * as validator from 'validator'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONFIG from '../../../../common/options/config'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import Consumer from './ConsumerModel'
-import IConsumer from '../interfaces/IConsumer'
+import Consumer from '../users/ConsumerModel'
+import IConsumer from '../../interfaces/users/IConsumer'
 
 import Agenda from './AgendaModel'
 import Attendee from './AttendeeModel'
-import Photo from './PhotoModel'
-import Point from './PointModel'
+import Photo from '../share/PhotoModel'
+import Point from '../share/PointModel'
 import Subset from './SubsetModel'
 
-import IEvent from '../interfaces/IEvent'
+import IEvent from '../../interfaces/event/IEvent'
 
 let EventSchema: Schema = new Schema({
   // organizer id

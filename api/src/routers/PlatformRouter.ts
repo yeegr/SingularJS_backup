@@ -2,7 +2,7 @@ import { NextFunction, Request, Response, Router } from 'express'
 import * as moment from 'moment'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
-import '../config/passport/consumer'
+import '../config/passport/platform'
 import * as validator from 'validator'
 import * as randomstring from 'randomstring'
 
@@ -12,8 +12,8 @@ import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
 
-import Consumer from '../models/users/ConsumerModel'
-import IConsumer from '../interfaces/users/IConsumer'
+import Platform from '../models/users/PlatformModel'
+import IPlatform from '../interfaces/users/IPlatform'
 
 import Totp from '../models/TotpModel'
 import ITotp from '../interfaces/ITotp'
@@ -21,17 +21,17 @@ import ITotp from '../interfaces/ITotp'
 import SMS from '../modules/sms'
 
 /**
- * ConsumerRouter class
+ * PlatformRouter class
  *
- * @class ConsumerRouter
+ * @class PlatformRouter
  */
-class ConsumerRouter {
+class PlatformRouter {
   router: Router
 
   /**
    * Constructor
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @constructor
    */
   constructor() {
@@ -42,7 +42,7 @@ class ConsumerRouter {
   /**
    * List search results
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method list
    * @param {Request} req
    * @param {Response} res
@@ -53,14 +53,14 @@ class ConsumerRouter {
         status: CONST.STATUSES.CONSUMER.ACTIVE
       }, 'handle')
 
-    Consumer
+    Platform
     .find(params.query)
     .skip(params.skip)
     .limit(params.limit)
     .sort(params.sort)
     .select(CONST.PUBLIC_CONSUMER_INFO_LIST)
     .exec()
-    .then((arr: IConsumer[]) => {
+    .then((arr: IPlatform[]) => {
       if (arr) {
         res.status(200).json(arr)
       } else {
@@ -77,14 +77,14 @@ class ConsumerRouter {
    * Gets single entry by param of 'handle', 
    * without private information
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method get
    * @param {Request} req
    * @param {Response} res
    * @returns {void}
    */
   public get = (req: Request, res: Response): void => {
-    Consumer
+    Platform
     .findOneAndUpdate({
       handle: req.params.handle
     }, {$inc: {viewCount: 1}}, {new: true})
@@ -121,7 +121,7 @@ class ConsumerRouter {
         select: CONST.CONSUMER_EVENT_SHOWCASE_KEYS
       },
     })
-    .then((user: IConsumer) => {
+    .then((user: IPlatform) => {
       if (user) {
         res.status(200).json(user)
       } else {
@@ -137,7 +137,7 @@ class ConsumerRouter {
   /**
    * Check if unique field is available to user
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method unique
    * @param {Request} req
    * @param {Response} res
@@ -176,9 +176,9 @@ class ConsumerRouter {
         break
       }
 
-      Consumer
+      Platform
       .findOne(query)
-      .then((data: IConsumer) => {
+      .then((data: IPlatform) => {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
@@ -192,7 +192,7 @@ class ConsumerRouter {
   /**
    * Creates a single user with handle/password
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method create
    * @param {Request} req
    * @param {Response} res
@@ -204,11 +204,11 @@ class ConsumerRouter {
 
     if (UTIL.isNotUndefinedNullEmpty(body.handle)) {
       if (UTIL.isNotUndefinedNullEmpty(body.password) || UTIL.validatePassword(body.password)) {
-        let user: IConsumer = new Consumer({
+        let user: IPlatform = new Platform({
           handle: body.handle,
           password: body.password
         })
-        this.createConsumer(user, device, res)
+        this.createPlatform(user, device, res)
       } else {
         res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
       }
@@ -220,7 +220,7 @@ class ConsumerRouter {
   /**
    * Updates entry by params of 'handle'
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method update
    * @param {Request} req
    * @param {Response} res
@@ -232,9 +232,9 @@ class ConsumerRouter {
       device: any = req.body.device
     
     if (handle === req.user.handle) {
-      Consumer
+      Platform
       .findOneAndUpdate({_id}, req.body, {new: true})
-      .then((user: IConsumer) => {
+      .then((user: IPlatform) => {
         if (user) {
           res.status(200).json(this.getSignedUser(user))
   
@@ -262,7 +262,7 @@ class ConsumerRouter {
   /**
    * Deletes entry by params of 'handle'
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method delete
    * @param {Request} req
    * @param {Response} res
@@ -274,9 +274,9 @@ class ConsumerRouter {
       device: any = req.body.device
     
     if (handle === req.user.handle) {
-      Consumer
+      Platform
       .findOneAndRemove({_id})
-      .then((user: IConsumer) => {
+      .then((user: IPlatform) => {
         if (user) {
           res.status(204).end()
           
@@ -304,14 +304,14 @@ class ConsumerRouter {
   /**
    * Login user
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method login
    * @param {Request} req
    * @param {Response} res
    * @returns {void}
    */
   public login = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user
+    const user: IPlatform = req.user
 
     res.status(200).json(this.getSignedUser(user))
 
@@ -329,14 +329,14 @@ class ConsumerRouter {
   /**
    * Creates a single user
    * 
-   * @param {IConsumer} user 
+   * @param {IPlatform} user 
    * @param {any} device 
    * @param {Response} res 
    */
-  private createConsumer(user: IConsumer, device: any, res: Response): void {
+  private createPlatform(user: IPlatform, device: any, res: Response): void {
     user
     .save()
-    .then((user: IConsumer) => {
+    .then((user: IPlatform) => {
       res.status(201).json(this.getSignedUser(user))
 
       new Logger({
@@ -357,9 +357,9 @@ class ConsumerRouter {
   /**
    * Signs a token using user id
    * 
-   * @param {IConsumer} user 
+   * @param {IPlatform} user 
    */
-  private signToken(user: IConsumer): string {
+  private signToken(user: IPlatform): string {
     let now: moment.Moment = moment(),
       duration: [moment.unitOfTime.DurationConstructor, number] = CONST.USER_TOKEN_EXPIRATION_DURATION
     
@@ -374,10 +374,10 @@ class ConsumerRouter {
   /**
    * Gets a user with signed token
    * 
-   * @param {IConsumer} user
+   * @param {IPlatform} user
    * @returns {object} 
    */
-  private getSignedUser(user: IConsumer): object {
+  private getSignedUser(user: IPlatform): object {
     const data: any = user.toJSON(),
       token: string = this.signToken(data)
 
@@ -387,7 +387,7 @@ class ConsumerRouter {
   /**
    * Login via handle/password
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method local
    * @param {Request} req
    * @param {Response} res
@@ -398,7 +398,7 @@ class ConsumerRouter {
     passport.authenticate('local', {
       session: false,
       badRequestMessage: ERR.USER.MISSING_CREDENTIALS
-    }, (err: Error, user: IConsumer, info: object) => {
+    }, (err: Error, user: IPlatform, info: object) => {
       if (err) {
         res.status(400).send(err) 
         return
@@ -419,7 +419,7 @@ class ConsumerRouter {
   /**
    * Initializes TOTP 
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method initTotp
    * @param {Request} req
    * @param {Response} res
@@ -452,7 +452,7 @@ class ConsumerRouter {
   /**
    * Login via TOTP 
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method verifyTotp
    * @param {Request} req
    * @param {Response} res
@@ -479,15 +479,15 @@ class ConsumerRouter {
         break
       }
 
-      Consumer
+      Platform
       .findOne(query)
-      .then((user: IConsumer) => {
+      .then((user: IPlatform) => {
         if (user) {
           let token: string = this.signToken(user)
           res.status(200).json(Object.assign({}, user.toJSON(), {token}))
         } else {
-          let user: IConsumer = new Consumer(query)
-          this.createConsumer(user, req.body.device, res)
+          let user: IPlatform = new Platform(query)
+          this.createPlatform(user, req.body.device, res)
         }
       })
     })
@@ -500,7 +500,7 @@ class ConsumerRouter {
   /**
    * Gets user with populated sublist
    *
-   * @class ConsumerRouter
+   * @class PlatformRouter
    * @method sublist
    * @param {Request} req
    * @param {Response} res
@@ -514,7 +514,7 @@ class ConsumerRouter {
       opt: any = UTIL.assembleSearchParams(req)
 
     if (handle === req.user.handle) {
-      Consumer
+      Platform
       .findOne({handle})
       .select('_id handle')
       .populate({
@@ -531,7 +531,7 @@ class ConsumerRouter {
         })
       })
       .exec()
-      .then((data: IConsumer) => {
+      .then((data: IPlatform) => {
         if (data) {
           res.status(200).json(data)
         } else {
@@ -584,7 +584,7 @@ class ConsumerRouter {
 }
 
 // export
-const consumerRouter = new ConsumerRouter()
+const consumerRouter = new PlatformRouter()
 consumerRouter.routes()
 const thisRouter = consumerRouter.router
 

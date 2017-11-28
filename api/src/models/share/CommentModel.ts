@@ -1,9 +1,9 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IComment from '../interfaces/IComment'
+import IComment from '../../interfaces/share/IComment'
 
 let CommentSchema: Schema = new Schema({
   // creator

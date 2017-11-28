@@ -2,7 +2,7 @@ import { NextFunction, Request, Response, Router } from 'express'
 import { Schema, Types } from 'mongoose'
 
 import * as passport from 'passport'
-import '../config/passport'
+import '../config/passport/consumer'
 
 import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
@@ -10,11 +10,11 @@ import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
 import IRequest from '../interfaces/IRequest'
 
-import Consumer from '../models/ConsumerModel'
-import IConsumer from '../interfaces/IConsumer'
+import Consumer from '../models/users/ConsumerModel'
+import IConsumer from '../interfaces/users/IConsumer'
 
-import Comment from '../models/CommentModel'
-import IComment from '../interfaces/IComment'
+import Comment from '../models/share/CommentModel'
+import IComment from '../interfaces/share/IComment'
 
 /**
  * CommentRouter class

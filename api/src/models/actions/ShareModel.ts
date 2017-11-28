@@ -1,11 +1,11 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IAction from '../interfaces/IAction'
+import IAction from '../../interfaces/actions/IAction'
 
-let DownloadSchema: Schema = new Schema({
+let ShareSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
@@ -40,29 +40,29 @@ let DownloadSchema: Schema = new Schema({
   }
 })
 
-DownloadSchema.virtual('UserModel', {
+ShareSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
-DownloadSchema.virtual('TargetModel', {
+ShareSchema.virtual('TargetModel', {
   ref: (doc: IAction) => doc.type,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
-DownloadSchema.post('save', function(action: IAction) {
+ShareSchema.post('save', function(action: IAction) {
   let TargetModel = UTIL.getModelFromKey(action.type)
 
   TargetModel
-  .findByIdAndUpdate(action.target, {$inc: {downloadCount: 1}})
+  .findByIdAndUpdate(action.target, {$inc: {shareCount: 1}})
   .then()
   .catch((err: NativeError) => {
     console.log(err)
   })
 })
 
-export default model<IAction>('Download', DownloadSchema)
+export default model<IAction>('Share', ShareSchema)

@@ -3,7 +3,7 @@ import { Schema, Types } from 'mongoose'
 
 import * as validator from 'validator'
 import * as passport from 'passport'
-import '../config/passport'
+import '../config/passport/consumer'
 
 import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
@@ -12,12 +12,13 @@ import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
 import IRequest from '../interfaces/IRequest'
 
-import Consumer from '../models/ConsumerModel'
-import IConsumer from '../interfaces/IConsumer'
+import Consumer from '../models/users/ConsumerModel'
+import IConsumer from '../interfaces/users/IConsumer'
 
-import Event from '../models/EventModel'
-import IEvent from '../interfaces/IEvent'
-import IComment from '../interfaces/IComment';
+import IComment from '../interfaces/share/IComment'
+
+import Event from '../models/event/EventModel'
+import IEvent from '../interfaces/event/IEvent'
 
 /**
  * EventRouter class
@@ -58,7 +59,7 @@ class EventRouter {
         if (user) {
           this.search(req, res, user._id)
         } else {
-          res.status(404).json({ message: ERR.USER.USER_NOF_FOUND })
+          res.status(404).json({ message: ERR.USER.USER_NOT_FOUND })
         }
       })
       .catch((err: Error) => {

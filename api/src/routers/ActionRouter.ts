@@ -2,7 +2,7 @@ import { NextFunction, Request, Response, Router } from 'express'
 import { Schema, NativeError } from 'mongoose'
 
 import * as passport from 'passport'
-import '../config/passport'
+import '../config/passport/consumer'
 
 import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
@@ -10,10 +10,10 @@ import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
 import IRequest from '../interfaces/IRequest'
 
-import Consumer from '../models/ConsumerModel'
-import IConsumer from '../interfaces/IConsumer'
+import Consumer from '../models/users/ConsumerModel'
+import IConsumer from '../interfaces/users/IConsumer'
 
-import IAction from '../interfaces/IAction'
+import IAction from '../interfaces/actions/IAction'
 
 import Log from '../models/LogModel'
 import ILog from '../interfaces/ILog'

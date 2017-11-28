@@ -1,11 +1,11 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
-import IAction from '../interfaces/IAction'
+import IAction from '../../interfaces/actions/IAction'
 
-let DislikeSchema: Schema = new Schema({
+let LikeSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
@@ -40,7 +40,7 @@ let DislikeSchema: Schema = new Schema({
   }
 })
 
-DislikeSchema.index({ 
+LikeSchema.index({ 
   creator: 1,
   ref: 1,
   type: 1,
@@ -49,42 +49,42 @@ DislikeSchema.index({
   unique: true
 })
 
-DislikeSchema.virtual('UserModel', {
+LikeSchema.virtual('UserModel', {
   ref: (doc: IAction) => doc.ref,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
-DislikeSchema.virtual('TargetModel', {
+LikeSchema.virtual('TargetModel', {
   ref: (doc: IAction) => doc.type,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
-DislikeSchema.post('save', function(action: IAction) {
+LikeSchema.post('save', function(action: IAction) {
   let TargetModel = UTIL.getModelFromKey(action.type)
 
   TargetModel
-  .findByIdAndUpdate(action.target, {$inc: {dislikeCount: 1}})
+  .findByIdAndUpdate(action.target, {$inc: {likeCount: 1}})
   .then()
   .catch((err: NativeError) => {
     console.log(err)
   })
 })
 
-DislikeSchema.post('findOneAndRemove', function(action: IAction) {
+LikeSchema.post('findOneAndRemove', function(action: IAction) {
   if (action) {
     let TargetModel = UTIL.getModelFromKey(action.type)
     
     TargetModel
-    .findByIdAndUpdate(action.target, {$inc: {dislikeCount: -1}})
+    .findByIdAndUpdate(action.target, {$inc: {likeCount: -1}})
     .then()
     .catch((err: NativeError) => {
       console.log(err)
-    })  
+    })
   }
 })
 
-export default model<IAction>('Dislike', DislikeSchema)
+export default model<IAction>('Like', LikeSchema)

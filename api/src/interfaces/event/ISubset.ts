@@ -1,6 +1,6 @@
 import { Document, Schema } from 'mongoose'
 
-import IPoint from './IPoint'
+import IPoint from '../share/IPoint'
 
 export default interface ISubset extends Document {
   title?: string

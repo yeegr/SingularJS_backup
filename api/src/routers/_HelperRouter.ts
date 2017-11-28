@@ -1,9 +1,4 @@
-import {
-  NextFunction,
-  Request,
-  Response,
-  Router
-} from 'express'
+import { NextFunction, Request, Response, Router } from 'express'
 
 import * as debug from 'debug'
 import * as mongoose from 'mongoose'

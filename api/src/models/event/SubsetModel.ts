@@ -1,14 +1,14 @@
 import { Schema, model } from 'mongoose'
 import * as validator from 'validator'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as UTIL from '../../../common/util'
+import * as CONFIG from '../../../../common/options/config'
+import * as CONST from '../../../../common/options/constants'
+import * as UTIL from '../../../../common/util'
 
 import Attendee from './AttendeeModel'
-import Point from './PointModel'
+import Point from '../share/PointModel'
 
-import ISubset from '../interfaces/ISubset'
+import ISubset from '../../interfaces/event/ISubset'
 
 let SubsetSchema: Schema = new Schema({
   // title
