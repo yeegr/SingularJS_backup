@@ -108,7 +108,7 @@ class EventRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })  
@@ -150,7 +150,7 @@ class EventRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -175,7 +175,7 @@ class EventRouter {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -218,13 +218,13 @@ class EventRouter {
         new Logger({
           creator,
           ref,
-          action: CONST.USER_ACTIONS.CONSUMER.CREATE,
+          action: CONST.USER_ACTIONS.COMMON.CREATE,
           type: CONST.ACTION_TARGETS.EVENT,
           target: data._id,
           device
         })
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -263,7 +263,7 @@ class EventRouter {
           new Logger({
             creator: user._id,
             ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.CONSUMER.UPDATE,
+            action: CONST.USER_ACTIONS.COMMON.UPDATE,
             type: CONST.ACTION_TARGETS.EVENT,
             target: data._id,
             device
@@ -272,7 +272,7 @@ class EventRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -411,7 +411,7 @@ class EventRouter {
         new Logger({
           creator: user._id,
           ref: CONST.USER_TYPES.CONSUMER,
-          action: CONST.USER_ACTIONS.CONSUMER.DELETE,
+          action: CONST.USER_ACTIONS.COMMON.DELETE,
           type: CONST.ACTION_TARGETS.EVENT,
           target: data._id,
           device
@@ -420,7 +420,7 @@ class EventRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -472,7 +472,7 @@ class EventRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -520,7 +520,7 @@ class EventRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })

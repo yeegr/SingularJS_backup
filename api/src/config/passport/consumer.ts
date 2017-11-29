@@ -10,9 +10,9 @@ import * as ERR from '../../../../common/options/errors'
 import Consumer from '../../models/users/ConsumerModel'
 import IConsumer from '../../interfaces/users/IConsumer'
 
-passport.use(new JwtStrategy({
+passport.use('consumerJwt', new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-    secretOrKey: CONFIG.JWT_SECRET
+    secretOrKey: CONFIG.JWT_SECRETS.CONSUMER
   }, (payload, done: Function) => {
     Consumer
     .findOne({
@@ -32,7 +32,7 @@ passport.use(new JwtStrategy({
   })
 )
 
-passport.use(new LocalStrategy({
+passport.use('consumerLocal', new LocalStrategy({
     usernameField: 'handle'
   }, (handle: string, password: string, done: Function) => {
     Consumer

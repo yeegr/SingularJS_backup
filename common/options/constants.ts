@@ -83,17 +83,17 @@ export const PLATFORM_USER_ROLES_ENUM: string[] = obj2enum(USER_ROLES.PLATFORM)
  * User action types
  */
 interface IUserActions {
-  ALL: {
-    CREATE: string
-    UPDATE: string
-    DELETE: string
-  }
-  CONSUMER: {
+  COMMON: {
+    LIST: string
+    GET: string
+    UNIQUE: string
     CREATE: string
     UPDATE: string
     DELETE: string
     LOGIN: string
     LOGOUT: string
+  }
+  CONSUMER: {
     LIKE: string
     UNDO_LIKE: string
     DISLIKE: string
@@ -111,20 +111,10 @@ interface IUserActions {
     RETRACT: string
   }
   SUPPLIER: {
-    CREATE: string
-    UPDATE: string
-    DELETE: string
     ENROLL: string
     UNDO_ENROLL: string
-    LOGIN: string
-    LOGOUT: string
   }
   PLATFORM: {
-    CREATE: string
-    UPDATE: string
-    DELETE: string
-    LOGIN: string
-    LOGOUT: string
     VERIFY: string
     APPROVE: string
     REJECT: string
@@ -133,17 +123,17 @@ interface IUserActions {
 }
 
 export const USER_ACTIONS: IUserActions = {
-  ALL: {
-    CREATE: 'CREATE',
-    UPDATE: 'UPDATE',
-    DELETE: 'DELETE'    
-  },
-  CONSUMER: {
+  COMMON: {
+    LIST: 'LIST',
+    GET: 'GET',
+    UNIQUE: 'UNIQUE',
     CREATE: 'CREATE',
     UPDATE: 'UPDATE',
     DELETE: 'DELETE',
     LOGIN: 'LOGIN',
     LOGOUT: 'LOGOUT',
+  },
+  CONSUMER: {
     LIKE: 'LIKE',
     UNDO_LIKE: 'UNDO_LIKE',
     DISLIKE: 'DISLIKE',
@@ -161,20 +151,10 @@ export const USER_ACTIONS: IUserActions = {
     RETRACT: 'RETRACT'
   },
   SUPPLIER: {
-    CREATE: 'CREATE',
-    UPDATE: 'UPDATE',
-    DELETE: 'DELETE',
     ENROLL: 'ENROLL',
-    UNDO_ENROLL: 'UNDO_ENROLL',
-    LOGIN: 'LOGIN',
-    LOGOUT: 'LOGOUT'
+    UNDO_ENROLL: 'UNDO_ENROLL'
   },
   PLATFORM: {
-    CREATE: 'CREATE',
-    UPDATE: 'UPDATE',
-    DELETE: 'DELETE',
-    LOGIN: 'LOGIN',
-    LOGOUT: 'LOGOUT',
     VERIFY: 'VERIFY',
     APPROVE: 'APPROVE',
     REJECT: 'REJECT',
@@ -348,6 +328,8 @@ export const STATUSES: IStatuses = {
 }
 
 export const CONSUMER_STATUSES_ENUM = obj2enum(STATUSES.CONSUMER)
+export const SUPPLIER_STATUSES_ENUM = obj2enum(STATUSES.SUPPLIER)
+export const PLATFORM_STATUSES_ENUM = obj2enum(STATUSES.PLATFORM)
 export const POST_STATUSES_ENUM = obj2enum(STATUSES.POST)
 export const EVENT_STATUSES_ENUM = obj2enum(STATUSES.EVENT)
 export const SET_STATUSES_ENUM = obj2enum(STATUSES.SET)
@@ -375,11 +357,6 @@ export const PAYMENT_METHODS_ENUM = obj2enum(PAYMENT_METHODS)
  * Consumer user default handle prefix
  */
 export const CONSUMER_HANDLE_PREFIX: string = 'User_'
-
-/**
- * Default expiration time for user token
- */
-export const USER_TOKEN_EXPIRATION_DURATION: [any, number] = ['days', 90]
 
 /**
  * Default number of list items per page

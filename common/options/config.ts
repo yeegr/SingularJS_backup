@@ -4,7 +4,6 @@ export const DEFAULT_COUNTRY_CODE: string = 'CN'
 export const DEFAULT_LOCALE = 'zh-CN'
 
 export const COOKIE_SECRET: string = 'cookie_secret'
-export const JWT_SECRET: string = 'jwt_secret_key'
 
 export const SMS_PROVIDER: string = 'ALIYUN'
 export const ALIYUN_SMS_ACCESS_ID: string = '23493240'
@@ -15,6 +14,39 @@ export const PUBLIC_EVENT_REQURIES_APPROVAL: boolean = true
 
 export const TOTP_CODE_LENGTH: number = 4
 export const TOTP_CODE_CHARSET: string = 'numeric'
+
+
+/**
+ * JWT secrets to sign users
+ */
+interface IJwtSecrets {
+  [key: string]: string
+  CONSUMER: string
+  SUPPLIER: string
+  PLATFORM: string
+}
+
+export const JWT_SECRETS: IJwtSecrets = {
+  CONSUMER: 'consumer_jwt_secret',
+  SUPPLIER: 'supplier_jwt_secret',
+  PLATFORM: 'platform_jwt_secret'
+}
+
+/**
+ * User token expirations
+ */
+interface ITokenExpiration {
+  [key: string]: [any, number]
+  CONSUMER: [any, number]
+  SUPPLIER: [any, number]
+  PLATFORM: [any, number]
+}
+
+export const USER_TOKEN_EXPIRATION: ITokenExpiration = {
+  CONSUMER: ['days', 90],
+  SUPPLIER: ['days', 90],
+  PLATFORM: ['days', 90]  
+}
 
 /**
  * Form input limits

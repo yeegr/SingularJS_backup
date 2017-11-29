@@ -1,8 +1,13 @@
 import { Document, Schema, NativeError } from 'mongoose'
-import { Request } from 'express'
+import { Request, Response } from 'express'
+import * as moment from 'moment'
+import * as jwt from 'jsonwebtoken'
 
+import * as CONFIG from '../../../common/options/config'
 import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
+
+import IUser from '../interfaces/users/IUser'
 
 import Consumer from '../models/users/ConsumerModel'
 import IConsumer from '../interfaces/users/IConsumer'
@@ -20,24 +25,38 @@ import Download from '../models/actions/DownloadModel'
 /**
  * Formats MongoDB native error to string
  * 
+ * @param {Response} res 
  * @param {NativeError} err 
  * @param {string} action 
  */
-export function formatError(err: NativeError, action: string): any {
-  let message = ''
+export function formatError(res: Response, err: NativeError, act: string = '', db: string = ''): void {
+  let status: number = 500,
+    message: string = '',
+    code: number = err.hasOwnProperty('code') ? parseInt((<any>err).code, 10) : null
 
-  if (err.hasOwnProperty('code') && (<any>err).code === 11000) {
-    switch (action) {
+  if (code === 11000) {
+    switch (act) {
       case CONST.USER_ACTIONS.CONSUMER.LIKE:
       case CONST.USER_ACTIONS.CONSUMER.DISLIKE:
       case CONST.USER_ACTIONS.CONSUMER.SAVE:
       case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
+        status = 409
         message = ERR.ACTION.DUPLICATED_ACTION
+      break
+
+      case CONST.USER_ACTIONS.COMMON.CREATE:
+        status = 409
+        message = ERR.USER.DUPLICATED_USER_INFORMATION
+      break
+
+      default:
+        message = ERR.UNKNOWN
       break
     }
   }
 
-  return {message}
+  res.status(status).json({ code, message })
+  console.log(err.message)
 }
 
 /**
@@ -127,7 +146,7 @@ export function getModelFromKey(key: string): any {
  * @param {string} path
  * @returns {string}
  */
-export function getModelFromPath(path: string): string {
+export function getModelFromPath(path: string): string|any {
   let key = path.toLowerCase(),
     model = ''
 
@@ -488,4 +507,29 @@ export function setUpdateTime(doc: Document, keys: string[]): void {
   if (toUpdate) {
     (<any>doc).updated = this.getTimestamp()
   }
+}
+
+/**
+ * Signs a token using user id
+ * 
+ * @param {IUser} user 
+ */
+export function signToken(user: IUser): string {
+  let now: moment.Moment = moment(),
+    ref: string = user.ref.toUpperCase(),
+    duration: [moment.unitOfTime.DurationConstructor, number] = CONFIG.USER_TOKEN_EXPIRATION[ref]
+  
+  return jwt.sign({
+    iss: CONFIG.PROJECT_TITLE,
+    sub: user._id,
+    ref,
+    iat: now.valueOf(),
+    exp: now.add(duration[0], duration[1]).valueOf()
+  }, CONFIG.JWT_SECRETS[ref])
+}
+
+export function getSignedUser(user: IUser): object {
+  let data: any = user.toJSON(),
+    token: string = signToken(user)
+  return Object.assign({}, data, {token})
 }

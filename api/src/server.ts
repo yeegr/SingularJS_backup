@@ -12,19 +12,22 @@ import * as path from 'path'
 // use native ES6 promises instead of mongoose promise library
 (<any>mongoose).Promise = global.Promise
 
-import _HelperRouter from './routers/_HelperRouter'
+import * as CONFIG from '../../common/options/config'
 
-import ActionRouter from './routers/ActionRouter'
+import _HelperRouter from './routers/_HelperRouter'
+import AdminRouter from './admin'
+
 import ConsumerRouter from './routers/ConsumerRouter'
+
 import EventRouter from './routers/EventRouter'
 import PostRouter from './routers/PostRouter'
+
+import ActionRouter from './routers/ActionRouter'
 import CommentRouter from './routers/CommentRouter'
 
 import {
   USER_NAME, USER_PASSWORD, HOST, PORT, DB_NAME
 } from '../../docker/env/development/init'
-
-import * as CONFIG from '../../common/options/config'
 
 /**
  * Server class
@@ -128,7 +131,7 @@ class Server {
     // this.app.use('/api/v1/suppliers', SupplierRouter)
 
     // platform administrator router
-    // this.app.use('/api/v1/admin', AdminRouter)
+    this.app.use('/api/v1/admin/', AdminRouter)
 
     // post router
     this.app.use('/api/v1/posts', PostRouter)

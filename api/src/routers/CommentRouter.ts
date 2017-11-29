@@ -73,7 +73,7 @@ class CommentRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -101,7 +101,7 @@ class CommentRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -149,13 +149,13 @@ class CommentRouter {
         new Logger({
           creator,
           ref,
-          action: CONST.USER_ACTIONS.ALL.CREATE,
+          action: CONST.USER_ACTIONS.COMMON.CREATE,
           type: CONST.ACTION_TARGETS.COMMENT,
           target: data._id,
           device
         })
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -204,7 +204,7 @@ class CommentRouter {
             new Logger({
               creator,
               ref,
-              action: CONST.USER_ACTIONS.ALL.UPDATE,
+              action: CONST.USER_ACTIONS.COMMON.UPDATE,
               type: CONST.ACTION_TARGETS.COMMENT,
               target: data._id,
               device
@@ -214,7 +214,7 @@ class CommentRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -246,7 +246,7 @@ class CommentRouter {
         new Logger({
           creator,
           ref,
-          action: CONST.USER_ACTIONS.ALL.DELETE,
+          action: CONST.USER_ACTIONS.COMMON.DELETE,
           type: CONST.ACTION_TARGETS.COMMENT,
           target: data._id,
           device
@@ -255,7 +255,7 @@ class CommentRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })

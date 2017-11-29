@@ -67,7 +67,7 @@ class ConsumerRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -128,9 +128,8 @@ class ConsumerRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
-      res.status(res.statusCode).send()
-      console.log(err)
+    .catch((err: Error) => {
+      UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.GET, CONST.ACTION_TARGETS.CONSUMER)
     })
   }
   
@@ -182,9 +181,8 @@ class ConsumerRouter {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
-      .catch((err) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+      .catch((err: Error) => {
+        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.UNIQUE, CONST.ACTION_TARGETS.CONSUMER)
       })
     }
   }
@@ -202,18 +200,17 @@ class ConsumerRouter {
     let body: any = req.body,
       device: any = req.body.device
 
-    if (UTIL.isNotUndefinedNullEmpty(body.handle)) {
-      if (UTIL.isNotUndefinedNullEmpty(body.password) || UTIL.validatePassword(body.password)) {
-        let user: IConsumer = new Consumer({
-          handle: body.handle,
-          password: body.password
-        })
-        this.createConsumer(user, device, res)
-      } else {
-        res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
-      }
-    } else {
+    if (!body.hasOwnProperty('handle') || !UTIL.validateHandle(body.handle)) {
       res.status(401).json({ message: ERR.USER.MISSING_CREDENTIALS })      
+    } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(body.password)) {
+      res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
+    } else {
+      let user: IConsumer = new Consumer({
+        handle: body.handle,
+        password: body.password
+      })
+
+      this.createConsumer(user, device, res)
     }
   }
   
@@ -233,15 +230,15 @@ class ConsumerRouter {
     
     if (handle === req.user.handle) {
       Consumer
-      .findOneAndUpdate({_id}, req.body, {new: true})
+      .findByIdAndUpdate(_id, req.body, {new: true})
       .then((user: IConsumer) => {
         if (user) {
-          res.status(200).json(this.getSignedUser(user))
+          res.status(200).json(UTIL.getSignedUser(user))
   
           new Logger({
             creator: user._id,
             ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.CONSUMER.UPDATE,
+            action: CONST.USER_ACTIONS.COMMON.UPDATE,
             type: CONST.ACTION_TARGETS.CONSUMER,
             target: user._id,
             device
@@ -250,9 +247,8 @@ class ConsumerRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+      .catch((err: Error) => {
+        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.UPDATE, CONST.ACTION_TARGETS.CONSUMER)
       })
     } else {
       res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
@@ -275,7 +271,7 @@ class ConsumerRouter {
     
     if (handle === req.user.handle) {
       Consumer
-      .findOneAndRemove({_id})
+      .findByIdAndRemove(_id)
       .then((user: IConsumer) => {
         if (user) {
           res.status(204).end()
@@ -283,7 +279,7 @@ class ConsumerRouter {
           new Logger({
             creator: _id,
             ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.CONSUMER.DELETE,
+            action: CONST.USER_ACTIONS.COMMON.DELETE,
             type: CONST.ACTION_TARGETS.CONSUMER,
             target: user._id,
             device
@@ -292,9 +288,8 @@ class ConsumerRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+      .catch((err: Error) => {
+        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.DELETE, CONST.ACTION_TARGETS.CONSUMER)
       })
     } else {
       res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
@@ -313,12 +308,12 @@ class ConsumerRouter {
   public login = (req: Request, res: Response): void => {
     const user: IConsumer = req.user
 
-    res.status(200).json(this.getSignedUser(user))
+    res.status(200).json(UTIL.getSignedUser(user))
 
     new Logger({
       creator: user._id,
       ref: CONST.USER_TYPES.CONSUMER,
-      action: CONST.USER_ACTIONS.CONSUMER.LOGIN,
+      action: CONST.USER_ACTIONS.COMMON.LOGIN,
       type: CONST.ACTION_TARGETS.CONSUMER,
       target: user._id,
       misc: req.authInfo,
@@ -337,51 +332,20 @@ class ConsumerRouter {
     user
     .save()
     .then((user: IConsumer) => {
-      res.status(201).json(this.getSignedUser(user))
+      res.status(201).json(UTIL.getSignedUser(user))
 
       new Logger({
         creator: user._id,
         ref: CONST.USER_TYPES.CONSUMER,
-        action: CONST.USER_ACTIONS.CONSUMER.CREATE,
+        action: CONST.USER_ACTIONS.COMMON.CREATE,
         type: CONST.ACTION_TARGETS.CONSUMER,
         target: user._id,
         device
       })        
     })
-    .catch((err) => {
-      res.status(res.statusCode).send()
-      console.log(err)
+    .catch((err: Error) => {
+      UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.CREATE, CONST.ACTION_TARGETS.CONSUMER)
     })
-  }
-
-  /**
-   * Signs a token using user id
-   * 
-   * @param {IConsumer} user 
-   */
-  private signToken(user: IConsumer): string {
-    let now: moment.Moment = moment(),
-      duration: [moment.unitOfTime.DurationConstructor, number] = CONST.USER_TOKEN_EXPIRATION_DURATION
-    
-    return jwt.sign({
-      iss: CONFIG.PROJECT_TITLE,
-      sub: user._id,
-      iat: now.valueOf(),
-      exp: now.add(duration[0], duration[1]).valueOf()
-    }, CONFIG.JWT_SECRET)
-  }
-
-  /**
-   * Gets a user with signed token
-   * 
-   * @param {IConsumer} user
-   * @returns {object} 
-   */
-  private getSignedUser(user: IConsumer): object {
-    const data: any = user.toJSON(),
-      token: string = this.signToken(data)
-
-    return Object.assign({}, data, {token})
   }
 
   /**
@@ -395,7 +359,7 @@ class ConsumerRouter {
    * @returns {void}
    */
   public local = (req: Request, res: Response, next: NextFunction): void => {
-    passport.authenticate('local', {
+    passport.authenticate('consumerLocal', {
       session: false,
       badRequestMessage: ERR.USER.MISSING_CREDENTIALS
     }, (err: Error, user: IConsumer, info: object) => {
@@ -428,7 +392,7 @@ class ConsumerRouter {
    */
   public initTotp = (req: Request, res: Response, next: NextFunction): void => {
     let totp: ITotp = new Totp((<any>Object).assign({
-      action: CONST.USER_ACTIONS.CONSUMER.LOGIN,
+      action: CONST.USER_ACTIONS.COMMON.LOGIN,
       code: randomstring.generate({
         length: CONFIG.TOTP_CODE_LENGTH,
         charset: CONFIG.TOTP_CODE_CHARSET
@@ -443,7 +407,7 @@ class ConsumerRouter {
 
       res.status(201).send('Success')
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -483,15 +447,14 @@ class ConsumerRouter {
       .findOne(query)
       .then((user: IConsumer) => {
         if (user) {
-          let token: string = this.signToken(user)
-          res.status(200).json(Object.assign({}, user.toJSON(), {token}))
+          res.status(200).json(UTIL.getSignedUser(user))
         } else {
           let user: IConsumer = new Consumer(query)
           this.createConsumer(user, req.body.device, res)
         }
       })
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -538,7 +501,7 @@ class ConsumerRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -559,25 +522,30 @@ class ConsumerRouter {
     this.router.post('/unique', this.unique)
 
     // login routes
+    // local login routes - user handle/password
     this.router.post('/login/local', this.local, this.login)
+
+    // TOTP login routes
     this.router.post('/login/totp', this.initTotp)
     this.router.patch('/login/totp', this.verifyTotp)
-    this.router.get('/login/token', passport.authenticate('jwt', {
+
+    // JWT login routes
+    this.router.get('/login/token', passport.authenticate('consumerJwt', {
       session: false
     }), this.login)
 
     // sublist route
-    this.router.get('/:handle/:sublist', passport.authenticate('jwt', {
+    this.router.get('/:handle/:sublist', passport.authenticate('consumerJwt', {
       session: false
     }), this.sublist)
 
     // update route
-    this.router.patch('/:handle', passport.authenticate('jwt', {
+    this.router.patch('/:handle', passport.authenticate('consumerJwt', {
       session: false
     }), this.update)
 
     // delete route
-    this.router.delete('/:handle', passport.authenticate('jwt', {
+    this.router.delete('/:handle', passport.authenticate('consumerJwt', {
       session: false
     }), this.delete)
   }

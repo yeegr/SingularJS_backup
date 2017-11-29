@@ -108,7 +108,7 @@ class PostRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })  
@@ -150,7 +150,7 @@ class PostRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -175,7 +175,7 @@ class PostRouter {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -218,13 +218,13 @@ class PostRouter {
         new Logger({
           creator,
           ref,
-          action: CONST.USER_ACTIONS.CONSUMER.CREATE,
+          action: CONST.USER_ACTIONS.COMMON.CREATE,
           type: CONST.ACTION_TARGETS.POST,
           target: data._id,
           device
         })
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -263,7 +263,7 @@ class PostRouter {
           new Logger({
             creator: user._id,
             ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.CONSUMER.UPDATE,
+            action: CONST.USER_ACTIONS.COMMON.UPDATE,
             type: CONST.ACTION_TARGETS.POST,
             target: data._id,
             device
@@ -272,7 +272,7 @@ class PostRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })
@@ -298,36 +298,40 @@ class PostRouter {
     Post
     .findOne({creator, slug})
     .then((data: IPost) => {
-      if (data.status === CONST.STATUSES.POST.PENDING || data.status === CONST.STATUSES.POST.APPROVED) {
-        res.status(422).json({ message: ERR.POST.POST_ALREADY_SUMMITED })
-      } else if (validator.isEmpty(data.slug)) {
-        res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
-      } else if (validator.isEmpty(data.slug)) {
-        res.status(422).json({ message: ERR.POST.POST_SLUG_REQUIRED })
-      } else if (validator.isEmpty(data.content)) {
-        res.status(422).json({ message: ERR.POST.POST_CONTENT_REQUIRED })
-      } else {
-        // approval ? pending : approved
-        data.status = CONFIG.POST_REQURIES_APPROVAL ? CONST.STATUSES.POST.PENDING : CONST.STATUSES.POST.APPROVED
+      if (data) {
+        if (data.status === CONST.STATUSES.POST.PENDING || data.status === CONST.STATUSES.POST.APPROVED) {
+          res.status(422).json({ message: ERR.POST.POST_ALREADY_SUMMITED })
+        } else if (validator.isEmpty(data.slug)) {
+          res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
+        } else if (validator.isEmpty(data.slug)) {
+          res.status(422).json({ message: ERR.POST.POST_SLUG_REQUIRED })
+        } else if (validator.isEmpty(data.content)) {
+          res.status(422).json({ message: ERR.POST.POST_CONTENT_REQUIRED })
+        } else {
+          // approval ? pending : approved
+          data.status = CONFIG.POST_REQURIES_APPROVAL ? CONST.STATUSES.POST.PENDING : CONST.STATUSES.POST.APPROVED
 
-        data
-        .save()
-        .then((post: IPost) => {
-          res.status(200).json(post)
-          
-          new Logger({
-            creator,
-            ref,
-            action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
-            type: CONST.ACTION_TARGETS.POST,
-            target: post._id,
-            device
+          data
+          .save()
+          .then((post: IPost) => {
+            res.status(200).json(post)
+            
+            new Logger({
+              creator,
+              ref,
+              action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
+              type: CONST.ACTION_TARGETS.POST,
+              target: post._id,
+              device
+            })
           })
-        })
-        .catch((err: Error) => {
-          res.status(res.statusCode).send()
-          console.log(err)
-        })
+          .catch((err: Error) => {
+            res.status(res.statusCode).send()
+            console.log(err)
+          })
+        }
+      } else {
+        res.status(404).send({ message: ERR.POST.CANNOT_SUBMIT_POST })
       }
     })
     .catch((err: Error) => {
@@ -411,7 +415,7 @@ class PostRouter {
         new Logger({
           creator: user._id,
           ref: CONST.USER_TYPES.CONSUMER,
-          action: CONST.USER_ACTIONS.CONSUMER.DELETE,
+          action: CONST.USER_ACTIONS.COMMON.DELETE,
           type: CONST.ACTION_TARGETS.POST,
           target: data._id,
           device
@@ -420,7 +424,7 @@ class PostRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -472,7 +476,7 @@ class PostRouter {
         res.status(404).send()
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -520,7 +524,7 @@ class PostRouter {
           res.status(404).send()
         }
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         res.status(res.statusCode).send()
         console.log(err)
       })

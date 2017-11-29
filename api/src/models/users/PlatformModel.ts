@@ -17,7 +17,7 @@ let PlatformSchema: Schema = new Schema({
     enum: [CONST.USER_TYPES.PLATFORM],
     required: true
   },
-  // user handle or user name
+  // user name
   username: {
     type: String,
     required: true,
@@ -33,13 +33,10 @@ let PlatformSchema: Schema = new Schema({
     default: '',
     required: true
   },
-  // user handle or user name
-  handle: {
+  // user nickname
+  nickname: {
     type: String,
     default: '',
-    unique: true,
-    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
-    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
     trim: true,
     index: true
   },
@@ -114,13 +111,13 @@ let PlatformSchema: Schema = new Schema({
   roles: {
     type: [String],
     required: true,
-    default: [CONST.USER_ROLES.CONSUMER.MEMBER]
+    default: [CONST.USER_ROLES.PLATFORM.ADMIN]
   },
   // current user status
   status: {
     type: String,
-    enum: CONST.CONSUMER_STATUSES_ENUM,
-    default: CONST.STATUSES.CONSUMER.ACTIVE
+    enum: CONST.PLATFORM_STATUSES_ENUM,
+    default: CONST.STATUSES.PLATFORM.SUSPENDED
   },
   // number of jobs completed by user
   jobCount: {
@@ -183,7 +180,7 @@ PlatformSchema.pre('save', function(next: Function): void {
       })
     })
   } else {
-    UTIL.setUpdateTime(user, ['username', 'password', 'handle', 'name', 'gender', 'mobile', 'email', 'pid', 'avatar', 'locale', 'city', 'country'])
+    UTIL.setUpdateTime(user, ['username', 'password', 'nickname', 'name', 'gender', 'mobile', 'email', 'pid', 'avatar', 'locale', 'city', 'country'])
     user.wasNew = user.isNew
 
     next()

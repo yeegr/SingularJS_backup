@@ -8,8 +8,13 @@ import * as UTIL from '../../../common/util'
 import Log from '../models/LogModel'
 import ILog from '../interfaces/ILog'
 
+import Err from '../models/ErrModel'
+import IErr from '../interfaces/IErr'
+
 import Totp from '../models/TotpModel'
 import ITotp from '../interfaces/ITotp'
+
+import IAction from '../interfaces/actions/IAction'
 
 /**
  * HelperRouter class
@@ -97,7 +102,46 @@ class HelperRouter {
     .then((data) => {
       res.status(200).json(data)
     })
-    .catch((err) => {
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
+  public errs = (req: Request, res: Response): void => {
+    const query = {},
+      page: number = UTIL.getListPageIndex(req),
+      count: number = UTIL.getListCountPerPage(req)
+    
+    Err
+    .find(query)
+    .skip(page * count)
+    .limit(count)
+    .sort({_id: -1})
+    .exec()
+    .then((data) => {
+      res.status(200).json(data)
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
+  public actions = (req: Request, res: Response): void => {
+    const ActionModel = UTIL.getModelFromAction(req.params.action),
+      params = UTIL.assembleSearchParams(req)
+
+    ActionModel
+    .find(params.query)
+    .skip(params.skip)
+    .limit(params.limit)
+    .sort({_id: -1})
+    .exec()
+    .then((data: IAction) => {
+      res.status(200).json(data)
+    })
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -118,7 +162,7 @@ class HelperRouter {
     .then((data) => {
       res.status(200).json(data)
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
     })
@@ -127,7 +171,9 @@ class HelperRouter {
   routes() {
     this.router.purge('/drop/:table', this.drop)
     this.router.get('/logs', this.logs)
+    this.router.get('/errs', this.errs)
     this.router.get('/totp', this.totp)
+    this.router.get('/actions/:action', this.actions)
   }
 }
 

@@ -1,33 +1,12 @@
-import { Document, Schema } from 'mongoose'
+import { Schema } from 'mongoose'
+import IUser from './IUser'
 
-export default interface IPlatform extends Document {
-  [key: string]: any
-  _id: Schema.Types.ObjectId
-  ref: string
+export default interface IPlatform extends IUser {
   username: string
-  password: string
-  handle: string
-  name: string
-  gender?: number
-  mobile: string
-  email: string
+  nickname: string
   pid: string
-  avatar: string
-  locale: string
-  city: string
-  country: string
-  updated: number
-  roles: string[]
-  status: string
   jobCount: number
 
   // virtual fields
-  jobs: [Schema.Types.ObjectId]
-
-  // document status
-  isNew: boolean
-  wasNew: boolean
-
-  // methods
-  comparePassword: Function
+  jobs: Schema.Types.ObjectId[]
 }

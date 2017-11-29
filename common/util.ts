@@ -58,6 +58,16 @@ export function validateRange(value: number, min: number, max: number): boolean 
 /**
  * Check if user handle is formatted correctly
  *
+ * @param {string} username
+ * @returns {boolean}
+ */
+export function validateUsername(username: string): boolean {
+  return validateRange(username.length, CONFIG.INPUT_LIMITS.MIN_USERNAME_LENGTH, CONFIG.INPUT_LIMITS.MAX_USERNAME_LENGTH)
+}
+
+/**
+ * Check if user handle is formatted correctly
+ *
  * @param {string} handle
  * @returns {boolean}
  */

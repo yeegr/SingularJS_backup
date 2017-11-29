@@ -10,9 +10,9 @@ import * as ERR from '../../../../common/options/errors'
 import Platform from '../../models/users/PlatformModel'
 import IPlatform from '../../interfaces/users/IPlatform'
 
-passport.use(new JwtStrategy({
+passport.use('platformJwt', new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-    secretOrKey: CONFIG.JWT_SECRET
+    secretOrKey: CONFIG.JWT_SECRETS.PLATFORM
   }, (payload, done: Function) => {
     Platform
     .findOne({
@@ -32,15 +32,16 @@ passport.use(new JwtStrategy({
   })
 )
 
-passport.use(new LocalStrategy({
-    usernameField: 'username'
-  }, (handle: string, password: string, done: Function) => {
+passport.use('platformLocal', new LocalStrategy((username: string, password: string, done: Function) => {
+    console.log('username: ' + username)
+    console.log('password: ' + password)
     Platform
     .findOne({
-      handle,
+      username,
       status: CONST.STATUSES.PLATFORM.ACTIVE
     })
     .then((user: IPlatform) => {
+      console.log(user)
       if (user) {
         user.comparePassword(password, (err: Error, isMatch: boolean) => {
           if (err) { return done(err) }

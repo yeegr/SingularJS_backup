@@ -147,7 +147,7 @@ class ActionRouter {
                     this.logger(log)
                   })
                   .catch((err: Error) => {
-                    res.status(res.statusCode).json(UTIL.formatError(err, action))
+                    UTIL.formatError(res, err, action)
                   })
                 break
 
