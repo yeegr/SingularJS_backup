@@ -237,7 +237,7 @@ export function removeComment(doc: any, rating: number): void {
  * @param {string[]]} keys 
  */
 export function sanitizeInput(model: string, body: any): any {
-  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount,device',
+  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount,ua',
     keyArray: string[] = []
   
   switch (model) {

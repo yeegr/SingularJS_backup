@@ -8,7 +8,7 @@ import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
-import IRequest from '../interfaces/IRequest'
+import Err from '../modules/err'
 
 import Consumer from '../models/users/ConsumerModel'
 import IConsumer from '../interfaces/users/IConsumer'
@@ -44,7 +44,7 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public list(req: IRequest, res: Response): void {
+  public list(req: Request, res: Response): void {
     let query: any = {},
       page: number = UTIL.getListPageIndex(req),
       count: number = UTIL.getListCountPerPage(req),
@@ -116,14 +116,13 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public create(req: IRequest, res: Response): void {
+  public create(req: Request, res: Response): void {
     const creator: string = req.user._id,
       ref: string = req.user.ref,
       type: string = req.body.type,
       target: string = req.body.target,
       rating: number = req.body.rating,
-      content: string = req.body.content,
-      device: any = req.body.device
+      content: string = req.body.content
 
     if (!creator || !ref) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
@@ -140,24 +139,26 @@ class CommentRouter {
         rating,
         content
       })
+      
+      let log = {
+        creator,
+        ref,
+        action: CONST.USER_ACTIONS.COMMON.CREATE,
+        type: CONST.ACTION_TARGETS.COMMENT,
+        ua: req.body.ua || req.ua
+      }
 
       comment
       .save()
       .then((data: IComment) => {
         res.status(201).json(data)
         
-        new Logger({
-          creator,
-          ref,
-          action: CONST.USER_ACTIONS.COMMON.CREATE,
-          type: CONST.ACTION_TARGETS.COMMENT,
-          target: data._id,
-          device
-        })
+        new Logger(Object.assign({}, log, {
+          target: data._id
+        }))
       })
       .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+        new Err(res, err, log)
       })
     }
   }
@@ -179,7 +180,14 @@ class CommentRouter {
       body: any = req.body,
       rating: number = body.rating,
       content: string = body.content,
-      device: any = body.device
+      log = {
+        creator,
+        ref,
+        action: CONST.USER_ACTIONS.COMMON.UPDATE,
+        type: CONST.ACTION_TARGETS.COMMENT,
+        target: _id,
+        ua: req.body.ua || req.ua
+      }
 
     if (!creator || !ref) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
@@ -199,24 +207,15 @@ class CommentRouter {
           data
           .save()
           .then((comment: IComment) => {
-            res.status(200).json(data)
-            
-            new Logger({
-              creator,
-              ref,
-              action: CONST.USER_ACTIONS.COMMON.UPDATE,
-              type: CONST.ACTION_TARGETS.COMMENT,
-              target: data._id,
-              device
-            })
+            res.status(200).json(comment)
+            new Logger(log)
           })
         } else {
           res.status(404).send()
         }
       })
       .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+        new Err(res, err, log)
       })
     }
   }  
@@ -235,30 +234,34 @@ class CommentRouter {
       creator: Schema.Types.ObjectId = user._id,
       ref: string = user.ref,
       _id: string = req.params.id,
-      device: any = req.body.device
-
-    Comment
-    .findOneAndRemove({creator, _id})
-    .then((data: IComment) => {
-      if (data) {
-        res.status(204).end()
-        
-        new Logger({
-          creator,
-          ref,
-          action: CONST.USER_ACTIONS.COMMON.DELETE,
-          type: CONST.ACTION_TARGETS.COMMENT,
-          target: data._id,
-          device
-        })        
-      } else {
-        res.status(404).send()
+      log = {
+        creator,
+        ref: user.ref,
+        action: CONST.USER_ACTIONS.COMMON.DELETE,
+        type: CONST.ACTION_TARGETS.COMMENT,
+        target: _id,
+        ua: req.body.ua || req.ua
       }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
+
+    if (!creator || !ref) {
+      res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
+    } else if (!_id) {
+      res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
+    } else {
+      Comment
+      .findOneAndRemove({creator, _id})
+      .then((data: IComment) => {
+        if (data) {
+          res.status(204).end()
+          new Logger(log)        
+        } else {
+          res.status(404).send()
+        }
+      })
+      .catch((err: Error) => {
+        new Err(res, err, log)
+      })
+    }
   }
 
   routes() {

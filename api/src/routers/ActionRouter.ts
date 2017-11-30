@@ -8,7 +8,7 @@ import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
-import IRequest from '../interfaces/IRequest'
+import Err from '../modules/err'
 
 import Consumer from '../models/users/ConsumerModel'
 import IConsumer from '../interfaces/users/IConsumer'
@@ -46,13 +46,12 @@ class ActionRouter {
    * @param {Response} res
    * @return {void}
    */
-  public create = (req: IRequest, res: Response) => {
+  public create = (req: Request, res: Response) => {
     const creator: Schema.Types.ObjectId = req.user._id,
       ref: string = req.user.ref,
       type: string = UTIL.capitalizeFirstLetter(req.body.type),
       target: Schema.Types.ObjectId = req.body.target,
-      action: string = req.body.action,
-      device: any = req.body.device
+      action: string = req.body.action
 
     if (!creator || !ref) {
       res.status(422).json({ message: ERR.ACTION.ACTION_CREATOR_REQUIRED })
@@ -79,7 +78,7 @@ class ActionRouter {
           type,
           target,
           action,
-          device
+          ua: req.body.ua || req.ua
         },
         data = new ActionModel(query)
 
@@ -161,8 +160,7 @@ class ActionRouter {
           }
         })
         .catch((err: Error) => {
-          res.status(404).send()
-          console.log(err)
+          new Err(res, err, log)
         })
       }
     }

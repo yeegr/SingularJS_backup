@@ -48,10 +48,6 @@ let SignupSchema: Schema = new Schema({
     enum: CONST.PAYMENT_METHODS_ENUM,
     default: CONST.PAYMENT_METHODS.ALIPAY,
     required: true
-  },
-  // signup device information
-  device: {
-    type: Object
   }
 })
 

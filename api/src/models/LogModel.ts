@@ -35,8 +35,8 @@ let LogSchema: Schema = new Schema({
     type: String,
     default: ''
   },
-  // user login device info
-  device: {
+  // request user agent information
+  ua: {
     type: Object
   }
 })

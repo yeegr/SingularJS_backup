@@ -4,3 +4,10 @@ declare module "*.json" {
 }
 
 declare module "@alicloud/sms-sdk"
+
+// adds user agent type to express Request
+declare namespace Express {
+  export interface Request {
+      ua?: any
+  }
+}

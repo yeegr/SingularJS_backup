@@ -10,7 +10,7 @@ import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
-import IRequest from '../interfaces/IRequest'
+import Err from '../modules/err'
 
 import Consumer from '../models/users/ConsumerModel'
 import IConsumer from '../interfaces/users/IConsumer'
@@ -168,7 +168,9 @@ class PostRouter {
   public slug = (req: Request, res: Response): void => {
     let slug: string = req.body.slug
 
-    if (slug.length > 0) {
+    if (slug.length < 1) {
+      res.status(422).json({ message: ERR.POST.POST_SLUG_REQUIRED })
+    } else {
       Post
       .findOne({slug})
       .then((data: IPost) => {
@@ -179,8 +181,6 @@ class PostRouter {
         res.status(res.statusCode).send()
         console.log(err)
       })
-    } else {
-      res.status(422).json({ message: ERR.POST.POST_SLUG_REQUIRED })
     }
   }
 
@@ -198,8 +198,7 @@ class PostRouter {
       creator: Schema.Types.ObjectId = user._id,
       ref: string = user.ref,
       title: string = req.body.title,
-      slug: string = req.body.slug,
-      device: any = req.body.device
+      slug: string = req.body.slug
 
     if (!creator || validator.isEmpty(ref)) {
       res.status(422).json({ message: ERR.POST.POST_AUTHOR_REQUIRED })
@@ -207,26 +206,29 @@ class PostRouter {
       res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
     } else {
       const post = new Post(Object.assign({}, {
-        creator
-      }, UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)))
+          creator
+        }, UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)))
+
+      let log = {
+        creator,
+        ref,
+        action: CONST.USER_ACTIONS.COMMON.CREATE,
+        type: CONST.ACTION_TARGETS.POST,
+        slug,
+        ua: req.body.ua || req.ua
+      }
 
       post
       .save()
       .then((data: IPost) => {
         res.status(201).json(data)
         
-        new Logger({
-          creator,
-          ref,
-          action: CONST.USER_ACTIONS.COMMON.CREATE,
-          type: CONST.ACTION_TARGETS.POST,
-          target: data._id,
-          device
-        })
+        new Logger(Object.assign({}, log, {
+          target: data._id
+        }))
       })
       .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+        new Err(res, err, log)
       })
     }
   }
@@ -246,7 +248,6 @@ class PostRouter {
       ref: string = user.ref,
       slug: string = req.params.slug,
       title: string = req.body.title,
-      device: any = req.body.device,
       body: any = UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)
 
     if (!creator || validator.isEmpty(ref)) {
@@ -254,27 +255,30 @@ class PostRouter {
     } else if (title && validator.isEmpty(title)) {
       res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
     } else {
+      let log = {
+        creator: user._id,
+        ref: CONST.USER_TYPES.CONSUMER,
+        action: CONST.USER_ACTIONS.COMMON.UPDATE,
+        type: CONST.ACTION_TARGETS.POST,
+        slug,
+        ua: req.body.ua || req.ua
+      }
+
       Post
       .findOneAndUpdate({creator, slug}, body, {new: true})
       .then((data: IPost) => {
         if (data) {
           res.status(200).json(data)
           
-          new Logger({
-            creator: user._id,
-            ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.COMMON.UPDATE,
-            type: CONST.ACTION_TARGETS.POST,
-            target: data._id,
-            device
-          })
+          new Logger(Object.assign({}, log, {
+            target: data._id
+          }))
         } else {
           res.status(404).send()
         }
       })
       .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
+        new Err(res, err, log)
       })
     }
   }
@@ -291,14 +295,14 @@ class PostRouter {
   public submit = (req: Request, res: Response): void => {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
-      ref: string = user.ref,
-      slug: string = req.params.slug,
-      device: any = req.body.device
+      slug: string = req.params.slug
 
     Post
     .findOne({creator, slug})
     .then((data: IPost) => {
-      if (data) {
+      if (!data) {
+        res.status(404).send({ message: ERR.POST.CANNOT_SUBMIT_POST })
+      } else {
         if (data.status === CONST.STATUSES.POST.PENDING || data.status === CONST.STATUSES.POST.APPROVED) {
           res.status(422).json({ message: ERR.POST.POST_ALREADY_SUMMITED })
         } else if (validator.isEmpty(data.slug)) {
@@ -308,6 +312,15 @@ class PostRouter {
         } else if (validator.isEmpty(data.content)) {
           res.status(422).json({ message: ERR.POST.POST_CONTENT_REQUIRED })
         } else {
+          let log = {
+            creator,
+            ref: user.ref,
+            action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
+            type: CONST.ACTION_TARGETS.POST,
+            slug,
+            ua: req.body.ua || req.ua
+          }
+
           // approval ? pending : approved
           data.status = CONFIG.POST_REQURIES_APPROVAL ? CONST.STATUSES.POST.PENDING : CONST.STATUSES.POST.APPROVED
 
@@ -316,22 +329,14 @@ class PostRouter {
           .then((post: IPost) => {
             res.status(200).json(post)
             
-            new Logger({
-              creator,
-              ref,
-              action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
-              type: CONST.ACTION_TARGETS.POST,
-              target: post._id,
-              device
-            })
+            new Logger(Object.assign({}, log, {
+              target: post._id
+            }))
           })
           .catch((err: Error) => {
-            res.status(res.statusCode).send()
-            console.log(err)
+            new Err(res, err, log)
           })
         }
-      } else {
-        res.status(404).send({ message: ERR.POST.CANNOT_SUBMIT_POST })
       }
     })
     .catch((err: Error) => {
@@ -352,9 +357,7 @@ class PostRouter {
   public retract = (req: Request, res: Response): void => {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
-      ref: string = user.ref,
-      slug: string = req.params.slug,
-      device: any = req.body.device
+      slug: string = req.params.slug
 
     Post
     .findOne({creator, slug})
@@ -362,6 +365,15 @@ class PostRouter {
       if (data.status === CONST.STATUSES.POST.EDITING) {
         res.status(422).json({ message: ERR.POST.POST_CANNOT_BE_RETRACTED })
       } else {
+        let log = {
+          creator,
+          ref: user.ref,
+          action: CONST.USER_ACTIONS.CONSUMER.RETRACT,
+          type: CONST.ACTION_TARGETS.POST,
+          slug,
+          ua: req.body.ua || req.ua          
+        }
+
         // approval ? pending : approved
         data.status = CONST.STATUSES.POST.EDITING
 
@@ -370,18 +382,12 @@ class PostRouter {
         .then((post: IPost) => {
           res.status(200).json(post)
           
-          new Logger({
-            creator,
-            ref,
-            action: CONST.USER_ACTIONS.CONSUMER.RETRACT,
-            type: CONST.ACTION_TARGETS.POST,
-            target: post._id,
-            device
-          })
+          new Logger(Object.assign({}, log, {
+            target: post._id
+          }))
         })
         .catch((err: Error) => {
-          res.status(res.statusCode).send()
-          console.log(err)
+          new Err(res, err, log)
         })
       }
     })
@@ -404,7 +410,14 @@ class PostRouter {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
       slug: string = req.params.slug,
-      device: any = req.body.device
+      log = {
+        creator: user._id,
+        ref: CONST.USER_TYPES.CONSUMER,
+        action: CONST.USER_ACTIONS.COMMON.DELETE,
+        type: CONST.ACTION_TARGETS.POST,
+        slug,
+        ua: req.body.ua || req.ua
+      }
 
     Post
     .findOneAndRemove({creator, slug})
@@ -412,34 +425,28 @@ class PostRouter {
       if (data) {
         res.status(204).end()
         
-        new Logger({
-          creator: user._id,
-          ref: CONST.USER_TYPES.CONSUMER,
-          action: CONST.USER_ACTIONS.COMMON.DELETE,
-          type: CONST.ACTION_TARGETS.POST,
-          target: data._id,
-          device
-        })        
+        new Logger(Object.assign({}, log, {
+          target: data._id
+        }))
       } else {
         res.status(404).send()
       }
     })
     .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
+      new Err(res, err, log)
     })
   }
 
   /**
-   * Gets comments on item
+   * Lists comments on item
    * 
    * @class PostRouter
    * @method comments
-   * @param {IRequest} req 
+   * @param {Request} req 
    * @param {Response} res 
    * @returns {void}
    */
-  public comments = (req: IRequest, res: Response): void => {
+  public comments = (req: Request, res: Response): void => {
     let slug: string = req.params.slug,
       opt: any = UTIL.assembleSearchParams(req),
       match: any = {}
@@ -487,11 +494,11 @@ class PostRouter {
    * 
    * @class PostRouter
    * @method sublist
-   * @param {IRequest} req 
+   * @param {Request} req 
    * @param {Response} res 
    * @returns {void}
    */
-  public sublist = (req: IRequest, res: Response): void => {
+  public sublist = (req: Request, res: Response): void => {
     const slug: string = req.params.slug,
       path: string = req.params.sublist,
       opt: any = UTIL.assembleSearchParams(req)
@@ -529,7 +536,7 @@ class PostRouter {
         console.log(err)
       })
     } else {
-      res.status(404).json()
+      res.status(404).send()
     }
   }
 

@@ -11,6 +11,7 @@ import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
+import Err from '../modules/err'
 
 import Consumer from '../models/users/ConsumerModel'
 import IConsumer from '../interfaces/users/IConsumer'
@@ -129,7 +130,8 @@ class ConsumerRouter {
       }
     })
     .catch((err: Error) => {
-      UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.GET, CONST.ACTION_TARGETS.CONSUMER)
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
   
@@ -182,7 +184,8 @@ class ConsumerRouter {
         res.status(200).json({isAvailable})
       })
       .catch((err: Error) => {
-        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.UNIQUE, CONST.ACTION_TARGETS.CONSUMER)
+        res.status(res.statusCode).send()
+        console.log(err)
       })
     }
   }
@@ -197,8 +200,7 @@ class ConsumerRouter {
    * @returns {void}
    */
   public create = (req: Request, res: Response): void => {
-    let body: any = req.body,
-      device: any = req.body.device
+    let body: any = req.body
 
     if (!body.hasOwnProperty('handle') || !UTIL.validateHandle(body.handle)) {
       res.status(401).json({ message: ERR.USER.MISSING_CREDENTIALS })      
@@ -210,7 +212,7 @@ class ConsumerRouter {
         password: body.password
       })
 
-      this.createConsumer(user, device, res)
+      this.createConsumer(user, req, res)
     }
   }
   
@@ -225,33 +227,33 @@ class ConsumerRouter {
    */
   public update = (req: Request, res: Response): void => {
     const handle: string = req.params.handle,
-      _id: string = req.user._id,
-      device: any = req.body.device
+      _id: string = req.user._id
     
-    if (handle === req.user.handle) {
+    if (handle !== req.user.handle) {
+      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
+    } else {
+      let log = {
+        creator: _id,
+        ref: CONST.USER_TYPES.CONSUMER,
+        action: CONST.USER_ACTIONS.COMMON.UPDATE,
+        type: CONST.ACTION_TARGETS.CONSUMER,
+        target: _id,
+        ua: req.body.ua || req.ua
+      }
+
       Consumer
       .findByIdAndUpdate(_id, req.body, {new: true})
       .then((user: IConsumer) => {
         if (user) {
           res.status(200).json(UTIL.getSignedUser(user))
-  
-          new Logger({
-            creator: user._id,
-            ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.COMMON.UPDATE,
-            type: CONST.ACTION_TARGETS.CONSUMER,
-            target: user._id,
-            device
-          })
+          new Logger(log)
         } else {
           res.status(404).send()
         }
       })
       .catch((err: Error) => {
-        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.UPDATE, CONST.ACTION_TARGETS.CONSUMER)
+        new Err(res, err, log)
       })
-    } else {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
   
@@ -266,33 +268,33 @@ class ConsumerRouter {
    */
   public delete = (req: Request, res: Response): void => {
     const handle: string = req.params.handle,
-      _id: string = req.user._id,
-      device: any = req.body.device
+      _id: string = req.user._id
     
-    if (handle === req.user.handle) {
+    if (handle !== req.user.handle) {
+      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
+    } else {
+      let log = {
+        creator: _id,
+        ref: CONST.USER_TYPES.CONSUMER,
+        action: CONST.USER_ACTIONS.COMMON.DELETE,
+        type: CONST.ACTION_TARGETS.CONSUMER,
+        target: _id,
+        ua: req.body.ua || req.ua
+      }
+
       Consumer
       .findByIdAndRemove(_id)
       .then((user: IConsumer) => {
         if (user) {
           res.status(204).end()
-          
-          new Logger({
-            creator: _id,
-            ref: CONST.USER_TYPES.CONSUMER,
-            action: CONST.USER_ACTIONS.COMMON.DELETE,
-            type: CONST.ACTION_TARGETS.CONSUMER,
-            target: user._id,
-            device
-          })        
+          new Logger(log)        
         } else {
           res.status(404).send()
         }
       })
       .catch((err: Error) => {
-        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.DELETE, CONST.ACTION_TARGETS.CONSUMER)
+        new Err(res, err, log)
       })
-    } else {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
 
@@ -317,7 +319,7 @@ class ConsumerRouter {
       type: CONST.ACTION_TARGETS.CONSUMER,
       target: user._id,
       misc: req.authInfo,
-      device: req.body.device
+      ua: req.body.ua || req.ua
     })
   }
 
@@ -325,26 +327,28 @@ class ConsumerRouter {
    * Creates a single user
    * 
    * @param {IConsumer} user 
-   * @param {any} device 
+   * @param {Request} req 
    * @param {Response} res 
    */
-  private createConsumer(user: IConsumer, device: any, res: Response): void {
+  private createConsumer(user: IConsumer, req: Request, res: Response): void {
+    let log = {
+      action: CONST.USER_ACTIONS.COMMON.CREATE,
+      type: CONST.ACTION_TARGETS.CONSUMER,
+      ua: req.body.ua || req.ua
+    }
+
     user
     .save()
-    .then((user: IConsumer) => {
-      res.status(201).json(UTIL.getSignedUser(user))
-
-      new Logger({
-        creator: user._id,
+    .then((data: IConsumer) => {
+      res.status(201).json(UTIL.getSignedUser(data))
+      new Logger(Object.assign({}, log, {
+        creator: data._id,
         ref: CONST.USER_TYPES.CONSUMER,
-        action: CONST.USER_ACTIONS.COMMON.CREATE,
-        type: CONST.ACTION_TARGETS.CONSUMER,
-        target: user._id,
-        device
-      })        
+        target: data._id
+      }))        
     })
     .catch((err: Error) => {
-      UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.CREATE, CONST.ACTION_TARGETS.CONSUMER)
+      new Err(res, err, log)
     })
   }
 
@@ -450,7 +454,7 @@ class ConsumerRouter {
           res.status(200).json(UTIL.getSignedUser(user))
         } else {
           let user: IConsumer = new Consumer(query)
-          this.createConsumer(user, req.body.device, res)
+          this.createConsumer(user, req, res)
         }
       })
     })
@@ -476,7 +480,9 @@ class ConsumerRouter {
       model = UTIL.getModelFromPath(path),
       opt: any = UTIL.assembleSearchParams(req)
 
-    if (handle === req.user.handle) {
+    if (handle !== req.user.handle) {
+      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
+    } else {
       Consumer
       .findOne({handle})
       .select('_id handle')
@@ -505,8 +511,6 @@ class ConsumerRouter {
         res.status(res.statusCode).send()
         console.log(err)
       })
-    } else {
-      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
 

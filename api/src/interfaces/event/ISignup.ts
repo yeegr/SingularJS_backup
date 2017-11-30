@@ -11,5 +11,4 @@ export default interface ISignup extends Document {
   total: number
   status: string
   paymentMethod: string
-  device: any
 }

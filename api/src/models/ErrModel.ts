@@ -24,6 +24,10 @@ let ErrSchema: Schema = new Schema({
   target: {
     type: Schema.Types.ObjectId
   },
+  // target slug
+  slug: {
+    type: String
+  },
   // user action
   action: {
     type: String,
@@ -49,8 +53,8 @@ let ErrSchema: Schema = new Schema({
     type: String,
     default: ''
   },
-  // user login device info
-  device: {
+  // user request ua info
+  ua: {
     type: Object
   }
 })

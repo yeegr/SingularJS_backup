@@ -30,6 +30,7 @@
     "@types/passport-local": "^1.0.32",
     "@types/passport-oauth2": "^1.4.2",
     "@types/randomstring": "^1.1.6",
+    "@types/ua-parser-js": "^0.7.32",
     "@types/validator": "^6.3.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
@@ -69,6 +70,7 @@
     "path": "^0.12.7",
     "randomstring": "^1.1.5",
     "request": "^2.83.0",
+    "ua-parser-js": "^0.7.17",
     "validator": "^9.1.2"
   }
 }

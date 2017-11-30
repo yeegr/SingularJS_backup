@@ -11,9 +11,6 @@ import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
-
-import Log from '../models/LogModel'
-import ILog from '../interfaces/ILog'
 import Err from '../modules/err'
 
 import Platform from '../models/users/PlatformModel'
@@ -70,7 +67,8 @@ class PlatformRouter {
       }
     })
     .catch((err: Error) => {
-      UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.LIST, CONST.ACTION_TARGETS.PLATFORM)
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
 
@@ -95,7 +93,8 @@ class PlatformRouter {
       }
     })
     .catch((err: Error) => {
-      UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.GET, CONST.ACTION_TARGETS.PLATFORM)
+      res.status(res.statusCode).send()
+      console.log(err)
     })
   }
   
@@ -166,8 +165,7 @@ class PlatformRouter {
   public create = (req: Request, res: Response): void => {
     let body: any = req.body,
       username: string = body.username,
-      password: string = body.password,
-      device: any = req.body.device
+      password: string = body.password
 
     if (!body.hasOwnProperty('username') || !UTIL.validateUsername(username)) {
       res.status(401).json({ message: ERR.USER.MISSING_CREDENTIALS })      
@@ -181,18 +179,18 @@ class PlatformRouter {
         log = {
           action: CONST.USER_ACTIONS.COMMON.CREATE,
           type: CONST.ACTION_TARGETS.PLATFORM,
-          device
+          ua: req.body.ua || req.ua
         }
 
       user
       .save()
-      .then((user: IPlatform) => {
-        res.status(201).json(UTIL.getSignedUser(user))
+      .then((data: IPlatform) => {
+        res.status(201).json(UTIL.getSignedUser(data))
   
         new Logger(Object.assign({}, log, {
-          creator: user._id,
+          creator: data._id,
           ref: CONST.USER_TYPES.PLATFORM,
-          target: user._id
+          target: data._id
         }))     
       })
       .catch((err: Error) => {
@@ -212,17 +210,18 @@ class PlatformRouter {
    */
   public update = (req: Request, res: Response): void => {
     const username: string = req.params.username,
-      _id: string = req.user._id,
-      device: any = req.body.device
+      _id: string = req.user._id
     
-    if (username === req.user.username) {
+    if (username !== req.user.username) {
+      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
+    } else {
       let log = {
         creator: _id,
         ref: CONST.USER_TYPES.PLATFORM,
         action: CONST.USER_ACTIONS.COMMON.UPDATE,
         type: CONST.ACTION_TARGETS.PLATFORM,
         target: _id,
-        device
+        ua: req.body.ua || req.ua
       }
 
       Platform
@@ -238,8 +237,6 @@ class PlatformRouter {
       .catch((err: Error) => {
         new Err(res, err, log)
       })
-    } else {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
   
@@ -254,33 +251,33 @@ class PlatformRouter {
    */
   public delete = (req: Request, res: Response): void => {
     const username: string = req.params.username,
-      _id: string = req.user._id,
-      device: any = req.body.device
+      _id: string = req.user._id
     
-    if (username === req.user.username) {
+    if (username !== req.user.username) {
+      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
+    } else {
+      let log = {
+        creator: _id,
+        ref: CONST.USER_TYPES.PLATFORM,
+        action: CONST.USER_ACTIONS.COMMON.DELETE,
+        type: CONST.ACTION_TARGETS.PLATFORM,
+        target: _id,
+        ua: req.body.ua || req.ua
+      }
+
       Platform
       .findByIdAndRemove(_id)
       .then((user: IPlatform) => {
         if (user) {
           res.status(204).end()
-          
-          new Logger({
-            creator: _id,
-            ref: CONST.USER_TYPES.PLATFORM,
-            action: CONST.USER_ACTIONS.COMMON.DELETE,
-            type: CONST.ACTION_TARGETS.PLATFORM,
-            target: user._id,
-            device
-          })        
+          new Logger(log)        
         } else {
           res.status(404).send()
         }
       })
       .catch((err: Error) => {
-        UTIL.formatError(res, err, CONST.USER_ACTIONS.COMMON.DELETE, CONST.ACTION_TARGETS.PLATFORM)
+        new Err(res, err, log)
       })
-    } else {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
 
@@ -305,7 +302,7 @@ class PlatformRouter {
       type: CONST.ACTION_TARGETS.PLATFORM,
       target: user._id,
       misc: req.authInfo,
-      device: req.body.device
+      ua: req.body.ua || req.ua
     })
   }
 
@@ -357,7 +354,9 @@ class PlatformRouter {
       model = UTIL.getModelFromPath(path),
       opt: any = UTIL.assembleSearchParams(req)
 
-    if (username === req.user.username) {
+    if (username !== req.user.username) {
+      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
+    } else {
       Platform
       .findOne({username})
       .select('_id username')
@@ -370,8 +369,7 @@ class PlatformRouter {
           skip: opt.skip
         },
         populate: ({
-          path: 'target',
-          select: 'slug title excerpt commentCount totalRatings averageRating'
+          path: 'target'
         })
       })
       .exec()
@@ -386,8 +384,6 @@ class PlatformRouter {
         res.status(res.statusCode).send()
         console.log(err)
       })
-    } else {
-      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
     }
   }
 

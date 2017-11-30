@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from 'express'
 import * as bodyParser from 'body-parser'
 import * as compression from 'compression'
 import * as cookieParser from "cookie-parser"
@@ -8,6 +9,7 @@ import * as logger from 'morgan'
 import * as mongoose from 'mongoose'
 import * as passport from 'passport'
 import * as path from 'path'
+import * as uaParser from 'ua-parser-js'
 
 // use native ES6 promises instead of mongoose promise library
 (<any>mongoose).Promise = global.Promise
@@ -96,8 +98,16 @@ class Server {
     // mount cors
     this.app.use(cors())
 
+    // mount ua info
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      let ua = new uaParser(req.headers['user-agent'].toString());
+      req.ua = ua.getResult()
+
+      next()
+    })
+
     // cors
-    // this.app.use((req, res, next) => {
+    // this.app.use((req: Request, res: Response, next: NextFunction) => {
     //   res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
     //   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, PURGE')
     //   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Allow-Credentials')

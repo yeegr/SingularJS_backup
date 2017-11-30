@@ -8,5 +8,5 @@ export default interface ILog extends Document {
   target?: Schema.Types.ObjectId
   action: string
   misc?: string
-  device: any
+  ua: any
 }
