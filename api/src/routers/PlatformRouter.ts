@@ -354,7 +354,7 @@ class PlatformRouter {
     let username = req.params.username,
       id: string = req.user._id,
       path = req.params.sublist,
-      model = UTIL.getModelFromPath(path),
+      model = UTIL.getModelNameFromPath(path),
       opt: any = UTIL.assembleSearchParams(req)
 
     if (username !== req.user.username) {

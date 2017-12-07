@@ -29,40 +29,25 @@ let EventSchema: Schema = new Schema({
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER
   },
-  // event slug
+  // slug: http://domain/events/{{slug}}
   slug: {
     type: String,
     default: '',
-    required: true,
     unique: true,
     lowercase: true
   },
-  // event title
+  // title
   title: {
     type: String,
     default: '',
     required: true
   },
-  // event description
-  description: {
+  // content
+  content: {
     type: String,
-    default: '',
-    required: true
+    default: ''
   },
-  // additional information such as
-  // difficulty level, intensity level, etc.
-  misc: [{
-    _id: false,
-    key: {
-      type: String,
-      required: true
-    },
-    value: {
-      type: String,
-      required: true
-    }
-  }],
-  // event excerpt
+  // excerpt
   excerpt: {
     type: String,
     default: ''
@@ -72,7 +57,36 @@ let EventSchema: Schema = new Schema({
     type: String,
     default: ''
   },
-  // additional destination description
+  // tags
+  tags: [String],
+  // TODO: publish time
+  publish: {
+    type: Number
+  },
+  // TODO: set whether event is opened to public signup
+  isPublic: {
+    type: Boolean,
+    default: true,
+    required: true
+  },
+  // TODO: set whether signup requires approval
+  requireApproval: {
+    type: Boolean,
+    default: false
+  },
+  // additional information such as
+  // difficulty level, intensity level, etc.
+  misc: [{
+    key: {
+      type: String,
+      required: true
+    },
+    value: {
+      type: String,
+      required: true
+    }
+  }],
+  // additional destination information
   destination: {
     type: String
   },
@@ -82,8 +96,6 @@ let EventSchema: Schema = new Schema({
   photos: [Photo],
   // list of gears to bring
   gears: [Schema.Types.Mixed],
-  // list of tags
-  tags: [String],
   // city
   city: {
     type: String,
@@ -98,28 +110,17 @@ let EventSchema: Schema = new Schema({
     trim: true,
     validator: (code: string) => UTIL.isCountryCode(code)
   },
-  // set wether event is opened to public signup
-  isPublic: {
-    type: Boolean,
-    default: true,
-    required: true
-  },
-  // set wether event signup requires approval
-  requireApproval: {
-    type: Boolean,
-    default: false
-  },
   // maximum attendence cap
   maxAttendee: {
     type: Number,
-    default: 200
+    default: CONFIG.DEFAULT_EVENT_MAX_ATTENDEE
   },
   // minimum attendence required
   minAttendee: {
     type: Number,
-    default: 20
+    default: CONFIG.DEFAULT_EVENT_MIN_ATTENDEE
   },
-  // event expenses
+  // expenses
   expenses: {
     deposit: {
       type: Number,
@@ -137,9 +138,8 @@ let EventSchema: Schema = new Schema({
     includes: [String],
     excludes: [String]
   },
-  // contact persons
+  // contact information
   contacts: [{
-    _id: false,
     handle: {
       type: String,
       required: true,
@@ -159,20 +159,16 @@ let EventSchema: Schema = new Schema({
       validation: (val: string) => validator.isEmail(val)
     }
   }],
-  // event schedule
+  // schedule
   schedule: [Agenda],
   // repeating groups
   subsets: [Subset],
-  // publish time
-  publish: {
-    type: Number
-  },
-  // current event status
+  // current status
   status: {
     type: String,
     required: true,
-    enum: CONST.EVENT_STATUSES_ENUM,
-    default: CONST.STATUSES.EVENT.EDITING
+    enum: CONST.CONTENT_STATUSES_ENUM,
+    default: CONST.STATUSES.CONTENT.EDITING
   },
   // last modified time
   updated: {
@@ -214,11 +210,6 @@ let EventSchema: Schema = new Schema({
   },
   // total number of shares by users
   shareCount: {
-    type: Number,
-    default: 0
-  },
-  // total number of downloads by user
-  downloadCount: {
     type: Number,
     default: 0
   }
@@ -277,24 +268,15 @@ EventSchema.virtual('shares', {
 })
 
 /**
- * Instances of downloads by users
- */
-EventSchema.virtual('downloads', {
-  ref: CONST.ACTION_MODELS.DOWNLOAD,
-  localField: '_id',
-  foreignField: 'target'
-})
-
-/**
  * Creates a virtual 'averageRating' property
  */
 EventSchema.virtual('averageRating').get(function() {
-  return (this.commentCount > 0) ? Math.round(this.totalRating / this.commentCount * 2) / 2 : null
+  return UTIL.getAverageRating(this)
 })
 
 EventSchema.pre('save', function(next: Function): void {
   // Set last modified time when values of only following props are changed
-  UTIL.setUpdateTime(this, ['slug', 'title', 'description', 'excerpt', 'hero', 'location', 'destination', 'notes', 'gears', 'tags', 'city', 'country', 'expenses', 'contacts', 'schedule', 'subsets', 'publish'])
+  UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish', 'isPublic', 'requireApproval', 'misc', 'destination', 'photos', 'notes', 'gears', 'city', 'country', 'expenses', 'contacts', 'schedule', 'subsets'])
   this.wasNew = this.isNew
 
   next()

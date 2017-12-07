@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response, Router } from 'express'
+import { Schema, Types } from 'mongoose'
 import * as moment from 'moment'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
@@ -12,14 +13,21 @@ import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
 import Err from '../modules/err'
+import Processor from '../modules/process'
+
+import Process from '../models/workflow/ProcessModel'
+import IProcess from '../interfaces/workflow/IProcess'
+import Activity from '../models/workflow/ActivityModel'
+import IActivity from '../interfaces/workflow/IActivity'
 
 import Consumer from '../models/users/ConsumerModel'
-import IConsumer from '../interfaces/users/IConsumer'
+import IUser from '../interfaces/users/IUser'
 
 import Totp from '../models/TotpModel'
 import ITotp from '../interfaces/ITotp'
-
 import SMS from '../modules/sms'
+
+import IContent from '../interfaces/share/IContent'
 
 /**
  * ConsumerRouter class
@@ -61,7 +69,7 @@ class ConsumerRouter {
     .sort(params.sort)
     .lean()
     .exec()
-    .then((arr: IConsumer[]) => {
+    .then((arr: IUser[]) => {
       if (arr) {
         res.status(200).json(arr)
       } else {
@@ -95,7 +103,7 @@ class ConsumerRouter {
       model: CONST.ACTION_TARGETS.POST,
       options: {
         find: {
-          // 'status': CONST.STATUSES.POST.APPROVED,
+          // 'status': CONST.STATUSES.CONTENT.APPROVED,
           // 'publish': {$lte: moment()}
         },
         sort: {
@@ -111,7 +119,7 @@ class ConsumerRouter {
       model: CONST.ACTION_TARGETS.EVENT,
       options: {
         find: {
-          'status': CONST.STATUSES.EVENT.APPROVED,
+          'status': CONST.STATUSES.CONTENT.APPROVED,
           // 'publish': {$lte: moment()}
         },
         sort: {
@@ -123,7 +131,7 @@ class ConsumerRouter {
       },
     })
     .lean()
-    .then((user: IConsumer) => {
+    .then((user: IUser) => {
       if (user) {
         res.status(200).json(user)
       } else {
@@ -180,7 +188,7 @@ class ConsumerRouter {
 
       Consumer
       .findOne(query)
-      .then((data: IConsumer) => {
+      .then((data: IUser) => {
         let isAvailable: boolean = !(data)
         res.status(200).json({isAvailable})
       })
@@ -208,7 +216,7 @@ class ConsumerRouter {
     } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(body.password)) {
       res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
     } else {
-      let user: IConsumer = new Consumer({
+      let user: IUser = new Consumer({
         handle: body.handle,
         password: body.password
       })
@@ -227,35 +235,28 @@ class ConsumerRouter {
    * @returns {void}
    */
   public update = (req: Request, res: Response): void => {
-    const handle: string = req.params.handle,
-      _id: string = req.user._id
+    const _id: string = req.user._id
     
-    if (handle !== req.user.handle) {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
-    } else {
-      let log = {
-        creator: _id,
-        creatorRef: CONST.USER_TYPES.CONSUMER,
-        action: CONST.USER_ACTIONS.COMMON.UPDATE,
-        targetRef: CONST.ACTION_TARGETS.CONSUMER,
-        target: _id,
-        ua: req.body.ua || req.ua
+    let log = {
+      creator: _id,
+      creatorRef: CONST.USER_TYPES.CONSUMER,
+      action: CONST.USER_ACTIONS.COMMON.UPDATE,
+      ua: req.body.ua || req.ua
+    }
+
+    Consumer
+    .findByIdAndUpdate(_id, req.body, {new: true})
+    .then((user: IUser) => {
+      if (user) {
+        res.status(200).json(UTIL.getSignedUser(user))
+        new Logger(log)
       }
 
-      Consumer
-      .findByIdAndUpdate(_id, req.body, {new: true})
-      .then((user: IConsumer) => {
-        if (user) {
-          res.status(200).json(UTIL.getSignedUser(user))
-          new Logger(log)
-        } else {
-          res.status(404).send()
-        }
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
-    }
+      res.status(404).send()
+    })
+    .catch((err: Error) => {
+      new Err(res, err, log)
+    })
   }
   
   /**
@@ -268,35 +269,28 @@ class ConsumerRouter {
    * @returns {void}
    */
   public delete = (req: Request, res: Response): void => {
-    const handle: string = req.params.handle,
-      _id: string = req.user._id
+    const _id: string = req.user._id
     
-    if (handle !== req.user.handle) {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
-    } else {
-      let log = {
-        creator: _id,
-        creatorRef: CONST.USER_TYPES.CONSUMER,
-        action: CONST.USER_ACTIONS.COMMON.DELETE,
-        targetRef: CONST.ACTION_TARGETS.CONSUMER,
-        target: _id,
-        ua: req.body.ua || req.ua
+    let log = {
+      creator: _id,
+      creatorRef: CONST.USER_TYPES.CONSUMER,
+      action: CONST.USER_ACTIONS.COMMON.DELETE,
+      ua: req.body.ua || req.ua
+    }
+
+    Consumer
+    .findByIdAndRemove(_id)
+    .then((user: IUser) => {
+      if (user) {
+        res.status(204).end()
+        new Logger(log)        
       }
 
-      Consumer
-      .findByIdAndRemove(_id)
-      .then((user: IConsumer) => {
-        if (user) {
-          res.status(204).end()
-          new Logger(log)        
-        } else {
-          res.status(404).send()
-        }
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
-    }
+      res.status(404).send()
+    })
+    .catch((err: Error) => {
+      new Err(res, err, log)
+    })
   }
 
   /**
@@ -309,7 +303,7 @@ class ConsumerRouter {
    * @returns {void}
    */
   public login = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user
+    const user: IUser = req.user
 
     res.status(200).json(UTIL.getSignedUser(user))
 
@@ -317,8 +311,6 @@ class ConsumerRouter {
       creator: user._id,
       creatorRef: CONST.USER_TYPES.CONSUMER,
       action: CONST.USER_ACTIONS.COMMON.LOGIN,
-      targetRef: CONST.ACTION_TARGETS.CONSUMER,
-      target: user._id,
       state: req.authInfo,
       ua: req.body.ua || req.ua
     })
@@ -327,29 +319,27 @@ class ConsumerRouter {
   /**
    * Creates a single user
    * 
-   * @param {IConsumer} user 
+   * @param {IUser} user 
    * @param {Request} req 
    * @param {Response} res 
    */
-  private createConsumer(user: IConsumer, req: Request, res: Response): void {
+  private createConsumer(user: IUser, req: Request, res: Response): void {
     let log = {
+      creatorRef: CONST.USER_TYPES.CONSUMER,
       action: CONST.USER_ACTIONS.COMMON.CREATE,
-      targetRef: CONST.ACTION_TARGETS.CONSUMER,
       ua: req.body.ua || req.ua
     }
 
     user
     .save()
-    .then((data: IConsumer) => {
+    .then((data: IUser) => {
       res.status(201).json(UTIL.getSignedUser(data))
+
       new Logger(Object.assign({}, log, {
         creator: data._id,
-        creatorRef: CONST.USER_TYPES.CONSUMER,
-        target: data._id
       }))        
     })
     .catch((err: Error) => {
-      console.log(err)
       new Err(res, err, log)
     })
   }
@@ -368,7 +358,7 @@ class ConsumerRouter {
     passport.authenticate('consumerLocal', {
       session: false,
       badRequestMessage: ERR.USER.MISSING_CREDENTIALS
-    }, (err: Error, user: IConsumer, info: object) => {
+    }, (err: Error, user: IUser, info: object) => {
       if (err) {
         res.status(400).send(err) 
         return
@@ -451,11 +441,11 @@ class ConsumerRouter {
 
       Consumer
       .findOne(query)
-      .then((user: IConsumer) => {
+      .then((user: IUser) => {
         if (user) {
           res.status(200).json(UTIL.getSignedUser(user))
         } else {
-          let user: IConsumer = new Consumer(query)
+          let user: IUser = new Consumer(query)
           this.createConsumer(user, req, res)
         }
       })
@@ -476,56 +466,244 @@ class ConsumerRouter {
    * @returns {void}
    */
   public sublist = (req: Request, res: Response): void => {
-    let handle = req.params.handle,
-      id: string = req.user._id,
+    let id: string = req.user._id,
       path = req.params.sublist,
-      model = UTIL.getModelFromPath(path),
+      model = UTIL.getModelNameFromPath(path),
       opt: any = UTIL.assembleSearchParams(req)
 
-    if (handle !== req.user.handle) {
-      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
-    } else {
-      Consumer
-      .findOne({handle})
-      .select('_id handle')
-      .populate({
-        path,
-        model,
-        options: {
-          sort: opt.sort,
-          limit: opt.limit,
-          skip: opt.skip
-        },
-        populate: ({
-          path: 'target',
-          select: 'slug title excerpt commentCount totalRatings averageRating'
-        })
+    Consumer
+    .findById(id)
+    .select('handle')
+    .populate({
+      path,
+      model,
+      options: {
+        sort: opt.sort,
+        limit: opt.limit,
+        skip: opt.skip
+      },
+      populate: ({
+        path: 'target',
+        select: 'slug title excerpt commentCount totalRatings averageRating'
       })
-      .exec()
-      .then((data: IConsumer) => {
-        if (data) {
-          res.status(200).json(data)
-        } else {
-          res.status(404).send()
-        }
-      })
-      .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
-      })
+    })
+    .lean()
+    .exec()
+    .then((data: IUser) => {
+      if (data) {
+        res.status(200).json(data)
+      } else {
+        res.status(404).send()
+      }
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
+  /**
+   * Gets user with populated sublist
+   *
+   * @class ConsumerRouter
+   * @method content
+   * @param {Request} req
+   * @param {Response} res
+   * @returns {void}
+   */
+  public content = (req: Request, res: Response): void => {
+    let creator: string = req.user._id,
+      path = req.params.sublist,
+      slug = req.params.slug,
+      Model = UTIL.getModelFromKey(UTIL.getModelNameFromPath(path))
+
+    Model
+    .findOne({
+      creator,
+      slug
+    })
+    .exec()
+    .then((data: any) => {
+      if (data) {
+        res.status(200).json(data)
+      } else {
+        res.status(404).send()
+      }
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
+  /**
+   * Submit content by id
+   *
+   * @class ConsumerRouter
+   * @method submit
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public submit = (req: Request, res: Response): void => {
+    const user: IUser = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      _id: Schema.Types.ObjectId = req.body.id,
+      targetRef: string = req.body.type,
+      Model: any = UTIL.getModelFromKey(targetRef)
+
+    let log: any = {
+      creator,
+      creatorRef: user.ref,
+      target: _id,
+      targetRef,
+      action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
+      ua: req.body.ua || req.ua
     }
+
+    Model
+    .findOne({creator, _id})
+    .then((data: IContent) => {
+      if (data) {
+        if (data.status === CONST.STATUSES.CONTENT.PENDING || data.status === CONST.STATUSES.CONTENT.APPROVED) {
+          res.status(422).json({ message: ERR.CONTENT.CONTENT_ALREADY_SUMMITED })
+        } else if (validator.isEmpty(data.slug)) {
+          res.status(422).json({ message: ERR.CONTENT.CONTENT_TITLE_REQUIRED })
+        } else if (validator.isEmpty(data.slug)) {
+          res.status(422).json({ message: ERR.CONTENT.CONTENT_SLUG_REQUIRED })
+        } else if (validator.isEmpty(data.content)) {
+          res.status(422).json({ message: ERR.CONTENT.CONTENT_CONTENT_REQUIRED })
+        } else {
+          // approval ? pending : approved
+          switch (targetRef) {
+            case CONST.ACTION_TARGETS.POST:
+              data.status = CONFIG.POST_REQURIES_APPROVAL ? CONST.STATUSES.CONTENT.PENDING : CONST.STATUSES.CONTENT.APPROVED
+            break
+
+            case CONST.ACTION_TARGETS.EVENT:
+              data.status = (data.isPublic && CONFIG.PUBLIC_EVENT_REQURIES_APPROVAL) ? CONST.STATUSES.CONTENT.PENDING : CONST.STATUSES.CONTENT.APPROVED
+            break
+
+            default:
+              data.status = CONST.STATUSES.CONTENT.APPROVED
+            break
+          }
+
+          return data.save()
+        }
+      }
+
+      res.status(404).send({ message: ERR.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
+      return null
+    })
+    .then((data: IContent) => {
+      if (data) {
+        res.status(200).json(data)
+        new Logger(log)
+  
+        let init: IActivity = new Activity({
+          creator: log.creator,
+          creatorRef: log.creatorRef,
+          target: log.target,
+          targetRef: log.targetRef,
+          action: log.action,
+          initStatus: data.status
+        })
+
+        // create submission/approval process if required
+        if (
+          // submitting post (always public)
+          (targetRef === CONST.ACTION_TARGETS.POST && CONFIG.POST_REQURIES_APPROVAL) || 
+          // submitting public event
+          (targetRef === CONST.ACTION_TARGETS.EVENT && CONFIG.PUBLIC_EVENT_REQURIES_APPROVAL && data.isPublic)
+        ) {
+          new Processor(init, CONST.PROCESS_TYPES.APPROVAL)
+        }
+      }
+    })
+    .catch((err: Error) => {
+      new Err(res, err, log)
+    })
+  }
+  
+  /**
+   * Retract entry by params of 'slug'
+   *
+   * @class PostRouter
+   * @method retract
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public retract = (req: Request, res: Response): void => {
+    const user: IUser = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      _id: Schema.Types.ObjectId = req.body.id,
+      targetRef: string = req.body.type,
+      Model: any = UTIL.getModelFromKey(targetRef)
+
+    let log: any = {
+      creator,
+      creatorRef: user.ref,
+      target: _id,
+      targetRef,
+      action: CONST.USER_ACTIONS.CONSUMER.RETRACT,
+      ua: req.body.ua || req.ua          
+    }
+
+    Model
+    .findOne({creator, _id})
+    .then((data: IContent) => {
+      if (data) {
+        if (data.status === CONST.STATUSES.CONTENT.EDITING) {
+          res.status(422).json({ message: ERR.CONTENT.CONTENT_CANNOT_BE_RETRACTED })
+          return null
+        } else {
+          data.status = CONST.STATUSES.CONTENT.EDITING
+          return data.save()
+        }
+      }
+
+      res.status(404).send({ message: ERR.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
+      return null
+    })
+    .then((data: IContent) => {
+      res.status(200).json(data)
+      new Logger(log)
+
+      // retract submission/approval process if required
+      if (CONFIG.POST_REQURIES_APPROVAL) {
+        return Process
+        .findOneAndUpdate({
+          creator: log.creator,
+          creatorRef: log.creatorRef,
+          target: log.target,
+          targetRef: log.targetRef,
+          type: CONST.PROCESS_TYPES.APPROVAL
+        }, {
+          status: CONST.STATUSES.PROCESS.CANCELLED,
+          completed: UTIL.getTimestamp()
+        })
+        .sort({_id: -1})
+      } else {
+        return null
+      }
+    })
+    .catch((err: Error) => {
+      new Err(res, err, log)
+    })
   }
 
   routes() {
     // list route
-    this.router.get('/', this.list)
-    this.router.get('/:handle', this.get)
+    this.router.get('/users', this.list)
+    this.router.get('/users/:handle', this.get)
     
     // create route
-    this.router.post('/', this.create)
+    this.router.post('/users', this.create)
     
     // route to check unique values
-    this.router.post('/unique', this.unique)
+    this.router.post('/users/unique', this.unique)
 
     // login routes
     // local login routes - user handle/password
@@ -535,25 +713,40 @@ class ConsumerRouter {
     this.router.post('/login/totp', this.initTotp)
     this.router.patch('/login/totp', this.verifyTotp)
 
-    // JWT login routes
-    this.router.get('/login/token', passport.authenticate('consumerJwt', {
+    // JWT login route
+    this.router.get('/mine', passport.authenticate('consumerJwt', {
       session: false
     }), this.login)
 
-    // sublist route
-    this.router.get('/:handle/:sublist', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.sublist)
-
     // update route
-    this.router.patch('/:handle', passport.authenticate('consumerJwt', {
+    this.router.patch('/mine', passport.authenticate('consumerJwt', {
       session: false
     }), this.update)
 
     // delete route
-    this.router.delete('/:handle', passport.authenticate('consumerJwt', {
+    this.router.delete('/mine', passport.authenticate('consumerJwt', {
       session: false
     }), this.delete)
+
+    // sublist route
+    this.router.get('/mine/:sublist', passport.authenticate('consumerJwt', {
+      session: false
+    }), this.sublist)
+
+    // user content route
+    this.router.get('/mine/:sublist/:slug', passport.authenticate('consumerJwt', {
+      session: false
+    }), this.content)
+
+    // user submit content route
+    this.router.post('/mine/submit', passport.authenticate('consumerJwt', {
+      session: false
+    }), this.submit)
+
+    // user retract content route
+    this.router.post('/mine/retract', passport.authenticate('consumerJwt', {
+      session: false
+    }), this.retract)
   }
 }
 

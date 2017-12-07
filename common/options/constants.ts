@@ -46,12 +46,12 @@ interface IUserRoles {
   }
   SUPPLIER: {
     STAFF: string
-    EDITOR: string
     SUPERVISOR: string
     MANAGER: string
   }
   PLATFORM: {
     ADMIN: string
+    EDITOR: string
     SUPER: string
   }
 }
@@ -65,12 +65,12 @@ export const USER_ROLES: IUserRoles = {
   },
   SUPPLIER: {
     STAFF: 'staff',
-    EDITOR: 'editor',
     SUPERVISOR: 'supervisor',
     MANAGER: 'manager'
   },
   PLATFORM: {
     ADMIN: 'admin',
+    EDITOR: 'editor',
     SUPER: 'super'
   }
 }
@@ -247,7 +247,7 @@ interface IStatuses {
     ACTIVE: string
     SUSPENDED: string
   }
-  POST: {
+  CONTENT: {
     EDITING: string
     PENDING: string
     APPROVED: string
@@ -255,21 +255,13 @@ interface IStatuses {
     SUSPENDED: string
     EXPIRED: string
   }
-  EVENT: {
-    EDITING: string
-    PENDING: string
-    APPROVED: string
-    CONCLUDED: string
-    SUSPENDED: string
-    EXPIRED: string
-  },
   SET: {
     ACCEPTING: string
     FILLED: string
     PASTDUE: string
     CONCLUDED: string
     SUSPENDED: string
-  },
+  }
   SIGNUP: {
     PENDING: string
     APPROVED: string
@@ -306,19 +298,11 @@ export const STATUSES: IStatuses = {
     ACTIVE: 'active',
     SUSPENDED: 'suspended'
   },
-  POST: {
+  CONTENT: {
     EDITING: 'editing',
     PENDING: 'pending',
     APPROVED: 'approved',
     REJECTED: 'rejected',
-    SUSPENDED: 'suspended',
-    EXPIRED: 'expired'
-  },
-  EVENT: {
-    EDITING: 'editing',
-    PENDING: 'pending',
-    APPROVED: 'approved',
-    CONCLUDED: 'concluded',
     SUSPENDED: 'suspended',
     EXPIRED: 'expired'
   },
@@ -355,8 +339,7 @@ export const STATUSES: IStatuses = {
 export const CONSUMER_STATUSES_ENUM = obj2enum(STATUSES.CONSUMER)
 export const SUPPLIER_STATUSES_ENUM = obj2enum(STATUSES.SUPPLIER)
 export const PLATFORM_STATUSES_ENUM = obj2enum(STATUSES.PLATFORM)
-export const POST_STATUSES_ENUM = obj2enum(STATUSES.POST)
-export const EVENT_STATUSES_ENUM = obj2enum(STATUSES.EVENT)
+export const CONTENT_STATUSES_ENUM = obj2enum(STATUSES.CONTENT)
 export const SET_STATUSES_ENUM = obj2enum(STATUSES.SET)
 export const SIGNUP_STATUSES_ENUM = obj2enum(STATUSES.SIGNUP)
 export const PAYMENT_STATUSES_ENUM = obj2enum(STATUSES.PAYMENT)

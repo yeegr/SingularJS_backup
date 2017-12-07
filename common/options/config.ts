@@ -15,6 +15,9 @@ export const PUBLIC_EVENT_REQURIES_APPROVAL: boolean = true
 export const TOTP_CODE_LENGTH: number = 4
 export const TOTP_CODE_CHARSET: string = 'numeric'
 
+export const DEFAULT_EVENT_MAX_ATTENDEE: number = 200
+export const DEFAULT_EVENT_MIN_ATTENDEE: number = 20
+
 
 /**
  * JWT secrets to sign users

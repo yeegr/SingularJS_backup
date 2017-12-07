@@ -8,6 +8,7 @@ import * as CONST from '../../../common/options/constants'
 import * as ERR from '../../../common/options/errors'
 
 import IUser from '../interfaces/users/IUser'
+import IContent from '../interfaces/share/IContent'
 
 import Consumer from '../models/users/ConsumerModel'
 import IConsumer from '../interfaces/users/IConsumer'
@@ -146,7 +147,7 @@ export function getModelFromKey(key: string): any {
  * @param {string} path
  * @returns {string}
  */
-export function getModelFromPath(path: string): string|any {
+export function getModelNameFromPath(path: string): string|any {
   let key = path.toLowerCase(),
     model = ''
 
@@ -274,7 +275,7 @@ export function getRequestParam(req: Request, key: string): string {
   value = (params && params.hasOwnProperty(key)) ? params[key] : value
   value = (query && query.hasOwnProperty(key)) ? query[key] : value
 
-  return value
+  return (key === 'sortOn' && value === 'id') ? '_id' : value
 }
 
 /**
@@ -494,10 +495,10 @@ export function getTimeFromObjectId(id: string, isUnix: boolean = true): number 
  * Set updated timestamp
  * 
  * @export
- * @param {Document} doc 
+ * @param {IContent} doc 
  * @param {string[]]} keys 
  */
-export function setUpdateTime(doc: Document, keys: string[]): void {
+export function setUpdateTime(doc: IContent, keys: string[]): void {
   let toUpdate = false
 
   keys.map((key: string) => {
@@ -505,8 +506,17 @@ export function setUpdateTime(doc: Document, keys: string[]): void {
   })
 
   if (toUpdate) {
-    (<any>doc).updated = this.getTimestamp()
+    doc.updated = this.getTimestamp()
   }
+}
+
+/**
+ * Returns average rating from comments
+ * 
+ * @param {IContent} doc 
+ */
+export function getAverageRating(doc: IContent): number {
+  return (doc.commentCount > 0) ? Math.round(doc.totalRating / doc.commentCount * 2) / 2 : null
 }
 
 /**
@@ -528,22 +538,13 @@ export function signToken(user: IUser): string {
   }, CONFIG.JWT_SECRETS[ref])
 }
 
+/**
+ * Returs a signed user
+ * 
+ * @param {IUser} user 
+ */
 export function getSignedUser(user: IUser): object {
   let data: any = user.toJSON(),
     token: string = signToken(user)
   return Object.assign({}, data, {token})
-}
-
-
-export function cleanupUser(user: IUser): IUser {
-  for (let key in user) {
-    console.log(key)
-    if (key === 'posts') {
-      delete user[key]
-    }
-  }
-
-  console.log(user)
-
-  return user
 }

@@ -11,18 +11,20 @@ import * as ERR from '../../../common/options/errors'
 import * as UTIL from '../../../common/util'
 import Logger from '../modules/logger'
 import Err from '../modules/err'
-import Process from '../modules/process'
+import Processor from '../modules/process'
+
+import Process from '../models/workflow/ProcessModel'
+import IProcess from '../interfaces/workflow/IProcess'
+import Activity from '../models/workflow/ActivityModel'
+import IActivity from '../interfaces/workflow/IActivity'
 
 import Consumer from '../models/users/ConsumerModel'
-import IConsumer from '../interfaces/users/IConsumer'
+import IUser from '../interfaces/users/IUser'
 
 import IComment from '../interfaces/share/IComment'
 
 import Post from '../models/post/PostModel'
 import IPost from '../interfaces/post/IPost'
-
-import Activity from '../models/workflow/ActivityModel'
-import IActivity from '../interfaces/workflow/IActivity'
 
 /**
  * PostRouter class
@@ -60,7 +62,7 @@ class PostRouter {
       .findOne({handle})
       .select('_id')
       .lean()
-      .then((user: IConsumer) => {
+      .then((user: IUser) => {
         if (user) {
           this.search(req, res, user._id)
         } else {
@@ -87,7 +89,7 @@ class PostRouter {
    */
   private search = (req: Request, res: Response, creator?: Schema.Types.ObjectId) => {
     let params = UTIL.assembleSearchParams(req, {
-        status: CONST.STATUSES.POST.APPROVED
+        status: CONST.STATUSES.CONTENT.APPROVED
       }, 'title excerpt content')
 
     if (creator) {
@@ -132,7 +134,7 @@ class PostRouter {
     Post
     .findOneAndUpdate({
       slug: req.params.slug,
-      status: CONST.STATUSES.POST.APPROVED
+      status: CONST.STATUSES.CONTENT.APPROVED
     }, {$inc: {viewCount: 1}}, {new: true})
     .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
     .populate({
@@ -160,316 +162,6 @@ class PostRouter {
     .catch((err: Error) => {
       res.status(res.statusCode).send()
       console.log(err)
-    })
-  }
-  
-  /**
-   * Check proposed slug is available to user
-   *
-   * @class ConsumerRouter
-   * @method slug
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public slug = (req: Request, res: Response): void => {
-    let slug: string = req.body.slug
-
-    if (slug.length < 1) {
-      res.status(422).json({ message: ERR.POST.POST_SLUG_REQUIRED })
-    } else {
-      Post
-      .findOne({slug})
-      .then((data: IPost) => {
-        let isAvailable: boolean = !(data)
-        res.status(200).json({isAvailable})
-      })
-      .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
-      })
-    }
-  }
-
-  /**
-   * Creates single new entry
-   *
-   * @class PostRouter
-   * @method create
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public create = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      creatorRef: string = user.ref,
-      title: string = req.body.title,
-      slug: string = req.body.slug
-
-    if (!creator || validator.isEmpty(creatorRef)) {
-      res.status(422).json({ message: ERR.POST.POST_AUTHOR_REQUIRED })
-    } else if (!title || validator.isEmpty(title)) {
-      res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
-    } else {
-      const post = new Post(Object.assign({}, {
-          creator,
-          ref: creatorRef
-        }, UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)))
-
-      let log = {
-        creator,
-        creatorRef,
-        action: CONST.USER_ACTIONS.COMMON.CREATE,
-        targetRef: CONST.ACTION_TARGETS.POST,
-        slug,
-        ua: req.body.ua || req.ua
-      }
-
-      post
-      .save()
-      .then((data: IPost) => {
-        res.status(201).json(data)
-
-        Consumer
-        .findByIdAndUpdate(creator, {$inc: {postCount: 1}})
-        .then()
-        .catch((err: Error) => {
-          console.log(err)
-        })
-        
-        new Logger(Object.assign({}, log, {
-          target: data._id
-        }))
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
-    }
-  }
-  
-  /**
-   * Updates entry by params of 'slug'
-   *
-   * @class PostRouter
-   * @method update
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public update = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      creatorRef: string = user.ref,
-      slug: string = req.params.slug,
-      title: string = req.body.title,
-      body: any = UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)
-
-    if (!creator || validator.isEmpty(creatorRef)) {
-      res.status(422).json({ message: ERR.POST.POST_AUTHOR_REQUIRED })
-    } else if (title && validator.isEmpty(title)) {
-      res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
-    } else {
-      let log = {
-        creator: user._id,
-        creatorRef: CONST.USER_TYPES.CONSUMER,
-        action: CONST.USER_ACTIONS.COMMON.UPDATE,
-        targetRef: CONST.ACTION_TARGETS.POST,
-        slug,
-        ua: req.body.ua || req.ua
-      }
-
-      Post
-      .findOneAndUpdate({creator, slug}, body, {new: true})
-      .then((data: IPost) => {
-        if (data) {
-          res.status(200).json(data)
-          
-          new Logger(Object.assign({}, log, {
-            target: data._id
-          }))
-        } else {
-          res.status(404).send()
-        }
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
-    }
-  }
-  
-  /**
-   * Submit entry by params of 'slug'
-   *
-   * @class PostRouter
-   * @method submit
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public submit = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      slug: string = req.params.slug
-
-    Post
-    .findOne({creator, slug})
-    .then((data: IPost) => {
-      if (!data) {
-        res.status(404).send({ message: ERR.POST.CANNOT_SUBMIT_POST })
-      } else {
-        if (data.status === CONST.STATUSES.POST.PENDING || data.status === CONST.STATUSES.POST.APPROVED) {
-          res.status(422).json({ message: ERR.POST.POST_ALREADY_SUMMITED })
-        } else if (validator.isEmpty(data.slug)) {
-          res.status(422).json({ message: ERR.POST.POST_TITLE_REQUIRED })
-        } else if (validator.isEmpty(data.slug)) {
-          res.status(422).json({ message: ERR.POST.POST_SLUG_REQUIRED })
-        } else if (validator.isEmpty(data.content)) {
-          res.status(422).json({ message: ERR.POST.POST_CONTENT_REQUIRED })
-        } else {
-          let log = {
-            creator,
-            creatorRef: user.ref,
-            action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
-            targetRef: CONST.ACTION_TARGETS.POST,
-            slug,
-            ua: req.body.ua || req.ua
-          }
-
-          // approval ? pending : approved
-          data.status = CONFIG.POST_REQURIES_APPROVAL ? CONST.STATUSES.POST.PENDING : CONST.STATUSES.POST.APPROVED
-
-          data
-          .save()
-          .then((post: IPost) => {
-            res.status(200).json(post)
-            
-            new Logger(Object.assign({}, log, {
-              target: post._id
-            }))
-
-            // create submission/approval process if required
-            if (CONFIG.POST_REQURIES_APPROVAL) {
-              let init: IActivity = new Activity({
-                creator: post.creator,
-                creatorRef: post.creatorRef,
-                target: post._id,
-                targetRef: CONST.ACTION_TARGETS.POST,
-                action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
-                initStatus: CONST.STATUSES.POST.PENDING
-              })
-  
-              new Process(init, CONST.PROCESS_TYPES.APPROVAL)
-            }
-          })
-          .catch((err: Error) => {
-            new Err(res, err, log)
-          })
-        }
-      }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-  
-  /**
-   * Retract entry by params of 'slug'
-   *
-   * @class PostRouter
-   * @method retract
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public retract = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      slug: string = req.params.slug
-
-    Post
-    .findOne({creator, slug})
-    .then((data: IPost) => {
-      if (data.status === CONST.STATUSES.POST.EDITING) {
-        res.status(422).json({ message: ERR.POST.POST_CANNOT_BE_RETRACTED })
-      } else {
-        let log = {
-          creator,
-          creatorRef: user.ref,
-          action: CONST.USER_ACTIONS.CONSUMER.RETRACT,
-          targetRef: CONST.ACTION_TARGETS.POST,
-          slug,
-          ua: req.body.ua || req.ua          
-        }
-
-        // approval ? pending : approved
-        data.status = CONST.STATUSES.POST.EDITING
-
-        data
-        .save()
-        .then((post: IPost) => {
-          res.status(200).json(post)
-          
-          new Logger(Object.assign({}, log, {
-            target: post._id
-          }))
-        })
-        .catch((err: Error) => {
-          new Err(res, err, log)
-        })
-      }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-
-  /**
-   * Deletes entry by params of 'slug'
-   *
-   * @class PostRouter
-   * @method delete
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public delete = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      slug: string = req.params.slug,
-      log = {
-        creator,
-        creatorRef: user.ref,
-        action: CONST.USER_ACTIONS.COMMON.DELETE,
-        targetRef: CONST.ACTION_TARGETS.POST,
-        slug,
-        ua: req.body.ua || req.ua
-      }
-
-    Post
-    .findOneAndRemove({creator, slug})
-    .then((data: IPost) => {
-      if (data) {
-        res.status(204).end()
-
-        Consumer
-        .findByIdAndUpdate(creator, {$inc: {postCount: -1}})
-        .then()
-        .catch((err: Error) => {
-          console.log(err)
-        })
-        
-        new Logger(Object.assign({}, log, {
-          target: data._id
-        }))
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err: Error) => {
-      new Err(res, err, log)
     })
   }
 
@@ -546,7 +238,7 @@ class PostRouter {
       .populate('creator', CONST.PUBLIC_CONSUMER_INFO_LIST)
       .populate({
         path,
-        model: UTIL.getModelFromPath(path),
+        model: UTIL.getModelNameFromPath(path),
         group: 'type',
         options: {
           sort: {'_id': -1},
@@ -575,11 +267,192 @@ class PostRouter {
       res.status(404).send()
     }
   }
+  
+  /**
+   * Check proposed slug is available to user
+   *
+   * @class ConsumerRouter
+   * @method slug
+   * @param {Request} req
+   * @param {Response} res
+   * @returns {void}
+   */
+  public slug = (req: Request, res: Response): void => {
+    let slug: string = req.body.slug
+
+    if (slug.length < 1) {
+      res.status(422).json({ message: ERR.CONTENT.CONTENT_SLUG_REQUIRED })
+    } else {
+      Post
+      .findOne({slug})
+      .then((data: IPost) => {
+        let isAvailable: boolean = !(data)
+        res.status(200).json({isAvailable})
+      })
+      .catch((err: Error) => {
+        res.status(res.statusCode).send()
+        console.log(err)
+      })
+    }
+  }
+
+  /**
+   * Creates single new entry
+   *
+   * @class PostRouter
+   * @method create
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public create = (req: Request, res: Response): void => {
+    const user: IUser = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      creatorRef: string = user.ref,
+      title: string = req.body.title
+
+    if (!creator || validator.isEmpty(creatorRef)) {
+      res.status(422).json({ message: ERR.CONTENT.CONTENT_CREATOR_REQUIRED })
+    } else if (!title || validator.isEmpty(title)) {
+      res.status(422).json({ message: ERR.CONTENT.CONTENT_TITLE_REQUIRED })
+    } else {
+      const post = new Post(Object.assign({}, {
+          creator,
+          ref: creatorRef
+        }, UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)))
+
+      let log: any = {
+        creator,
+        creatorRef,
+        targetRef: CONST.ACTION_TARGETS.POST,
+        action: CONST.USER_ACTIONS.COMMON.CREATE,
+        ua: req.body.ua || req.ua
+      }
+
+      post
+      .save()
+      .then((data: IPost) => {
+        res.status(201).json(data)
+        log.target = data._id
+
+        return Consumer.findByIdAndUpdate(creator, {$inc: {postCount: 1}})
+      })
+      .then((user: IUser) => {
+        new Logger(log)
+      })
+      .catch((err: Error) => {
+        new Err(res, err, log)
+      })
+    }
+  }
+  
+  /**
+   * Updates entry by params of 'slug'
+   *
+   * @class PostRouter
+   * @method update
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public update = (req: Request, res: Response): void => {
+    const user: IUser = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      creatorRef: string = user.ref,
+      slug: string = req.params.slug,
+      title: string = req.body.title,
+      body: any = UTIL.sanitizeInput(CONST.ACTION_TARGETS.POST, req.body)
+
+    if (!creator || validator.isEmpty(creatorRef)) {
+      res.status(422).json({ message: ERR.CONTENT.CONTENT_CREATOR_REQUIRED })
+    } else if (title && validator.isEmpty(title)) {
+      res.status(422).json({ message: ERR.CONTENT.CONTENT_TITLE_REQUIRED })
+    } else if (slug && validator.isEmpty(slug)) {
+      res.status(422).json({ message: ERR.CONTENT.CONTENT_SLUG_REQUIRED })
+    } else {
+      let log: any = {
+        creator,
+        creatorRef,
+        targetRef: CONST.ACTION_TARGETS.POST,
+        action: CONST.USER_ACTIONS.COMMON.UPDATE,
+        ua: req.body.ua || req.ua
+      }
+
+      Post
+      .findOneAndUpdate({creator, slug}, body, {new: true})
+      .then((data: IPost) => {
+        if (data) {
+          res.status(200).json(data)
+          log.target = data._id
+          return data
+        }
+
+        res.status(404).send()
+        return null
+      })
+      .then((data: IPost) => {
+        new Logger(log)
+      })
+      .catch((err: Error) => {
+        new Err(res, err, log)
+      })
+    }
+  }
+  /**
+   * Deletes entry by params of 'slug'
+   *
+   * @class PostRouter
+   * @method delete
+   * @param {Request} req
+   * @param {Response} res
+   * @return {void}
+   */
+  public delete = (req: Request, res: Response): void => {
+    const user: IUser = req.user,
+      creator: Schema.Types.ObjectId = user._id,
+      slug: string = req.params.slug
+
+    let log: any = {
+        creator,
+        creatorRef: user.ref,
+        action: CONST.USER_ACTIONS.COMMON.DELETE,
+        targetRef: CONST.ACTION_TARGETS.POST,
+        ua: req.body.ua || req.ua
+      }
+
+    Post
+    .findOneAndRemove({creator, slug})
+    .then((data: IPost) => {
+      if (data) {
+        log.target = data._id
+        res.status(204).end()
+        return data
+      }
+
+      res.status(404).send()
+      return null
+    })
+    .then((data: IPost) => {
+      return Consumer.findByIdAndUpdate(creator, {$inc: {postCount: -1}})
+    })
+    .then((user: IUser) => {
+      new Logger(log)
+    })
+    .catch((err: Error) => {
+      new Err(res, err, log)
+    })
+  }
 
   routes() {
     this.router.get('/', this.list)
     this.router.get('/:slug', this.get)
 
+    // comment route
+    this.router.get('/:slug/comments', this.comments)
+    
+    // action list route
+    this.router.get('/:slug/:sublist', this.sublist)
+    
     // check slug
     this.router.post('/slug', this.slug)
 
@@ -593,26 +466,10 @@ class PostRouter {
       session: false
     }), this.update)
 
-    // submit route
-    this.router.post('/:slug/submit', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.submit)
-
-    // retract route
-    this.router.post('/:slug/retract', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.retract)
-
     // delete route
     this.router.delete('/:slug', passport.authenticate('consumerJwt', {
       session: false
     }), this.delete)
-
-    // comment route
-    this.router.get('/:slug/comments', this.comments)
-
-    // action list route
-    this.router.get('/:slug/:sublist', this.sublist)
   }
 }
 

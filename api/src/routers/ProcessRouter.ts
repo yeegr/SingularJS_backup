@@ -46,8 +46,12 @@ class ProcessRouter {
    * @return {void}
    */
   public list = (req: Request, res: Response): void => {
-    let params = UTIL.assembleSearchParams(req, {}, '')
-    
+    let params: any = UTIL.assembleSearchParams(req, {}, '')
+
+    if (req.query.status) {
+      params.query.status = req.query.status
+    }
+
     Process
     .find(params.query)
     .skip(params.skip)
@@ -146,10 +150,9 @@ class ProcessRouter {
 
     let query: any = {
         _id: activity_id,
-        // state: CONST.ACTIVITY_STATES.PROCESSING
+        state: CONST.ACTIVITY_STATES.PROCESSING
       },
       update: any = {},
-      ref: string = '',
       log = {
         creator: user._id,
         creatorRef: user.ref,
@@ -179,28 +182,24 @@ class ProcessRouter {
       break
 
       case CONST.USER_ACTIONS.PLATFORM.APPROVE:
-        ref = (<string>(body.targetRef)).toUpperCase()
-
         update = {
           handler: user._id,
           handlerRef: user.ref,
           processedAt: now,
           state: CONST.ACTIVITY_STATES.COMPLETED,
           comment: body.comment,
-          assignedStatus: CONST.STATUSES[ref].APPROVED
+          assignedStatus: CONST.STATUSES.CONTENT.APPROVED
         }
       break
 
       case CONST.USER_ACTIONS.PLATFORM.REJECT:
-        ref = (<string>(body.targetRef)).toUpperCase()
-
         update = {
           handler: user._id,
           handlerRef: user.ref,
           processedAt: now,
           state: CONST.ACTIVITY_STATES.COMPLETED,
           comment: body.comment,
-          assignedStatus: CONST.STATUSES[ref].REJECTED
+          assignedStatus: CONST.STATUSES.CONTENT.REJECTED
         }
       break
     }

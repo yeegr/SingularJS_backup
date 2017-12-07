@@ -9,38 +9,37 @@ import IConsumer from '../../interfaces/users/IConsumer'
 import IPost from '../../interfaces/post/IPost'
 
 let PostSchema: Schema = new Schema({
-  // creator
+  // author
   creator: {
     type: Schema.Types.ObjectId,
-    creatorRef: CONST.USER_TYPES.CONSUMER,
     required: true
   },
-  // organizer type
+  // author type
   ref: {
     type: String,
     required: true,
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER
   },
-  // post slug
+  // slug: http://domain/posts/{{slug}}
   slug: {
     type: String,
     default: '',
     unique: true,
     lowercase: true
   },
-  // post title
+  // title
   title: {
     type: String,
     default: '',
     required: true
   },
-  // post content
+  // content
   content: {
     type: String,
     default: ''
   },
-  // post excerpt
+  // excerpt
   excerpt: {
     type: String,
     default: ''
@@ -50,18 +49,18 @@ let PostSchema: Schema = new Schema({
     type: String,
     default: ''
   },
-  // post tags
+  // tags
   tags: [String],
-  // publish date
+  // TODO: publish date
   publish: {
     type: Number
   },
-  // post status
+  // current status
   status: {
     type: String,
     required: true,
-    enum: CONST.POST_STATUSES_ENUM,
-    default: CONST.STATUSES.POST.EDITING
+    enum: CONST.CONTENT_STATUSES_ENUM,
+    default: CONST.STATUSES.CONTENT.EDITING
   },
   // last updated time
   updated: {
@@ -178,7 +177,7 @@ PostSchema.virtual('downloads', {
  * Creates a virtual 'averageRating' property
  */
 PostSchema.virtual('averageRating').get(function() {
-  return (this.commentCount > 0) ? Math.round(this.totalRating / this.commentCount * 2) / 2 : null
+  return UTIL.getAverageRating(this)
 })
 
 PostSchema.pre('save', function(next: Function): void {
