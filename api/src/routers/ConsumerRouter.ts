@@ -59,7 +59,7 @@ class ConsumerRouter {
     .skip(params.skip)
     .limit(params.limit)
     .sort(params.sort)
-    .select(CONST.PUBLIC_CONSUMER_INFO_LIST)
+    .lean()
     .exec()
     .then((arr: IConsumer[]) => {
       if (arr) {
@@ -95,7 +95,7 @@ class ConsumerRouter {
       model: CONST.ACTION_TARGETS.POST,
       options: {
         find: {
-          'status': CONST.STATUSES.POST.APPROVED,
+          // 'status': CONST.STATUSES.POST.APPROVED,
           // 'publish': {$lte: moment()}
         },
         sort: {
@@ -122,6 +122,7 @@ class ConsumerRouter {
         select: CONST.CONSUMER_EVENT_SHOWCASE_KEYS
       },
     })
+    .lean()
     .then((user: IConsumer) => {
       if (user) {
         res.status(200).json(user)
@@ -234,9 +235,9 @@ class ConsumerRouter {
     } else {
       let log = {
         creator: _id,
-        ref: CONST.USER_TYPES.CONSUMER,
+        creatorRef: CONST.USER_TYPES.CONSUMER,
         action: CONST.USER_ACTIONS.COMMON.UPDATE,
-        type: CONST.ACTION_TARGETS.CONSUMER,
+        targetRef: CONST.ACTION_TARGETS.CONSUMER,
         target: _id,
         ua: req.body.ua || req.ua
       }
@@ -275,9 +276,9 @@ class ConsumerRouter {
     } else {
       let log = {
         creator: _id,
-        ref: CONST.USER_TYPES.CONSUMER,
+        creatorRef: CONST.USER_TYPES.CONSUMER,
         action: CONST.USER_ACTIONS.COMMON.DELETE,
-        type: CONST.ACTION_TARGETS.CONSUMER,
+        targetRef: CONST.ACTION_TARGETS.CONSUMER,
         target: _id,
         ua: req.body.ua || req.ua
       }
@@ -314,11 +315,11 @@ class ConsumerRouter {
 
     new Logger({
       creator: user._id,
-      ref: CONST.USER_TYPES.CONSUMER,
+      creatorRef: CONST.USER_TYPES.CONSUMER,
       action: CONST.USER_ACTIONS.COMMON.LOGIN,
-      type: CONST.ACTION_TARGETS.CONSUMER,
+      targetRef: CONST.ACTION_TARGETS.CONSUMER,
       target: user._id,
-      misc: req.authInfo,
+      state: req.authInfo,
       ua: req.body.ua || req.ua
     })
   }
@@ -333,7 +334,7 @@ class ConsumerRouter {
   private createConsumer(user: IConsumer, req: Request, res: Response): void {
     let log = {
       action: CONST.USER_ACTIONS.COMMON.CREATE,
-      type: CONST.ACTION_TARGETS.CONSUMER,
+      targetRef: CONST.ACTION_TARGETS.CONSUMER,
       ua: req.body.ua || req.ua
     }
 
@@ -343,11 +344,12 @@ class ConsumerRouter {
       res.status(201).json(UTIL.getSignedUser(data))
       new Logger(Object.assign({}, log, {
         creator: data._id,
-        ref: CONST.USER_TYPES.CONSUMER,
+        creatorRef: CONST.USER_TYPES.CONSUMER,
         target: data._id
       }))        
     })
     .catch((err: Error) => {
+      console.log(err)
       new Err(res, err, log)
     })
   }
@@ -430,8 +432,8 @@ class ConsumerRouter {
   public verifyTotp = (req: Request, res: Response, next: NextFunction): void => {
     let query: any = (<any>Object).assign({}, req.body),
       now: number = moment().valueOf()
-    query.expiredAt = {}
-    query.expiredAt.$gte = now
+    query.expireAt = {}
+    query.expireAt.$gte = now
     query.verifiedAt = null
 
     Totp

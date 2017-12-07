@@ -533,3 +533,17 @@ export function getSignedUser(user: IUser): object {
     token: string = signToken(user)
   return Object.assign({}, data, {token})
 }
+
+
+export function cleanupUser(user: IUser): IUser {
+  for (let key in user) {
+    console.log(key)
+    if (key === 'posts') {
+      delete user[key]
+    }
+  }
+
+  console.log(user)
+
+  return user
+}

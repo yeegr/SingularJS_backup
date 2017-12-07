@@ -7,9 +7,11 @@ export default interface IConsumer extends Document {
   password: string
   name: string
   gender?: number
+  pid?: string
   mobile: string
   email: string
   avatar: string
+  background?: string
   locale?: string
   city?: string
   country?: string
@@ -17,6 +19,7 @@ export default interface IConsumer extends Document {
   roles: string[]
   status: string
   verified?: Schema.Types.ObjectId
+  expires: number
   
   // virtual fields
   comments: Schema.Types.ObjectId[]

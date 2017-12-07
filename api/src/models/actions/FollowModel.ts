@@ -9,62 +9,62 @@ let FollowSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
-    refPath: 'ref',
+    refPath: 'creatorRef',
     required: true
   },
   // user type
-  ref: {
+  creatorRef: {
     type: String,
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER,
     required: true
   },
-  // target model type
-  type: {
-    type: String,
-    enum: CONST.ACTION_TARGETS_ENUM,
-    required: true
-  },
   // reference id
   target: {
     type: Schema.Types.ObjectId,
-    refPath: 'type',
+    refPath: 'targetRef',
+    required: true
+  },
+  // target reference
+  targetRef: {
+    type: String,
+    enum: CONST.ACTION_TARGETS_ENUM,
     required: true
   }
 }, {
   toObject: {
-    virtuals: true
+    virtuals: false
   },
   toJSON: {
-    virtuals: true
+    virtuals: false
   }
 })
 
 FollowSchema.index({ 
   creator: 1,
-  ref: 1,
-  type: 1,
-  target: 1
+  creatorRef: 1,
+  target: 1,
+  targetRef: 1
 }, {
   unique: true
 })
 
-FollowSchema.virtual('UserModel', {
-  ref: (doc: IAction) => doc.ref,
+FollowSchema.virtual('CreatorModel', {
+  ref: (doc: IAction) => doc.creatorRef,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
 FollowSchema.virtual('TargetModel', {
-  ref: (doc: IAction) => doc.type,
+  ref: (doc: IAction) => doc.targetRef,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
 FollowSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.type)
+  let TargetModel = UTIL.getModelFromKey(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {followCount: 1}})
@@ -76,7 +76,7 @@ FollowSchema.post('save', function(action: IAction) {
 
 FollowSchema.post('findOneAndRemove', function(action: IAction) {
   if (action) {
-    let TargetModel = UTIL.getModelFromKey(action.type)
+    let TargetModel = UTIL.getModelFromKey(action.targetRef)
     
     TargetModel
     .findByIdAndUpdate(action.target, {$inc: {followCount: -1}})

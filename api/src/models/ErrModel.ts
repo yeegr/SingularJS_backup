@@ -11,18 +11,18 @@ let ErrSchema: Schema = new Schema({
     default: null
   },
   // user type
-  ref: {
+  creatorRef: {
     type: String,
     enum: CONST.USER_TYPES_ENUM
-  },
-  // action target
-  type: {
-    type: String,
-    enum: CONST.ACTION_TARGETS_ENUM
   },
   // target id
   target: {
     type: Schema.Types.ObjectId
+  },
+  // target reference
+  targetRef: {
+    type: String,
+    enum: CONST.ACTION_TARGETS_ENUM
   },
   // target slug
   slug: {

@@ -17,17 +17,6 @@ let ConsumerSchema: Schema = new Schema({
     enum: [CONST.USER_TYPES.CONSUMER],
     required: true
   },
-  // user handle or user name
-  handle: {
-    type: String,
-    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
-    required: true,
-    unique: true,
-    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
-    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
-    trim: true,
-    index: true
-  },
   // user password, may or may not required
   password: {
     type: String,
@@ -46,6 +35,13 @@ let ConsumerSchema: Schema = new Schema({
     type: Number,
     validate: (val: number) => (val > -1)
   },
+  // personal id number
+  pid: {
+    type: String,
+    default: '',
+    trim: true,
+    validation: (val: string) => UTIL.isChinaPid(val) // check aginst Chinese PID
+  },
   // mobile phone number
   mobile: {
     type: String,
@@ -60,19 +56,6 @@ let ConsumerSchema: Schema = new Schema({
     lowercase: true,
     trim: true,
     validation: (val: string) => validator.isEmail(val)
-  },
-  // personal id number
-  pid: {
-    type: String,
-    default: '',
-    trim: true,
-    validation: (val: string) => UTIL.isChinaPid(val) // check aginst Chinese PID
-  },
-  // user self introduction
-  intro: {
-    type: String,
-    minlength: 2,
-    trim: true
   },
   // user avatar url
   avatar: {
@@ -106,12 +89,6 @@ let ConsumerSchema: Schema = new Schema({
     trim: true,
     validator: (code: string) => UTIL.isCountryCode(code)
   },
-  // WeChat OpenID
-  wechat: {
-    type: String,
-    default: '',
-    trim: true
-  },
   // last time user updated personal information
   updated: {
     type: Number,
@@ -139,11 +116,56 @@ let ConsumerSchema: Schema = new Schema({
   expires: {
     type: Number
   },
+  // user handle or user name
+  handle: {
+    type: String,
+    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
+    required: true,
+    unique: true,
+    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
+    trim: true,
+    index: true
+  },
+  // user self introduction
+  intro: {
+    type: String,
+    minlength: 2,
+    trim: true
+  },
+  // user viewing history
+  // history: [History],
+  // WeChat OpenID
+  wechat: {
+    type: String,
+    default: '',
+    trim: true
+  },
   // other users
   contacts: [{
     type: Schema.Types.ObjectId,
     ref: 'Consumer'
   }],
+  // user points
+  points: {
+    type: Number,
+    default: 0
+  },
+  // user level
+  level: {
+    type: Number
+  },
+  // user account balance
+  balance: {
+    type: Number,
+    default: 0
+  },
+  // user information retrieved
+  viewCount: {
+    type: Number,
+    default: 0,
+    validation: (val: number) => (val > -1)
+  },
   // number of posts authored by user
   postCount: {
     type: Number,
@@ -178,26 +200,6 @@ let ConsumerSchema: Schema = new Schema({
   totalFollowings: {
     type: Number,
     default: 0
-  },
-  // user points
-  points: {
-    type: Number,
-    default: 0
-  },
-  // user level
-  level: {
-    type: Number
-  },
-  // user account balance
-  balance: {
-    type: Number,
-    default: 0
-  },
-  // user information retrieved
-  viewCount: {
-    type: Number,
-    default: 0,
-    validation: (val: number) => (val > -1)
   }
 }, {
   toObject: {
@@ -212,9 +214,10 @@ let ConsumerSchema: Schema = new Schema({
  * Posts authored by user
  */
 ConsumerSchema.virtual('posts', {
-  ref: 'Post',
+  ref: CONST.ACTION_TARGETS.POST,
   localField: '_id',
-  foreignField: 'creator'
+  foreignField: 'creator',
+  justOne: false
 })
 
 /**
@@ -333,7 +336,7 @@ ConsumerSchema.virtual('followings', {
  * @class ConsumerSchema
  * @method addToBalance
  * @param {number} subTotal
- * @returns number
+ * @returns {number}
  */
 ConsumerSchema.methods.addToBalance = function(subTotal: number): number {
   this.balance += subTotal
@@ -350,7 +353,7 @@ ConsumerSchema.methods.addToBalance = function(subTotal: number): number {
  * @method comparePassword
  * @param {string} candidatePassword
  * @param {function} callback
- * @returns void
+ * @returns {void}
  */
 ConsumerSchema.methods.comparePassword = function(candidatePassword: string, callback: Function): void {
   bcrypt

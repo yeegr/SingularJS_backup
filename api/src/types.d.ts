@@ -1,9 +1,8 @@
+// adds type for JSON
 declare module "*.json" {
   const value: any;
   export default value;
 }
-
-declare module "@alicloud/sms-sdk"
 
 // adds user agent type to express Request
 declare namespace Express {
@@ -11,3 +10,5 @@ declare namespace Express {
       ua?: any
   }
 }
+
+declare module "@alicloud/sms-sdk"

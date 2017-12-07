@@ -25,7 +25,7 @@ class ErrLogger {
 
   private parseError = (err: any, log: any): IErr => {
     let status = 500,
-      code = 11000,
+      code = null,
       key = '',
       message = ''
 
@@ -35,6 +35,10 @@ class ErrLogger {
         code = 11000
         key = err.message.split(':')[2].trim().split(' ')[0].split('_')[0]
         message = ERR.USER.DUPLICATED_USER_INFORMATION
+      break
+
+      default:
+        message = err
       break
     }
 

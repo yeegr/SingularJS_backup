@@ -4,6 +4,7 @@ export default interface IPost extends Document {
   [key: string]: any
   _id: Schema.Types.ObjectId
   creator: Schema.Types.ObjectId
+  ref: string
   slug: string
   title: string
   content: string

@@ -4,21 +4,19 @@ import IHistory from './IHistory'
 
 export default interface IConsumer extends IUser {
   handle: string
-  pid?: string
   intro?: string
-  background: string
   wechat: string
   contacts: Schema.Types.ObjectId[]
   history: IHistory[]
+  points: number
+  level?: number
+  balance: number
   viewCount: number
   commentCount: number
   postCount: number
   eventCount: number
   signupCount: number
   orderCount: number
-  points: number
-  level?: number
-  balance: number
 
   // virtual fields
   posts: Schema.Types.ObjectId[]

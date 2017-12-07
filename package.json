@@ -13,9 +13,10 @@
     "api": "cd api && webpack",
     "build": "$npm_package_config_init && docker-compose build",
     "start": "$npm_package_config_init && docker-compose up -d",
-    "down": "$npm_package_config_init && docker-compose down",
+    "stop": "$npm_package_config_init && docker-compose down",
+    "restart": "npm run stop && npm run start",
+    "reset": "npm stop && npm run remove && npm run build && npm start",
     "logs": "$npm_package_config_init && docker-compose logs",
-    "reset": "npm run down && npm run remove && npm run build && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

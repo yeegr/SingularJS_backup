@@ -115,6 +115,9 @@ interface IUserActions {
     UNDO_ENROLL: string
   }
   PLATFORM: {
+    REQUEST: string
+    HOLD: string
+    CANCEL: string
     VERIFY: string
     APPROVE: string
     REJECT: string
@@ -155,6 +158,9 @@ export const USER_ACTIONS: IUserActions = {
     UNDO_ENROLL: 'UNDO_ENROLL'
   },
   PLATFORM: {
+    REQUEST: 'REQUEST',
+    HOLD: 'HOLD',
+    CANCEL: 'CANCEL',
     VERIFY: 'VERIFY',
     APPROVE: 'APPROVE',
     REJECT: 'REJECT',
@@ -165,6 +171,7 @@ export const USER_ACTIONS: IUserActions = {
 export const CONSUMER_USER_ACTIONS_ENUM: string[] = obj2enum(USER_ACTIONS.CONSUMER)
 export const SUPPLIER_USER_ACTIONS_ENUM: string[] = obj2enum(USER_ACTIONS.SUPPLIER)
 export const PLATFORM_USER_ACTIONS_ENUM: string[] = obj2enum(USER_ACTIONS.PLATFORM)
+
 
 /**
  * User action targets
@@ -179,6 +186,8 @@ interface IActionTargets {
   PRODUCT: string
   ORDER: string
   COMMENT: string
+  PROCESS: string
+  ACTIVITY: string
 }
 
 export const ACTION_TARGETS: IActionTargets = {
@@ -189,7 +198,9 @@ export const ACTION_TARGETS: IActionTargets = {
   EVENT: 'Event',
   PRODUCT: 'Product',
   ORDER: 'Order',
-  COMMENT: 'Comment'
+  COMMENT: 'Comment',
+  PROCESS: 'Process',
+  ACTIVITY: 'Activity'
 }
 
 export const ACTION_TARGETS_ENUM: string[] = obj2enum(ACTION_TARGETS)
@@ -222,6 +233,8 @@ export const ACTION_MODELS_ENUM: string[] = obj2enum(ACTION_MODELS)
  * Object statuses
  */
 interface IStatuses {
+  [key: string]: any
+
   CONSUMER: {
     ACTIVE: string
     SUSPENDED: string
@@ -238,6 +251,7 @@ interface IStatuses {
     EDITING: string
     PENDING: string
     APPROVED: string
+    REJECTED: string
     SUSPENDED: string
     EXPIRED: string
   }
@@ -272,6 +286,11 @@ interface IStatuses {
     NETWORK: string
     UNKNOWN: string
   }
+  PROCESS: {
+    PENDING: string
+    CANCELLED: string
+    FINALIZED: string
+  }
 }
 
 export const STATUSES: IStatuses = {
@@ -291,6 +310,7 @@ export const STATUSES: IStatuses = {
     EDITING: 'editing',
     PENDING: 'pending',
     APPROVED: 'approved',
+    REJECTED: 'rejected',
     SUSPENDED: 'suspended',
     EXPIRED: 'expired'
   },
@@ -324,6 +344,11 @@ export const STATUSES: IStatuses = {
     DUPLICATED: 'duplicated',
     NETWORK: 'network connection error',
     UNKNOWN: 'unknown'
+  },
+  PROCESS: {
+    PENDING: 'pending',
+    CANCELLED: 'cancelled',
+    FINALIZED: 'finalized'
   }
 }
 
@@ -335,6 +360,37 @@ export const EVENT_STATUSES_ENUM = obj2enum(STATUSES.EVENT)
 export const SET_STATUSES_ENUM = obj2enum(STATUSES.SET)
 export const SIGNUP_STATUSES_ENUM = obj2enum(STATUSES.SIGNUP)
 export const PAYMENT_STATUSES_ENUM = obj2enum(STATUSES.PAYMENT)
+
+/**
+ * Process types
+ */
+interface IProcessTypes {
+  APPROVAL: string
+}
+
+export const PROCESS_TYPES: IProcessTypes = {
+  APPROVAL: 'approval'
+}
+
+export const PROCESS_TYPES_ENUM = obj2enum(PROCESS_TYPES)
+
+/**
+ * Activity states
+ */
+interface IActivityStates {
+  READY: string
+  PROCESSING: string
+  COMPLETED: string
+}
+
+export const ACTIVITY_STATES: IActivityStates = {
+  READY: 'ready',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed'
+}
+
+export const ACTIVITY_STATES_ENUM = obj2enum(ACTIVITY_STATES)
+
 
 /**
  * Payment methods
@@ -371,20 +427,29 @@ export const COMMENT_SHOWCASE_COUNT: number = 3
 /**
  * Consumer information opened to the public
  */
-export const PUBLIC_CONSUMER_INFO: string = 'handle gender avatar status postCount eventCount commentCount likes dislikes saves shares followers followings points level viewCount'
+export const PUBLIC_CONSUMER_INFO: string = 'handle gender avatar status points level viewCount commentCount postCount eventCount likes dislikes saves shares dowloads followers followings'
 
 /**
  * Consumer information embeded in lists
  */
-export const PUBLIC_CONSUMER_INFO_LIST: string = '-_id handle gender avatar status postCount eventCount commentCount points level totalFollowers viewCount'
+export const PUBLIC_CONSUMER_INFO_LIST: string = 'handle gender avatar status points level totalFollowers viewCount postCount eventCount commentCount'
+
+/**
+ * Basic consumer information
+ */
+export const BASIC_USER_INFO: string = 'handle username avatar status points level'
+
+export const BASIC_CONTENT_INFO: string = 'title slug'
+
+const COUNTERS: string = ' viewCount commentCount likeCount dislikeCount saveCount shareCount downloadCount'
 
 export const CONSUMER_POST_SHOWCASE_COUNT: number = 3
 
-export const CONSUMER_POST_SHOWCASE_KEYS: string = 'slug title excerpt hero tags'
+export const CONSUMER_POST_SHOWCASE_KEYS: string = 'slug title excerpt hero tags' + COUNTERS
 
 export const CONSUMER_EVENT_SHOWCASE_COUNT: number = 3
 
-export const CONSUMER_EVENT_SHOWCASE_KEYS: string = 'slug title excerpt hero tags'
+export const CONSUMER_EVENT_SHOWCASE_KEYS: string = 'slug title excerpt hero tags' + COUNTERS
 
 export const DEFAULT_SORT_ORDER: any = {
   'viewCount': -1,

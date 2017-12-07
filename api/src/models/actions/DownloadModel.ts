@@ -9,53 +9,53 @@ let DownloadSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
-    refPath: 'ref',
+    refPath: 'creatorRef',
     required: true
   },
   // user type
-  ref: {
+  creatorRef: {
     type: String,
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER,
     required: true
   },
-  // target model type
-  type: {
-    type: String,
-    enum: CONST.ACTION_TARGETS_ENUM,
-    required: true
-  },
   // reference id
   target: {
     type: Schema.Types.ObjectId,
-    refPath: 'type',
+    refPath: 'targerRef',
+    required: true
+  },
+  // target model type
+  targetRef: {
+    type: String,
+    enum: CONST.ACTION_TARGETS_ENUM,
     required: true
   }
 }, {
   toObject: {
-    virtuals: true
+    virtuals: false
   },
   toJSON: {
-    virtuals: true
+    virtuals: false
   }
 })
 
-DownloadSchema.virtual('UserModel', {
-  ref: (doc: IAction) => doc.ref,
+DownloadSchema.virtual('CreatorModel', {
+  ref: (doc: IAction) => doc.creatorRef,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
 DownloadSchema.virtual('TargetModel', {
-  ref: (doc: IAction) => doc.type,
+  ref: (doc: IAction) => doc.targetRef,
   localField: 'target',
   foreignField: '_id',
   justOne: true
 })
 
 DownloadSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.type)
+  let TargetModel = UTIL.getModelFromKey(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {downloadCount: 1}})

@@ -58,6 +58,7 @@ class PlatformRouter {
     .skip(params.skip)
     .limit(params.limit)
     .sort(params.sort)
+    .lean()
     .exec()
     .then((arr: IPlatform[]) => {
       if (arr) {
@@ -85,6 +86,7 @@ class PlatformRouter {
   public get = (req: Request, res: Response): void => {
     Platform
     .findOne({username: req.params.username})
+    .lean()
     .then((user: IPlatform) => {
       if (user) {
         res.status(200).json(user)
@@ -174,11 +176,12 @@ class PlatformRouter {
     } else {
       let user: IPlatform = new Platform({
           username,
-          password
+          password,
+          status: 'active'  // to be removed
         }),
         log = {
           action: CONST.USER_ACTIONS.COMMON.CREATE,
-          type: CONST.ACTION_TARGETS.PLATFORM,
+          targetRef: CONST.ACTION_TARGETS.PLATFORM,
           ua: req.body.ua || req.ua
         }
 
@@ -189,7 +192,7 @@ class PlatformRouter {
   
         new Logger(Object.assign({}, log, {
           creator: data._id,
-          ref: CONST.USER_TYPES.PLATFORM,
+          creatorRef: CONST.USER_TYPES.PLATFORM,
           target: data._id
         }))     
       })
@@ -217,9 +220,9 @@ class PlatformRouter {
     } else {
       let log = {
         creator: _id,
-        ref: CONST.USER_TYPES.PLATFORM,
+        creatorRef: CONST.USER_TYPES.PLATFORM,
         action: CONST.USER_ACTIONS.COMMON.UPDATE,
-        type: CONST.ACTION_TARGETS.PLATFORM,
+        targetRef: CONST.ACTION_TARGETS.PLATFORM,
         target: _id,
         ua: req.body.ua || req.ua
       }
@@ -258,9 +261,9 @@ class PlatformRouter {
     } else {
       let log = {
         creator: _id,
-        ref: CONST.USER_TYPES.PLATFORM,
+        creatorRef: CONST.USER_TYPES.PLATFORM,
         action: CONST.USER_ACTIONS.COMMON.DELETE,
-        type: CONST.ACTION_TARGETS.PLATFORM,
+        targetRef: CONST.ACTION_TARGETS.PLATFORM,
         target: _id,
         ua: req.body.ua || req.ua
       }
@@ -297,11 +300,11 @@ class PlatformRouter {
 
     new Logger({
       creator: user._id,
-      ref: CONST.USER_TYPES.PLATFORM,
+      creatorRef: CONST.USER_TYPES.PLATFORM,
       action: CONST.USER_ACTIONS.COMMON.LOGIN,
-      type: CONST.ACTION_TARGETS.PLATFORM,
+      targetRef: CONST.ACTION_TARGETS.PLATFORM,
       target: user._id,
-      misc: req.authInfo,
+      state: req.authInfo,
       ua: req.body.ua || req.ua
     })
   }

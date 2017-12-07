@@ -17,28 +17,11 @@ let PlatformSchema: Schema = new Schema({
     enum: [CONST.USER_TYPES.PLATFORM],
     required: true
   },
-  // user name
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    minlength: CONFIG.INPUT_LIMITS.MIN_USERNAME_LENGTH,
-    maxlength: CONFIG.INPUT_LIMITS.MAX_USERNAME_LENGTH,
-    trim: true,
-    index: true
-  },
   // user password, hashed
   password: {
     type: String,
     default: '',
     required: true
-  },
-  // user nickname
-  nickname: {
-    type: String,
-    default: '',
-    trim: true,
-    index: true
   },
   // user actual name
   name: {
@@ -51,6 +34,13 @@ let PlatformSchema: Schema = new Schema({
   gender: {
     type: Number,
     validate: (val: number) => (val > -1)
+  },
+  // personal id number
+  pid: {
+    type: String,
+    default: '',
+    trim: true,
+    validation: (val: string) => UTIL.isChinaPid(val) // check against Chinese PID
   },
   // mobile phone number
   mobile: {
@@ -67,15 +57,13 @@ let PlatformSchema: Schema = new Schema({
     trim: true,
     validation: (val: string) => validator.isEmail(val)
   },
-  // personal id number
-  pid: {
-    type: String,
-    default: '',
-    trim: true,
-    validation: (val: string) => UTIL.isChinaPid(val) // check against Chinese PID
-  },
   // user avatar url
   avatar: {
+    type: String,
+    default: ''
+  },
+  // user homepage background image url
+  background: {
     type: String,
     default: ''
   },
@@ -119,8 +107,34 @@ let PlatformSchema: Schema = new Schema({
     enum: CONST.PLATFORM_STATUSES_ENUM,
     default: CONST.STATUSES.PLATFORM.SUSPENDED
   },
-  // number of jobs completed by user
-  jobCount: {
+  // user verification
+  verified: {
+    type: Schema.Types.ObjectId,
+    ref: 'Log'
+  },
+  // user verification expiration time
+  expires: {
+    type: Number
+  },
+  // user name
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    minlength: CONFIG.INPUT_LIMITS.MIN_USERNAME_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_USERNAME_LENGTH,
+    trim: true,
+    index: true
+  },
+  // user nickname
+  nickname: {
+    type: String,
+    default: '',
+    trim: true,
+    index: true
+  },
+  // number of activities completed by user
+  activityCount: {
     type: Number,
     default: 0
   }
@@ -134,12 +148,12 @@ let PlatformSchema: Schema = new Schema({
 })
 
 /**
- * Jobs administrated by user
+ * Activities handled | responded by user
  */
-PlatformSchema.virtual('jobs', {
-  ref: 'Job',
+PlatformSchema.virtual('activities', {
+  ref: 'Activity',
   localField: '_id',
-  foreignField: 'Platform'
+  foreignField: 'handler'
 })
 
 /**
@@ -150,7 +164,7 @@ PlatformSchema.virtual('jobs', {
  * @method comparePassword
  * @param {string} candidatePassword
  * @param {function} callback
- * @returns void
+ * @returns {void}
  */
 PlatformSchema.methods.comparePassword = function(candidatePassword: string, callback: Function): void {
   bcrypt
@@ -180,7 +194,7 @@ PlatformSchema.pre('save', function(next: Function): void {
       })
     })
   } else {
-    UTIL.setUpdateTime(user, ['username', 'password', 'nickname', 'name', 'gender', 'mobile', 'email', 'pid', 'avatar', 'locale', 'city', 'country'])
+    UTIL.setUpdateTime(user, ['username', 'password', 'nickname', 'name', 'gender', 'mobile', 'email', 'pid', 'avatar', 'background', 'locale', 'city', 'country'])
     user.wasNew = user.isNew
 
     next()

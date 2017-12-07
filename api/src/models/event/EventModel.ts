@@ -224,10 +224,10 @@ let EventSchema: Schema = new Schema({
   }
 }, {
   toObject: {
-    virtuals: true
+    virtuals: false
   },
   toJSON: {
-    virtuals: true
+    virtuals: false
   }
 })
 

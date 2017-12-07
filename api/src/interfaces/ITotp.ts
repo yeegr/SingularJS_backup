@@ -6,7 +6,7 @@ export default interface ITotp extends Document {
   type: string
   value: string
   code: string
-  expiredAt: number
+  expireAt: number
   verifiedAt?: number
   ip?: string
 }

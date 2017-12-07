@@ -17,7 +17,7 @@ import * as uaParser from 'ua-parser-js'
 import * as CONFIG from '../../common/options/config'
 
 import _HelperRouter from './routers/_HelperRouter'
-import AdminRouter from './admin'
+import AdminRouter from './routers/_admin'
 
 import ConsumerRouter from './routers/ConsumerRouter'
 
@@ -131,44 +131,47 @@ class Server {
     // use router middleware
     this.app.use('/', router)
 
+    const root = '/api/v1/'
+
     // helper router - not for production
-    this.app.use('/api/v1/helpers', _HelperRouter)
+    this.app.use(root + 'helpers', _HelperRouter)
 
     // consumer router - use 'users' in url following common practices
-    this.app.use('/api/v1/users', ConsumerRouter)
+    this.app.use(root + 'users', ConsumerRouter)
 
     // service / prodcut supplier router
-    // this.app.use('/api/v1/suppliers', SupplierRouter)
+    // this.app.use(root + 'suppliers', SupplierRouter)
+
+    // post router
+    this.app.use(root + 'posts', PostRouter)
+
+    // event router
+    this.app.use(root + 'events', EventRouter)
+
+    // store router
+    // this.app.use(root + 'stores', StoreRouter)
+
+    // product category router
+    // this.app.use(root + 'categories', CategoryRouter)
+
+    // product router
+    // this.app.use(root + 'products', ProductRouter)
+
+    // order router
+    // this.app.use(root + 'orders', OrderRouter)
+
+    // validation router
+    // this.app.use(root + 'validates', ValidateRouter)
+
+    // action router
+    this.app.use(root + 'actions', ActionRouter)
+
+    // comment router
+    this.app.use(root + 'comments', CommentRouter)
+
 
     // platform administrator router
     this.app.use('/api/v1/admin/', AdminRouter)
-
-    // post router
-    this.app.use('/api/v1/posts', PostRouter)
-
-    // event router
-    this.app.use('/api/v1/events', EventRouter)
-
-    // store router
-    // this.app.use('/api/v1/stores', StoreRouter)
-
-    // product category router
-    // this.app.use('/api/v1/categories', CategoryRouter)
-
-    // product router
-    // this.app.use('/api/v1/products', ProductRouter)
-
-    // order router
-    // this.app.use('/api/v1/orders', OrderRouter)
-
-    // validation router
-    // this.app.use('/api/v1/validates', ValidateRouter)
-
-    // action router
-    this.app.use('/api/v1/actions', ActionRouter)
-
-    // comment router
-    this.app.use('/api/v1/comments', CommentRouter)
   }
 }
 

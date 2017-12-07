@@ -9,26 +9,26 @@ let CommentSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
-    refPath: 'ref',
+    refPath: 'creatorRef',
     required: true
   },
   // user type
-  ref: {
+  creatorRef: {
     type: String,
     enum: CONST.USER_TYPES_ENUM,
     default: CONST.USER_TYPES.CONSUMER,
     required: true
   },
-  // target model type
-  type: {
-    type: String,
-    enum: CONST.ACTION_TARGETS_ENUM,
-    required: true
-  },
   // target id
   target: {
     type: Schema.Types.ObjectId,
-    refPath: 'type',
+    refPath: 'targetRef',
+    required: true
+  },
+  // target reference
+  targetRef: {
+    type: String,
+    enum: CONST.ACTION_TARGETS_ENUM,
     required: true
   },
   // comment rating
@@ -48,22 +48,22 @@ let CommentSchema: Schema = new Schema({
   }
 }, {
   toObject: {
-    virtuals: true
+    virtuals: false
   },
   toJSON: {
-    virtuals: true
+    virtuals: false
   }
 })
 
-CommentSchema.virtual('UserModel', {
-  ref: (doc: IComment) => doc.ref,
+CommentSchema.virtual('CreatorModel', {
+  ref: (doc: IComment) => doc.creatorRef,
   localField: 'creator',
   foreignField: '_id',
   justOne: true
 })
 
 CommentSchema.virtual('TargetModel', {
-  ref: (doc: IComment) => doc.type,
+  ref: (doc: IComment) => doc.targetRef,
   localField: 'target',
   foreignField: '_id',
   justOne: true
@@ -75,8 +75,8 @@ CommentSchema.pre('save', function(next: Function) {
 })
 
 CommentSchema.post('save', function(comment: IComment) {
-  let UserModel = UTIL.getModelFromKey(comment.ref),
-    TargetModel = UTIL.getModelFromKey(comment.type),
+  let CreatorModel = UTIL.getModelFromKey(comment.creatorRef),
+    TargetModel = UTIL.getModelFromKey(comment.targetRef),
     wasNew = this.wasNew
 
   TargetModel
@@ -85,7 +85,7 @@ CommentSchema.post('save', function(comment: IComment) {
     if (wasNew) {
       UTIL.addComment(doc, comment.rating)      
 
-      UserModel
+      CreatorModel
       .findByIdAndUpdate(comment.creator, {$inc: {commentCount: 1}})
       .then()
       .catch((err: NativeError) => {
@@ -101,15 +101,15 @@ CommentSchema.post('save', function(comment: IComment) {
 })
 
 CommentSchema.post('findOneAndRemove', function(comment: IComment) {
-  let UserModel = UTIL.getModelFromKey(comment.ref),
-    TargetModel = UTIL.getModelFromKey(comment.type)
+  let CreatorModel = UTIL.getModelFromKey(comment.creatorRef),
+    TargetModel = UTIL.getModelFromKey(comment.targetRef)
   
   TargetModel
   .findById(comment.target)
   .then((doc: any) => {
     UTIL.removeComment(doc, comment.rating)
 
-    UserModel
+    CreatorModel
     .findByIdAndUpdate(comment.creator, {$inc: {commentCount: -1}})
     .then()
     .catch((err: NativeError) => {

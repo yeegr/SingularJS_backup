@@ -48,35 +48,35 @@ class ActionRouter {
    */
   public create = (req: Request, res: Response) => {
     const creator: Schema.Types.ObjectId = req.user._id,
-      ref: string = req.user.ref,
-      type: string = UTIL.capitalizeFirstLetter(req.body.type),
+      creatorRef: string = req.user.ref,
       target: Schema.Types.ObjectId = req.body.target,
+      targetRef: string = UTIL.capitalizeFirstLetter(req.body.type),
       action: string = req.body.action
 
-    if (!creator || !ref) {
+    if (!creator || !creatorRef) {
       res.status(422).json({ message: ERR.ACTION.ACTION_CREATOR_REQUIRED })
-    } else if (!type || !target) {
+    } else if (!targetRef || !target) {
       res.status(422).json({ message: ERR.ACTION.ACTION_TARGET_NOT_SPECIFIED })
-    } else if (CONST.ACTION_TARGETS_ENUM.indexOf(type) < 0) {
+    } else if (CONST.ACTION_TARGETS_ENUM.indexOf(targetRef) < 0) {
       res.status(400).json({ message: ERR.ACTION.ACTION_TARGET_NOT_FOUND })
     } else if (!action) {
       res.status(422).json({ message: ERR.ACTION.ACTION_TYPE_REQUIRED })
-    } else if (ref === CONST.USER_TYPES.CONSUMER && CONST.CONSUMER_USER_ACTIONS_ENUM.indexOf(action) < 0) {
+    } else if (creatorRef === CONST.USER_TYPES.CONSUMER && CONST.CONSUMER_USER_ACTIONS_ENUM.indexOf(action) < 0) {
       res.status(400).json({ message: ERR.ACTION.ACTION_TYPE_NOT_FOUND })
     } else {
       let ActionModel = UTIL.getModelFromAction(action),
-        TargetModel = UTIL.getModelFromKey(type),
+        TargetModel = UTIL.getModelFromKey(targetRef),
         query = {
           creator,
-          ref,
-          type,
-          target
+          creatorRef,
+          target,
+          targetRef
         },
         log = {
           creator,
-          ref,
-          type,
+          creatorRef,
           target,
+          targetRef,
           action,
           ua: req.body.ua || req.ua
         },
@@ -172,7 +172,7 @@ class ActionRouter {
 
   routes() {
     // create route
-    this.router.post('/', passport.authenticate('jwt', {
+    this.router.post('/', passport.authenticate('consumerJwt', {
       session: false
     }), this.create)
   }

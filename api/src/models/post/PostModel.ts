@@ -12,8 +12,15 @@ let PostSchema: Schema = new Schema({
   // creator
   creator: {
     type: Schema.Types.ObjectId,
-    ref: CONST.USER_TYPES.CONSUMER,
+    creatorRef: CONST.USER_TYPES.CONSUMER,
     required: true
+  },
+  // organizer type
+  ref: {
+    type: String,
+    required: true,
+    enum: CONST.USER_TYPES_ENUM,
+    default: CONST.USER_TYPES.CONSUMER
   },
   // post slug
   slug: {
@@ -106,10 +113,10 @@ let PostSchema: Schema = new Schema({
   }
 }, {
   toObject: {
-    virtuals: true
+    virtuals: false
   },
   toJSON: {
-    virtuals: true
+    virtuals: false
   }
 })
 

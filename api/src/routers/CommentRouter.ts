@@ -44,27 +44,16 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public list(req: Request, res: Response): void {
-    let query: any = {},
-      page: number = UTIL.getListPageIndex(req),
-      count: number = UTIL.getListCountPerPage(req),
-      sort: any = UTIL.getListSort(req),
-      fields: string = UTIL.getRequestParam(req, 'on') || 'content'
-
-    if (UTIL.isNotUndefinedNullEmpty(UTIL.getRequestParam(req, 'in'))) {
-      query = Object.assign(query, UTIL.getListArray(req, 'in'))      
-    }
-
-    if (UTIL.isNotUndefinedNullEmpty(UTIL.getRequestParam(req, 'keywords'))) {
-      query = Object.assign(query, UTIL.getListKeywordQuery(req, fields))
-    }
+  public list = (req: Request, res: Response): void => {
+    let params = UTIL.assembleSearchParams(req, {}, 'content')
 
     Comment
-    .find(query)
-    .skip(page * count)
-    .limit(count)
-    .sort(sort)
+    .find(params.query)
+    .skip(params.skip)
+    .limit(params.limit)
+    .sort(params.sort)
     .populate('creator', CONST.PUBLIC_CONSUMER_INFO_LIST)
+    .lean()
     .exec()
     .then((arr) => {
       if (arr) {
@@ -88,15 +77,17 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public get(req: Request, res: Response): void {
+  public get = (req: Request, res: Response): void => {
     const id: string = req.params.id
     
     Comment
     .findById(id)
     .populate('creator', CONST.PUBLIC_CONSUMER_INFO)
+    .lean()
+    .exec()
     .then((comment: IComment) => {
       if (comment) {
-        res.status(200).json({comment})        
+        res.status(200).json(comment)        
       } else {
         res.status(404).send()
       }
@@ -116,35 +107,35 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public create(req: Request, res: Response): void {
+  public create = (req: Request, res: Response): void => {
     const creator: string = req.user._id,
-      ref: string = req.user.ref,
-      type: string = req.body.type,
+      creatorRef: string = req.user.ref,
       target: string = req.body.target,
+      targetRef: string = req.body.targetRef,
       rating: number = req.body.rating,
       content: string = req.body.content
 
-    if (!creator || !ref) {
+    if (!creator || !creatorRef) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
-    } else if (!type || !target) {
+    } else if (!targetRef || !target) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
     } else if (!content && !rating) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_CONTENT_REQUIRED })
     } else {
       const comment = new Comment({
         creator,
-        ref,
-        type,
+        creatorRef,
         target,
+        targetRef,
         rating,
         content
       })
       
       let log = {
         creator,
-        ref,
+        creatorRef,
         action: CONST.USER_ACTIONS.COMMON.CREATE,
-        type: CONST.ACTION_TARGETS.COMMENT,
+        targetRef: CONST.ACTION_TARGETS.COMMENT,
         ua: req.body.ua || req.ua
       }
 
@@ -158,6 +149,7 @@ class CommentRouter {
         }))
       })
       .catch((err: Error) => {
+        console.log(err)
         new Err(res, err, log)
       })
     }
@@ -172,24 +164,24 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public update(req: Request, res: Response): void {
+  public update = (req: Request, res: Response): void => {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
-      ref: string = user.ref,
+      creatorRef: string = user.ref,
       _id: string = req.params.id,
       body: any = req.body,
       rating: number = body.rating,
       content: string = body.content,
       log = {
         creator,
-        ref,
+        creatorRef,
         action: CONST.USER_ACTIONS.COMMON.UPDATE,
-        type: CONST.ACTION_TARGETS.COMMENT,
+        targetRef: CONST.ACTION_TARGETS.COMMENT,
         target: _id,
         ua: req.body.ua || req.ua
       }
 
-    if (!creator || !ref) {
+    if (!creator || !creatorRef) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
     } else if (!_id) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
@@ -229,21 +221,21 @@ class CommentRouter {
    * @param {Response} res
    * @return {void}
    */
-  public delete(req: Request, res: Response): void {
+  public delete = (req: Request, res: Response): void => {
     const user: IConsumer = req.user,
       creator: Schema.Types.ObjectId = user._id,
-      ref: string = user.ref,
+      creatorRef: string = user.ref,
       _id: string = req.params.id,
       log = {
         creator,
-        ref: user.ref,
+        creatorRef: user.ref,
         action: CONST.USER_ACTIONS.COMMON.DELETE,
-        type: CONST.ACTION_TARGETS.COMMENT,
+        targetRef: CONST.ACTION_TARGETS.COMMENT,
         target: _id,
         ua: req.body.ua || req.ua
       }
 
-    if (!creator || !ref) {
+    if (!creator || !creatorRef) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
     } else if (!_id) {
       res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
@@ -269,17 +261,17 @@ class CommentRouter {
     this.router.get('/:id', this.get)
 
     // create route
-    this.router.post('/', passport.authenticate('jwt', {
+    this.router.post('/', passport.authenticate('consumerJwt', {
       session: false
     }), this.create)
 
     // update route
-    this.router.patch('/:id', passport.authenticate('jwt', {
+    this.router.patch('/:id', passport.authenticate('consumerJwt', {
       session: false
     }), this.update)
 
     // delete route
-    this.router.delete('/:id', passport.authenticate('jwt', {
+    this.router.delete('/:id', passport.authenticate('consumerJwt', {
       session: false
     }), this.delete)
   }

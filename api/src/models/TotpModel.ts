@@ -26,7 +26,7 @@ let TotpSchema: Schema = new Schema({
     required: true,
     trim: true
   },
-  expiredAt: {
+  expireAt: {
     type: Number,
     required: true,
     default: () => moment().add(5, 'minutes').valueOf()

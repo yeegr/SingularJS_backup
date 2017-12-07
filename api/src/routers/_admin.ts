@@ -1,6 +1,8 @@
 import { Router } from 'express'
 
-import PlatformRouter from './routers/PlatformRouter'
+import PlatformRouter from './PlatformRouter'
+import ProcessRouter from './ProcessRouter'
+import ActivityRouter from './ActivityRouter'
 
 /**
  * AdminRouter class
@@ -31,6 +33,12 @@ class AdminRouter {
   public routes(): void {
     // user router
     this.router.use('/users', PlatformRouter)
+
+    // process router
+    this.router.use('/processes', ProcessRouter)
+
+    // process router
+    this.router.use('/activities', ActivityRouter)
   }
 }
 

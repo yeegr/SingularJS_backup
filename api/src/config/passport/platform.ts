@@ -33,15 +33,12 @@ passport.use('platformJwt', new JwtStrategy({
 )
 
 passport.use('platformLocal', new LocalStrategy((username: string, password: string, done: Function) => {
-    console.log('username: ' + username)
-    console.log('password: ' + password)
     Platform
     .findOne({
       username,
       status: CONST.STATUSES.PLATFORM.ACTIVE
     })
     .then((user: IPlatform) => {
-      console.log(user)
       if (user) {
         user.comparePassword(password, (err: Error, isMatch: boolean) => {
           if (err) { return done(err) }
