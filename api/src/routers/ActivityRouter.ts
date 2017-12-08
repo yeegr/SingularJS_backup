@@ -4,15 +4,11 @@ import { Schema, Types } from 'mongoose'
 import * as passport from 'passport'
 import '../config/passport/consumer'
 
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
-import IUser from '../interfaces/users/IUser'
+import { CONST, UTIL } from '../../../common'
+import { Logger, Err } from '../modules'
 
-import Activity from '../models/workflow/ActivityModel'
-import IActivity from '../interfaces/workflow/IActivity'
+import IUser from '../interfaces/users/IUser'
+import Activity, { IActivity } from '../models/workflow/ActivityModel'
 
 /**
  * ActivityRouter class

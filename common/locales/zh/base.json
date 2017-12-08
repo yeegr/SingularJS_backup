@@ -1,0 +1,16 @@
+{
+  "app": {
+    "name": "SingularJS"
+  },
+  "user": {
+    "login": {
+      "totp": {
+        "email": {
+          "subject": "this is a totp",
+          "text": "Your verification code is __code__",
+          "html": "<h1>Your verification code is</h1><strong>__code__</strong>"
+        }
+      }
+    }
+  }
+}

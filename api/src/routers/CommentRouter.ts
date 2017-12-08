@@ -4,17 +4,13 @@ import { Schema, Types } from 'mongoose'
 import * as passport from 'passport'
 import '../config/passport/consumer'
 
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
+import { CONST, ERRORS, UTIL } from '../../../common'
+import { Logger, Err } from '../modules'
 
 import Consumer from '../models/users/ConsumerModel'
-import IConsumer from '../interfaces/users/IConsumer'
+import IUser from '../interfaces/users/IUser'
 
-import Comment from '../models/share/CommentModel'
-import IComment from '../interfaces/share/IComment'
+import Comment, { IComment } from '../models/share/CommentModel'
 
 /**
  * CommentRouter class
@@ -116,11 +112,11 @@ class CommentRouter {
       content: string = req.body.content
 
     if (!creator || !creatorRef) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_CREATOR_REQUIRED })
     } else if (!targetRef || !target) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_TARGET_REQUIRED })
     } else if (!content && !rating) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_CONTENT_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_CONTENT_REQUIRED })
     } else {
       const comment = new Comment({
         creator,
@@ -165,7 +161,7 @@ class CommentRouter {
    * @return {void}
    */
   public update = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
+    const user: IUser = req.user,
       creator: Schema.Types.ObjectId = user._id,
       creatorRef: string = user.ref,
       _id: string = req.params.id,
@@ -182,11 +178,11 @@ class CommentRouter {
       }
 
     if (!creator || !creatorRef) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_CREATOR_REQUIRED })
     } else if (!_id) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_TARGET_REQUIRED })
     } else if (!content && !rating) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_CONTENT_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_CONTENT_REQUIRED })
     } else {
       Comment
       .findOne({creator, _id})
@@ -222,7 +218,7 @@ class CommentRouter {
    * @return {void}
    */
   public delete = (req: Request, res: Response): void => {
-    const user: IConsumer = req.user,
+    const user: IUser = req.user,
       creator: Schema.Types.ObjectId = user._id,
       creatorRef: string = user.ref,
       _id: string = req.params.id,
@@ -236,9 +232,9 @@ class CommentRouter {
       }
 
     if (!creator || !creatorRef) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_CREATOR_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_CREATOR_REQUIRED })
     } else if (!_id) {
-      res.status(422).json({ message: ERR.COMMENT.COMMENT_TARGET_REQUIRED })
+      res.status(422).json({ message: ERRORS.COMMENT.COMMENT_TARGET_REQUIRED })
     } else {
       Comment
       .findOneAndRemove({creator, _id})

@@ -6,18 +6,11 @@ import '../config/passport/platform'
 import * as validator from 'validator'
 import * as randomstring from 'randomstring'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
+import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
+import { Logger, Err } from '../modules'
 
-import Platform from '../models/users/PlatformModel'
-import IPlatform from '../interfaces/users/IPlatform'
-
-import Totp from '../models/TotpModel'
-import ITotp from '../interfaces/ITotp'
+import Platform, { IPlatform } from '../models/users/PlatformModel'
+import Totp, { ITotp } from '../models/users/TotpModel'
 
 import SMS from '../modules/sms'
 
@@ -170,9 +163,9 @@ class PlatformRouter {
       password: string = body.password
 
     if (!body.hasOwnProperty('username') || !UTIL.validateUsername(username)) {
-      res.status(401).json({ message: ERR.USER.MISSING_CREDENTIALS })      
+      res.status(401).json({ message: ERRORS.USER.MISSING_CREDENTIALS })      
     } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(password)) {
-      res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
+      res.status(401).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
     } else {
       let user: IPlatform = new Platform({
           username,
@@ -216,7 +209,7 @@ class PlatformRouter {
       _id: string = req.user._id
     
     if (username !== req.user.username) {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
+      res.status(401).json({ message: ERRORS.USER.PERMISSION_DENIED })
     } else {
       let log = {
         creator: _id,
@@ -257,7 +250,7 @@ class PlatformRouter {
       _id: string = req.user._id
     
     if (username !== req.user.username) {
-      res.status(401).json({ message: ERR.USER.PERMISSION_DENIED })
+      res.status(401).json({ message: ERRORS.USER.PERMISSION_DENIED })
     } else {
       let log = {
         creator: _id,
@@ -322,7 +315,7 @@ class PlatformRouter {
   public local = (req: Request, res: Response, next: NextFunction): void => {
     passport.authenticate('platformLocal', {
       session: false,
-      badRequestMessage: ERR.USER.MISSING_CREDENTIALS
+      badRequestMessage: ERRORS.USER.MISSING_CREDENTIALS
     }, (err: Error, user: IPlatform, info: object) => {
       if (err) {
         res.status(400).send(err) 
@@ -358,7 +351,7 @@ class PlatformRouter {
       opt: any = UTIL.assembleSearchParams(req)
 
     if (username !== req.user.username) {
-      res.status(422).json({ message: ERR.USER.PERMISSION_DENIED })
+      res.status(422).json({ message: ERRORS.USER.PERMISSION_DENIED })
     } else {
       Platform
       .findOne({username})

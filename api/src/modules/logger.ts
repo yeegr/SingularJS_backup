@@ -1,5 +1,4 @@
-import LogModel from '../models/LogModel'
-import ILog from '../interfaces/ILog'
+import LogModel, { ILog } from '../models/LogModel'
 
 class Logger {
   constructor(obj: any) {

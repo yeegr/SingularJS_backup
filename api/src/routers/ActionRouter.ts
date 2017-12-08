@@ -4,19 +4,11 @@ import { Schema, NativeError } from 'mongoose'
 import * as passport from 'passport'
 import '../config/passport/consumer'
 
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
+import { CONST, UTIL, ERRORS } from '../../../common'
+import { Logger, Err } from '../modules'
 
 import Consumer from '../models/users/ConsumerModel'
-import IConsumer from '../interfaces/users/IConsumer'
-
 import IAction from '../interfaces/actions/IAction'
-
-import Log from '../models/LogModel'
-import ILog from '../interfaces/ILog'
 
 /**
  * ActionRouter class
@@ -54,15 +46,15 @@ class ActionRouter {
       action: string = req.body.action
 
     if (!creator || !creatorRef) {
-      res.status(422).json({ message: ERR.ACTION.ACTION_CREATOR_REQUIRED })
+      res.status(422).json({ message: ERRORS.ACTION.ACTION_CREATOR_REQUIRED })
     } else if (!targetRef || !target) {
-      res.status(422).json({ message: ERR.ACTION.ACTION_TARGET_NOT_SPECIFIED })
+      res.status(422).json({ message: ERRORS.ACTION.ACTION_TARGET_NOT_SPECIFIED })
     } else if (CONST.ACTION_TARGETS_ENUM.indexOf(targetRef) < 0) {
-      res.status(400).json({ message: ERR.ACTION.ACTION_TARGET_NOT_FOUND })
+      res.status(400).json({ message: ERRORS.ACTION.ACTION_TARGET_NOT_FOUND })
     } else if (!action) {
-      res.status(422).json({ message: ERR.ACTION.ACTION_TYPE_REQUIRED })
+      res.status(422).json({ message: ERRORS.ACTION.ACTION_TYPE_REQUIRED })
     } else if (creatorRef === CONST.USER_TYPES.CONSUMER && CONST.CONSUMER_USER_ACTIONS_ENUM.indexOf(action) < 0) {
-      res.status(400).json({ message: ERR.ACTION.ACTION_TYPE_NOT_FOUND })
+      res.status(400).json({ message: ERRORS.ACTION.ACTION_TYPE_NOT_FOUND })
     } else {
       let ActionModel = UTIL.getModelFromAction(action),
         TargetModel = UTIL.getModelFromKey(targetRef),
@@ -112,7 +104,7 @@ class ActionRouter {
         .then((doc: any) => {
           if (doc) {
             if ((<any>creator).equals(doc.creator)) {
-              res.status(422).json({ message: ERR.ACTION.ACTION_NOT_AUTHORIZED})
+              res.status(422).json({ message: ERRORS.ACTION.ACTION_NOT_AUTHORIZED})
             } else {
               switch (action) {
                 case CONST.USER_ACTIONS.CONSUMER.UNDO_LIKE:
@@ -123,7 +115,7 @@ class ActionRouter {
                   .findOneAndRemove(query)
                   .then((act: IAction) => {
                     if (!act) {
-                      res.status(404).json({ message: ERR.ACTION.CANNOT_UNDO_NON_ACTION })
+                      res.status(404).json({ message: ERRORS.ACTION.CANNOT_UNDO_NON_ACTION })
                     } else {
                       res.status(res.statusCode).send()                      
                       this.logger(log)
@@ -151,12 +143,12 @@ class ActionRouter {
                 break
 
                 default:
-                  res.status(422).json({ message: ERR.ACTION.UNABLE_TO_PERFORM_ACTION })
+                  res.status(422).json({ message: ERRORS.ACTION.UNABLE_TO_PERFORM_ACTION })
                 break
               }
             }
           } else {
-            res.status(404).json({ message: ERR.ACTION.ACTION_TARGET_NOT_FOUND })
+            res.status(404).json({ message: ERRORS.ACTION.ACTION_TARGET_NOT_FOUND })
           }
         })
         .catch((err: Error) => {

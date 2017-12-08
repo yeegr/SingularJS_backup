@@ -5,26 +5,17 @@ import * as validator from 'validator'
 import * as passport from 'passport'
 import '../config/passport/consumer'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
-import Processor from '../modules/process'
+import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
+import { Logger, Err } from '../modules'
 
-import Process from '../models/workflow/ProcessModel'
-import IProcess from '../interfaces/workflow/IProcess'
-import Activity from '../models/workflow/ActivityModel'
-import IActivity from '../interfaces/workflow/IActivity'
+import Processor from '../modules/process'
+import Process, { IProcess } from '../models/workflow/ProcessModel'
+import Activity, { IActivity }  from '../models/workflow/ActivityModel'
 
 import Consumer from '../models/users/ConsumerModel'
 import IUser from '../interfaces/users/IUser'
 
-import IComment from '../interfaces/share/IComment'
-
-import Event from '../models/event/EventModel'
-import IEvent from '../interfaces/event/IEvent'
+import Event, { IEvent } from '../models/event/EventModel'
 
 /**
  * EventRouter class
@@ -66,7 +57,7 @@ class EventRouter {
         if (user) {
           this.search(req, res, user._id)
         } else {
-          res.status(404).json({ message: ERR.USER.USER_NOT_FOUND })
+          res.status(404).json({ message: ERRORS.USER.USER_NOT_FOUND })
         }
       })
       .catch((err: Error) => {
@@ -281,7 +272,7 @@ class EventRouter {
     let slug: string = req.body.slug
 
     if (slug.length < 1) {
-      res.status(422).json({ message: ERR.CONTENT.CONTENT_SLUG_REQUIRED })
+      res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
     } else {
       Event
       .findOne({slug})
@@ -312,9 +303,9 @@ class EventRouter {
       title: string = req.body.title
 
     if (!creator || validator.isEmpty(creatorRef)) {
-      res.status(422).json({ message: ERR.CONTENT.CONTENT_CREATOR_REQUIRED })
+      res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CREATOR_REQUIRED })
     } else if (!title || validator.isEmpty(title)) {
-      res.status(422).json({ message: ERR.CONTENT.CONTENT_TITLE_REQUIRED })
+      res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
     } else {
       const evt = new Event(Object.assign({}, {
         creator,
@@ -364,11 +355,11 @@ class EventRouter {
       body: any = UTIL.sanitizeInput(CONST.ACTION_TARGETS.EVENT, req.body)
 
     if (!creator || validator.isEmpty(creatorRef)) {
-      res.status(422).json({ message: ERR.CONTENT.CONTENT_CREATOR_REQUIRED })
+      res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CREATOR_REQUIRED })
     } else if (title && validator.isEmpty(title)) {
-      res.status(422).json({ message: ERR.CONTENT.CONTENT_TITLE_REQUIRED })
+      res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
     } else if (slug && validator.isEmpty(slug)) {
-      res.status(422).json({ message: ERR.CONTENT.CONTENT_SLUG_REQUIRED })
+      res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
     } else {
       let log: any = {
         creator,

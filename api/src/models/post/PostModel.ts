@@ -1,10 +1,8 @@
 import { Schema, model } from 'mongoose'
 
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONST, UTIL } from '../../../../common'
 
-import Consumer from '../users/ConsumerModel'
-import IConsumer from '../../interfaces/users/IConsumer'
+import Consumer, { IConsumer } from '../users/ConsumerModel'
 
 import IPost from '../../interfaces/post/IPost'
 
@@ -187,5 +185,7 @@ PostSchema.pre('save', function(next: Function): void {
 
   next()
 })
+
+export { IPost }
 
 export default model<IPost>('Post', PostSchema)

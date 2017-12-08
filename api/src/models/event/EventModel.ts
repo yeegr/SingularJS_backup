@@ -1,12 +1,9 @@
 import { Schema, model } from 'mongoose'
 import * as validator from 'validator'
 
-import * as CONFIG from '../../../../common/options/config'
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONFIG, CONST, UTIL } from '../../../../common'
 
-import Consumer from '../users/ConsumerModel'
-import IConsumer from '../../interfaces/users/IConsumer'
+import Consumer, { IConsumer } from '../users/ConsumerModel'
 
 import Agenda from './AgendaModel'
 import Attendee from './AttendeeModel'
@@ -281,5 +278,7 @@ EventSchema.pre('save', function(next: Function): void {
 
   next()
 })
+
+export { IEvent }
 
 export default model<IEvent>('Event', EventSchema)

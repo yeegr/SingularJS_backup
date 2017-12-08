@@ -1,10 +1,8 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONST } from '../../../../common'
 
 import IActivity from '../../interfaces/workflow/IActivity'
-import IUser from '../../interfaces/users/IUser'
 
 let ActivitySchema: Schema = new Schema({
   // creator
@@ -113,5 +111,7 @@ ActivitySchema.pre('save', function(next: Function) {
   this.wasNew = this.isNew  
   next()
 })
+
+export { IActivity }
 
 export default model<IActivity>('Activity', ActivitySchema)

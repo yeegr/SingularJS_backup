@@ -2,9 +2,9 @@ import { Schema, model } from 'mongoose'
 import * as moment from 'moment'
 import * as validator from 'validator'
 
-import * as CONST from '../../../common/options/constants'
+import { CONFIG, CONST } from '../../../../common'
 
-import ITotp from '../interfaces/ITotp'
+import ITotp from '../../interfaces/users/ITotp'
 
 let TotpSchema: Schema = new Schema({
   action: {
@@ -13,6 +13,7 @@ let TotpSchema: Schema = new Schema({
   },
   type: {
     type: String,
+    enum: CONST.TOTP_TYPES_ENUM,
     required: true,
     trim: true
   },
@@ -29,7 +30,7 @@ let TotpSchema: Schema = new Schema({
   expireAt: {
     type: Number,
     required: true,
-    default: () => moment().add(5, 'minutes').valueOf()
+    default: () => moment().add(CONFIG.DEFAULT_TOTP_EXPIRATION[0], CONFIG.DEFAULT_TOTP_EXPIRATION[1]).valueOf()
   },
   verifiedAt: {
     type: Number,
@@ -42,5 +43,7 @@ let TotpSchema: Schema = new Schema({
     match: (val: string) => validator.isIP(val)
   }
 })
+
+export { ITotp }
 
 export default model<ITotp>('Totp', TotpSchema)

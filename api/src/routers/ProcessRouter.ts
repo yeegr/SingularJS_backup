@@ -4,18 +4,12 @@ import { Schema, Types } from 'mongoose'
 import * as passport from 'passport'
 import '../config/passport/platform'
 
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
+import { CONST, ERRORS, UTIL } from '../../../common'
+import { Logger, Err } from '../modules'
+
 import IUser from '../interfaces/users/IUser'
-
-import Process from '../models/workflow/ProcessModel'
-import IProcess from '../interfaces/workflow/IProcess'
-
-import Activity from '../models/workflow/ActivityModel'
-import IActivity from '../interfaces/workflow/IActivity'
+import Process, { IProcess } from '../models/workflow/ProcessModel'
+import Activity, { IActivity } from '../models/workflow/ActivityModel'
 
 /**
  * ProcessRouter class
@@ -50,6 +44,10 @@ class ProcessRouter {
 
     if (req.query.status) {
       params.query.status = req.query.status
+    }
+
+    if (req.query.type) {
+      params.query.targetRef = UTIL.capitalizeFirstLetter(req.query.type, true)
     }
 
     Process
@@ -220,7 +218,7 @@ class ProcessRouter {
           return null
         }
       } else {
-        res.status(400).json({ message: ERR.PROGRESS.ACTIVITY_IS_LOCKED })
+        res.status(400).json({ message: ERRORS.PROGRESS.ACTIVITY_IS_LOCKED })
         return null
       }
     })

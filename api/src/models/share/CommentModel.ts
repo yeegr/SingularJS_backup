@@ -1,7 +1,6 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONST, UTIL } from '../../../../common'
 
 import IComment from '../../interfaces/share/IComment'
 
@@ -120,5 +119,7 @@ CommentSchema.post('findOneAndRemove', function(comment: IComment) {
     console.log(err)
   })
 })
+
+export { IComment }
 
 export default model<IComment>('Comment', CommentSchema)

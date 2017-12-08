@@ -3,9 +3,7 @@ import * as bcrypt from 'bcrypt-nodejs'
 import * as moment from 'moment'
 import * as validator from 'validator'
 
-import * as CONFIG from '../../../../common/options/config'
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONFIG, CONST, UTIL } from '../../../../common'
 
 import IPlatform from '../../interfaces/users/IPlatform'
 
@@ -200,5 +198,7 @@ PlatformSchema.pre('save', function(next: Function): void {
     next()
   }
 })
+
+export { IPlatform }
 
 export default model<IPlatform>('Platform', PlatformSchema)

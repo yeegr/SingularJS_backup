@@ -3,15 +3,13 @@ import { Request, Response } from 'express'
 import * as moment from 'moment'
 import * as jwt from 'jsonwebtoken'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
+import { CONFIG, CONST, ERRORS } from '../../../common'
 
 import IUser from '../interfaces/users/IUser'
 import IContent from '../interfaces/share/IContent'
 
 import Consumer from '../models/users/ConsumerModel'
-import IConsumer from '../interfaces/users/IConsumer'
+import Platform from '../models/users/PlatformModel'
 
 import Post from '../models/post/PostModel'
 import Event from '../models/event/EventModel'
@@ -42,16 +40,16 @@ export function formatError(res: Response, err: NativeError, act: string = '', d
       case CONST.USER_ACTIONS.CONSUMER.SAVE:
       case CONST.USER_ACTIONS.CONSUMER.FOLLOW:
         status = 409
-        message = ERR.ACTION.DUPLICATED_ACTION
+        message = ERRORS.ACTION.DUPLICATED_ACTION
       break
 
       case CONST.USER_ACTIONS.COMMON.CREATE:
         status = 409
-        message = ERR.USER.DUPLICATED_USER_INFORMATION
+        message = ERRORS.USER.DUPLICATED_USER_INFORMATION
       break
 
       default:
-        message = ERR.UNKNOWN
+        message = ERRORS.UNKNOWN
       break
     }
   }

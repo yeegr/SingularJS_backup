@@ -3,12 +3,9 @@ import { ExtractJwt, Strategy as JwtStrategy}  from 'passport-jwt'
 import * as passportOAuth2 from 'passport-oauth2'
 import { Strategy as LocalStrategy } from 'passport-local'
 
-import * as CONFIG from '../../../../common/options/config'
-import * as CONST from '../../../../common/options/constants'
-import * as ERR from '../../../../common/options/errors'
+import { CONFIG, CONST, ERRORS } from '../../../../common'
 
-import Platform from '../../models/users/PlatformModel'
-import IPlatform from '../../interfaces/users/IPlatform'
+import Platform, { IPlatform } from '../../models/users/PlatformModel'
 
 passport.use('platformJwt', new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromHeader('authorization'),
@@ -42,11 +39,11 @@ passport.use('platformLocal', new LocalStrategy((username: string, password: str
       if (user) {
         user.comparePassword(password, (err: Error, isMatch: boolean) => {
           if (err) { return done(err) }
-          if (!isMatch) { return done(null, false, {message: ERR.USER.PASSWORD_INCORRECT })}
+          if (!isMatch) { return done(null, false, {message: ERRORS.USER.PASSWORD_INCORRECT })}
           return done(null, user, 'local')
         })
       } else {
-        return done(null, false, { message: ERR.USER.USER_NOT_FOUND })
+        return done(null, false, { message: ERRORS.USER.USER_NOT_FOUND })
       }
     })
     .catch((err: Error) => {

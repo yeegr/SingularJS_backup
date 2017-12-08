@@ -18,6 +18,19 @@ export const TOTP_CODE_CHARSET: string = 'numeric'
 export const DEFAULT_EVENT_MAX_ATTENDEE: number = 200
 export const DEFAULT_EVENT_MIN_ATTENDEE: number = 20
 
+export const DEFAULT_EMAIL_SERVICE = {
+  service: '163',
+  host: 'smtp.163.com',
+  port: 465,
+  secure: true,
+  greetingTimeout: 100000,
+  auth: {
+    user: 'singularjs@163.com',
+    pass: 'Ss0ucSsx7622'
+  }
+}
+
+export const DEFAULT_TOTP_EXPIRATION: [any, number] = ['minutes', 5]
 
 /**
  * JWT secrets to sign users

@@ -2,8 +2,7 @@ import { Response } from 'express'
 
 import * as ERR from '../../../common/options/errors'
 
-import ErrModel from '../models/ErrModel'
-import IErr from '../interfaces/IErr'
+import ErrModel, { IErr } from '../models/ErrModel'
 
 class ErrLogger {
   constructor(res: Response, err: any, log: any) {

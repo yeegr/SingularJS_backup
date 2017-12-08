@@ -3,18 +3,12 @@ import { NextFunction, Request, Response, Router } from 'express'
 import * as debug from 'debug'
 import * as mongoose from 'mongoose'
 
-import * as UTIL from '../../../common/util'
-
-import Log from '../models/LogModel'
-import ILog from '../interfaces/ILog'
-
-import Err from '../models/ErrModel'
-import IErr from '../interfaces/IErr'
-
-import Totp from '../models/TotpModel'
-import ITotp from '../interfaces/ITotp'
+import { UTIL } from '../../../common'
 
 import IAction from '../interfaces/actions/IAction'
+import Log, { ILog } from '../models/LogModel'
+import Err, { IErr } from '../models/ErrModel'
+import Totp, { ITotp } from '../models/users/TotpModel'
 
 /**
  * HelperRouter class

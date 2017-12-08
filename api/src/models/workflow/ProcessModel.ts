@@ -1,10 +1,8 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONST, UTIL }  from '../../../../common'
 
-import Activity from './ActivityModel'
-import IActivity from '../../interfaces/workflow/IActivity'
+import Activity, { IActivity } from './ActivityModel'
 import IProcess from '../../interfaces/workflow/IProcess'
 
 let ProcessSchema: Schema = new Schema({
@@ -170,5 +168,7 @@ ProcessSchema.methods.returnData = function(process: IProcess): Promise<IProcess
   })
   .execPopulate()
 }
+
+export { IProcess }
 
 export default model<IProcess>('Process', ProcessSchema)

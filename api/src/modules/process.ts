@@ -1,10 +1,8 @@
-import Process from '../models/workflow/ProcessModel'
-import IProcess from '../interfaces/workflow/IProcess'
-import Activity from '../models/workflow/ActivityModel'
-import IActivity from '../interfaces/workflow/IActivity'
-import * as CONST from '../../../common/options/constants'
-import Logger from './logger'
-import Err from './err'
+import { CONST } from '../../../common'
+import { Logger } from '../modules'
+
+import Process, { IProcess } from '../models/workflow/ProcessModel'
+import Activity, { IActivity } from '../models/workflow/ActivityModel'
 
 class ProcessClass {
   constructor(act: IActivity, type: string) {

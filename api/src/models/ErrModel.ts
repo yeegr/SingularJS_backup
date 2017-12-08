@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
+import { CONST } from '../../../common'
 
 import IErr from '../interfaces/IErr'
 
@@ -58,5 +58,7 @@ let ErrSchema: Schema = new Schema({
     type: Object
   }
 })
+
+export { IErr }
 
 export default model<IErr>('Err', ErrSchema)

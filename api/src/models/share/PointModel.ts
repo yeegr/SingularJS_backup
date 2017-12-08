@@ -1,8 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-import * as CONFIG from '../../../../common/options/config'
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONFIG, CONST, UTIL } from '../../../../common'
 
 import IPoint from '../../interfaces/share/IPoint'
 

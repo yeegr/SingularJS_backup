@@ -1,7 +1,6 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import * as CONST from '../../../../common/options/constants'
-import * as UTIL from '../../../../common/util'
+import { CONST, UTIL } from '../../../../common'
 
 import IAction from '../../interfaces/actions/IAction'
 

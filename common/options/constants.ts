@@ -17,6 +17,21 @@ function obj2enum(obj: any): string[] {
 }
 
 /**
+ * TOTP types
+ */
+interface ITotpTypes {
+  EMAIL: string
+  SMS: string
+}
+
+export const TOTP_TYPES: ITotpTypes = {
+  EMAIL: 'email',
+  SMS: 'sms'
+}
+
+export const TOTP_TYPES_ENUM: string[] = obj2enum(TOTP_TYPES)
+
+/**
  * User types
  */
 interface IUserTypes {

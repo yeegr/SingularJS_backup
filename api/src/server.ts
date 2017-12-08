@@ -169,7 +169,6 @@ class Server {
     // comment router
     this.app.use(root + 'comments', CommentRouter)
 
-
     // platform administrator router
     this.app.use('/api/v1/admin/', AdminRouter)
   }

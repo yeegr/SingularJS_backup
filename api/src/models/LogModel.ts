@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose'
 
-import * as CONST from '../../../common/options/constants'
+import { CONST } from '../../../common'
 
 import ILog from '../interfaces/ILog'
 
@@ -40,5 +40,7 @@ let LogSchema: Schema = new Schema({
     type: Object
   }
 })
+
+export { ILog }
 
 export default model<ILog>('Log', LogSchema)

@@ -1,7 +1,7 @@
-import * as CONFIG from './options/config'
-import * as CONST from './options/constants'
+import * as CONFIG from '../options/config'
+import * as CONST from '../options/constants'
 
-export * from '../api/src/modules/util'
+export * from '../../api/src/modules/util'
 
 /**
  * Capitalizes first letter of the string

@@ -7,25 +7,19 @@ import '../config/passport/consumer'
 import * as validator from 'validator'
 import * as randomstring from 'randomstring'
 
-import * as CONFIG from '../../../common/options/config'
-import * as CONST from '../../../common/options/constants'
-import * as ERR from '../../../common/options/errors'
-import * as UTIL from '../../../common/util'
-import Logger from '../modules/logger'
-import Err from '../modules/err'
-import Processor from '../modules/process'
+import { CONFIG, CONST, ERRORS, UTIL } from '../../../common/'
+import { Logger, Err, LANG } from '../modules'
 
-import Process from '../models/workflow/ProcessModel'
-import IProcess from '../interfaces/workflow/IProcess'
-import Activity from '../models/workflow/ActivityModel'
-import IActivity from '../interfaces/workflow/IActivity'
+import Processor from '../modules/process'
+import Process, { IProcess } from '../models/workflow/ProcessModel'
+import Activity, { IActivity } from '../models/workflow/ActivityModel'
 
 import Consumer from '../models/users/ConsumerModel'
 import IUser from '../interfaces/users/IUser'
 
-import Totp from '../models/TotpModel'
-import ITotp from '../interfaces/ITotp'
+import Totp, { ITotp } from '../models/users/TotpModel'
 import SMS from '../modules/sms'
+import Emailer from '../modules/email'
 
 import IContent from '../interfaces/share/IContent'
 
@@ -212,9 +206,9 @@ class ConsumerRouter {
     let body: any = req.body
 
     if (!body.hasOwnProperty('handle') || !UTIL.validateHandle(body.handle)) {
-      res.status(401).json({ message: ERR.USER.MISSING_CREDENTIALS })      
+      res.status(401).json({ message: ERRORS.USER.MISSING_CREDENTIALS })      
     } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(body.password)) {
-      res.status(401).json({ message: ERR.USER.VALID_PASSWORD_REQUIRED })
+      res.status(401).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
     } else {
       let user: IUser = new Consumer({
         handle: body.handle,
@@ -357,7 +351,7 @@ class ConsumerRouter {
   public local = (req: Request, res: Response, next: NextFunction): void => {
     passport.authenticate('consumerLocal', {
       session: false,
-      badRequestMessage: ERR.USER.MISSING_CREDENTIALS
+      badRequestMessage: ERRORS.USER.MISSING_CREDENTIALS
     }, (err: Error, user: IUser, info: object) => {
       if (err) {
         res.status(400).send(err) 
@@ -387,18 +381,36 @@ class ConsumerRouter {
    * @returns {void}
    */
   public initTotp = (req: Request, res: Response, next: NextFunction): void => {
-    let totp: ITotp = new Totp((<any>Object).assign({
+    let totp: ITotp = new Totp(Object.assign({}, req.body, {
       action: CONST.USER_ACTIONS.COMMON.LOGIN,
       code: randomstring.generate({
         length: CONFIG.TOTP_CODE_LENGTH,
         charset: CONFIG.TOTP_CODE_CHARSET
       })
-    }, req.body))
+    }))
 
+    console.log(totp)
+    console.log(LANG.t('user.login.totp.email.subject'))
+    
     totp
     .save()
     .then((data) => {
-      let sms = new SMS({'content':'something'})
+      switch (data.type) {
+        case CONST.TOTP_TYPES.EMAIL:
+          new Emailer({
+            to: data.value,
+            subject: 'this is the third test',
+            html: `<h1>this is a test</h1><strong>of nodemailer 2</strong>`
+          })
+        break
+
+        case CONST.TOTP_TYPES.SMS:
+          
+        break
+      }
+
+
+      // let sms = new SMS({'content':'something'})
       // sms.send({'content':'something'})
 
       res.status(201).send('Success')
@@ -566,13 +578,13 @@ class ConsumerRouter {
     .then((data: IContent) => {
       if (data) {
         if (data.status === CONST.STATUSES.CONTENT.PENDING || data.status === CONST.STATUSES.CONTENT.APPROVED) {
-          res.status(422).json({ message: ERR.CONTENT.CONTENT_ALREADY_SUMMITED })
+          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_ALREADY_SUMMITED })
         } else if (validator.isEmpty(data.slug)) {
-          res.status(422).json({ message: ERR.CONTENT.CONTENT_TITLE_REQUIRED })
+          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
         } else if (validator.isEmpty(data.slug)) {
-          res.status(422).json({ message: ERR.CONTENT.CONTENT_SLUG_REQUIRED })
+          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
         } else if (validator.isEmpty(data.content)) {
-          res.status(422).json({ message: ERR.CONTENT.CONTENT_CONTENT_REQUIRED })
+          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CONTENT_REQUIRED })
         } else {
           // approval ? pending : approved
           switch (targetRef) {
@@ -593,7 +605,7 @@ class ConsumerRouter {
         }
       }
 
-      res.status(404).send({ message: ERR.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
+      res.status(404).send({ message: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
       return null
     })
     .then((data: IContent) => {
@@ -656,7 +668,7 @@ class ConsumerRouter {
     .then((data: IContent) => {
       if (data) {
         if (data.status === CONST.STATUSES.CONTENT.EDITING) {
-          res.status(422).json({ message: ERR.CONTENT.CONTENT_CANNOT_BE_RETRACTED })
+          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CANNOT_BE_RETRACTED })
           return null
         } else {
           data.status = CONST.STATUSES.CONTENT.EDITING
@@ -664,7 +676,7 @@ class ConsumerRouter {
         }
       }
 
-      res.status(404).send({ message: ERR.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
+      res.status(404).send({ message: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
       return null
     })
     .then((data: IContent) => {
