@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { Schema, Types } from 'mongoose'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
 import '../config/passport/consumer'
@@ -389,9 +389,6 @@ class ConsumerRouter {
       })
     }))
 
-    console.log(totp)
-    console.log(LANG.t('user.login.totp.email.subject'))
-    
     totp
     .save()
     .then((data) => {
@@ -399,8 +396,15 @@ class ConsumerRouter {
         case CONST.TOTP_TYPES.EMAIL:
           new Emailer({
             to: data.value,
-            subject: 'this is the third test',
-            html: `<h1>this is a test</h1><strong>of nodemailer 2</strong>`
+            subject: LANG.t('user.login.totp.email.subject'),
+            text: LANG.t('user.login.totp.email.text', {
+              code: data.code,
+              expiration: moment(data.expireAt).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+            }),
+            html: LANG.t('user.login.totp.email.html', {
+              code: data.code,
+              expiration: moment(data.expireAt).tz(CONFIG.DEFAULT_TIMEZONE).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+            })
           })
         break
 

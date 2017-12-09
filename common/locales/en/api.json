@@ -1,0 +1,13 @@
+{
+  "user": {
+    "login": {
+      "totp": {
+        "email": {
+          "subject": "来自$t(base:app.name)的验证码3",
+          "text": "Your verification code is __code__",
+          "html": "<h1>Your verification code is</h1><strong>__code__</strong>"
+        }
+      }
+    }
+  }
+}

@@ -2,6 +2,8 @@ export const PROJECT_TITLE: string = 'SingularJS'
 
 export const DEFAULT_COUNTRY_CODE: string = 'CN'
 export const DEFAULT_LOCALE = 'zh-CN'
+export const DEFAULT_TIMEZONE: string = 'Asia/Shanghai'
+export const DEFAULT_DATETIME_FORMAT: string = 'YYYY-MM-DD HH:mm:ss'
 
 export const COOKIE_SECRET: string = 'cookie_secret'
 
@@ -30,7 +32,7 @@ export const DEFAULT_EMAIL_SERVICE = {
   }
 }
 
-export const DEFAULT_TOTP_EXPIRATION: [any, number] = ['minutes', 5]
+export const DEFAULT_TOTP_EXPIRATION: [number, any] = [15, 'minutes']
 
 /**
  * JWT secrets to sign users
@@ -52,16 +54,16 @@ export const JWT_SECRETS: IJwtSecrets = {
  * User token expirations
  */
 interface ITokenExpiration {
-  [key: string]: [any, number]
-  CONSUMER: [any, number]
-  SUPPLIER: [any, number]
-  PLATFORM: [any, number]
+  [key: string]: [number, any]
+  CONSUMER: [number, any]
+  SUPPLIER: [number, any]
+  PLATFORM: [number, any]
 }
 
 export const USER_TOKEN_EXPIRATION: ITokenExpiration = {
-  CONSUMER: ['days', 90],
-  SUPPLIER: ['days', 90],
-  PLATFORM: ['days', 90]  
+  CONSUMER: [90, 'days'],
+  SUPPLIER: [90, 'days'],
+  PLATFORM: [90, 'days']  
 }
 
 /**

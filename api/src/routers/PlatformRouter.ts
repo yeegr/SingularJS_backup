@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from 'express'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
 import '../config/passport/platform'

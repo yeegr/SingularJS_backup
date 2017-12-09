@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as validator from 'validator'
 
 import { CONFIG, CONST } from '../../../../common'

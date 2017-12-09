@@ -1,6 +1,6 @@
 import { Document, Schema, NativeError } from 'mongoose'
 import { Request, Response } from 'express'
-import * as moment from 'moment'
+import * as moment from 'moment-timezone'
 import * as jwt from 'jsonwebtoken'
 
 import { CONFIG, CONST, ERRORS } from '../../../common'
@@ -525,7 +525,7 @@ export function getAverageRating(doc: IContent): number {
 export function signToken(user: IUser): string {
   let now: moment.Moment = moment(),
     ref: string = user.ref.toUpperCase(),
-    duration: [moment.unitOfTime.DurationConstructor, number] = CONFIG.USER_TOKEN_EXPIRATION[ref]
+    duration: [number, moment.unitOfTime.DurationConstructor] = CONFIG.USER_TOKEN_EXPIRATION[ref]
   
   return jwt.sign({
     iss: CONFIG.PROJECT_TITLE,
