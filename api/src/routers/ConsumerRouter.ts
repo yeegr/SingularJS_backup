@@ -1,27 +1,15 @@
-import { NextFunction, Request, Response, Router } from 'express'
-import { Schema, Types } from 'mongoose'
+import { NextFunction, Request, Response, RequestHandler, Router } from 'express'
 import * as moment from 'moment-timezone'
-import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
 import '../config/passport/consumer'
-import * as validator from 'validator'
-import * as randomstring from 'randomstring'
 
 import { CONFIG, CONST, ERRORS, UTIL } from '../../../common/'
-import { Logger, Err, LANG } from '../modules'
+import { Logger, Err } from '../modules'
 
-import Processor from '../modules/process'
-import Process, { IProcess } from '../models/workflow/ProcessModel'
-import Activity, { IActivity } from '../models/workflow/ActivityModel'
-
-import Consumer from '../models/users/ConsumerModel'
-import IUser from '../interfaces/users/IUser'
-
+import Consumer, { IConsumer } from '../models/users/ConsumerModel'
 import Totp, { ITotp } from '../models/users/TotpModel'
-import SMS from '../modules/sms'
-import Emailer from '../modules/email'
 
-import IContent from '../interfaces/share/IContent'
+import * as UserController from '../controllers/UserController'
 
 /**
  * ConsumerRouter class
@@ -40,40 +28,6 @@ class ConsumerRouter {
   constructor() {
     this.router = Router()
     this.routes()
-  }
-
-  /**
-   * List search results
-   *
-   * @class ConsumerRouter
-   * @method list
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public list = (req: Request, res: Response): void => {
-    let params = UTIL.assembleSearchParams(req, {
-        status: CONST.STATUSES.CONSUMER.ACTIVE
-      }, 'handle')
-
-    Consumer
-    .find(params.query)
-    .skip(params.skip)
-    .limit(params.limit)
-    .sort(params.sort)
-    .lean()
-    .exec()
-    .then((arr: IUser[]) => {
-      if (arr) {
-        res.status(200).json(arr)
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
   }
 
   /**
@@ -125,7 +79,7 @@ class ConsumerRouter {
       },
     })
     .lean()
-    .then((user: IUser) => {
+    .then((user: IConsumer) => {
       if (user) {
         res.status(200).json(user)
       } else {
@@ -137,62 +91,7 @@ class ConsumerRouter {
       console.log(err)
     })
   }
-  
-  /**
-   * Check if unique field is available to user
-   *
-   * @class ConsumerRouter
-   * @method unique
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public unique = (req: Request, res: Response): void => {
-    let query = {},
-      tuple: any = UTIL.kvp2tuple(req.body),
-      key: string = tuple[0],
-      value: any = tuple[1]
 
-    if (key.length > 0 && value.length > 0) {
-      switch (key) {
-        case 'handle':
-        default:
-          // validate user handle
-          if (UTIL.validateHandle(value)) {
-            query = {handle: value}
-          }
-        break
-  
-        case 'email':
-          // validate email address
-          if (validator.isEmail(value)) {
-            query = {email: value}
-          }
-        break
-  
-        case 'mobile':
-          value = UTIL.normalizeMobile(value)
-
-          // validate mobile phone number
-          if (validator.isMobilePhone(value, CONFIG.DEFAULT_LOCALE)) {
-            query = {mobile: value}
-          }
-        break
-      }
-
-      Consumer
-      .findOne(query)
-      .then((data: IUser) => {
-        let isAvailable: boolean = !(data)
-        res.status(200).json({isAvailable})
-      })
-      .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
-      })
-    }
-  }
-  
   /**
    * Creates a single user with handle/password
    *
@@ -210,114 +109,23 @@ class ConsumerRouter {
     } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(body.password)) {
       res.status(401).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
     } else {
-      let user: IUser = new Consumer({
+      let user: IConsumer = new Consumer({
         handle: body.handle,
         password: body.password
       })
 
-      this.createConsumer(user, req, res)
+      this.createUser(user, req, res)
     }
   }
   
-  /**
-   * Updates entry by params of 'handle'
-   *
-   * @class ConsumerRouter
-   * @method update
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public update = (req: Request, res: Response): void => {
-    const _id: string = req.user._id
-    
-    let log = {
-      creator: _id,
-      creatorRef: CONST.USER_TYPES.CONSUMER,
-      action: CONST.USER_ACTIONS.COMMON.UPDATE,
-      ua: req.body.ua || req.ua
-    }
-
-    Consumer
-    .findByIdAndUpdate(_id, req.body, {new: true})
-    .then((user: IUser) => {
-      if (user) {
-        res.status(200).json(UTIL.getSignedUser(user))
-        new Logger(log)
-      }
-
-      res.status(404).send()
-    })
-    .catch((err: Error) => {
-      new Err(res, err, log)
-    })
-  }
-  
-  /**
-   * Deletes entry by params of 'handle'
-   *
-   * @class ConsumerRouter
-   * @method delete
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public delete = (req: Request, res: Response): void => {
-    const _id: string = req.user._id
-    
-    let log = {
-      creator: _id,
-      creatorRef: CONST.USER_TYPES.CONSUMER,
-      action: CONST.USER_ACTIONS.COMMON.DELETE,
-      ua: req.body.ua || req.ua
-    }
-
-    Consumer
-    .findByIdAndRemove(_id)
-    .then((user: IUser) => {
-      if (user) {
-        res.status(204).end()
-        new Logger(log)        
-      }
-
-      res.status(404).send()
-    })
-    .catch((err: Error) => {
-      new Err(res, err, log)
-    })
-  }
-
-  /**
-   * Login user
-   *
-   * @class ConsumerRouter
-   * @method login
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public login = (req: Request, res: Response): void => {
-    const user: IUser = req.user
-
-    res.status(200).json(UTIL.getSignedUser(user))
-
-    new Logger({
-      creator: user._id,
-      creatorRef: CONST.USER_TYPES.CONSUMER,
-      action: CONST.USER_ACTIONS.COMMON.LOGIN,
-      state: req.authInfo,
-      ua: req.body.ua || req.ua
-    })
-  }
-
   /**
    * Creates a single user
    * 
-   * @param {IUser} user 
+   * @param {IConsumer} user 
    * @param {Request} req 
    * @param {Response} res 
    */
-  private createConsumer(user: IUser, req: Request, res: Response): void {
+  private createUser(user: IConsumer, req: Request, res: Response): void {
     let log = {
       creatorRef: CONST.USER_TYPES.CONSUMER,
       action: CONST.USER_ACTIONS.COMMON.CREATE,
@@ -326,7 +134,7 @@ class ConsumerRouter {
 
     user
     .save()
-    .then((data: IUser) => {
+    .then((data: IConsumer) => {
       res.status(201).json(UTIL.getSignedUser(data))
 
       new Logger(Object.assign({}, log, {
@@ -352,7 +160,7 @@ class ConsumerRouter {
     passport.authenticate('consumerLocal', {
       session: false,
       badRequestMessage: ERRORS.USER.MISSING_CREDENTIALS
-    }, (err: Error, user: IUser, info: object) => {
+    }, (err: Error, user: IConsumer, info: object) => {
       if (err) {
         res.status(400).send(err) 
         return
@@ -371,61 +179,6 @@ class ConsumerRouter {
   }
 
   /**
-   * Initializes TOTP 
-   *
-   * @class ConsumerRouter
-   * @method initTotp
-   * @param {Request} req
-   * @param {Response} res
-   * @param {NextFunction} next
-   * @returns {void}
-   */
-  public initTotp = (req: Request, res: Response, next: NextFunction): void => {
-    let totp: ITotp = new Totp(Object.assign({}, req.body, {
-      action: CONST.USER_ACTIONS.COMMON.LOGIN,
-      code: randomstring.generate({
-        length: CONFIG.TOTP_CODE_LENGTH,
-        charset: CONFIG.TOTP_CODE_CHARSET
-      })
-    }))
-
-    totp
-    .save()
-    .then((data) => {
-      switch (data.type) {
-        case CONST.TOTP_TYPES.EMAIL:
-          new Emailer({
-            to: data.value,
-            subject: LANG.t('user.login.totp.email.subject'),
-            text: LANG.t('user.login.totp.email.text', {
-              code: data.code,
-              expiration: moment(data.expireAt).format(CONFIG.DEFAULT_DATETIME_FORMAT)
-            }),
-            html: LANG.t('user.login.totp.email.html', {
-              code: data.code,
-              expiration: moment(data.expireAt).tz(CONFIG.DEFAULT_TIMEZONE).format(CONFIG.DEFAULT_DATETIME_FORMAT)
-            })
-          })
-        break
-
-        case CONST.TOTP_TYPES.SMS:
-          
-        break
-      }
-
-
-      // let sms = new SMS({'content':'something'})
-      // sms.send({'content':'something'})
-
-      res.status(201).send('Success')
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-
-  /**
    * Login via TOTP 
    *
    * @class ConsumerRouter
@@ -436,333 +189,93 @@ class ConsumerRouter {
    * @returns {void}
    */
   public verifyTotp = (req: Request, res: Response, next: NextFunction): void => {
-    let query: any = (<any>Object).assign({}, req.body),
+    let query: any = req.body,
       now: number = moment().valueOf()
-    query.expireAt = {}
-    query.expireAt.$gte = now
+
     query.verifiedAt = null
 
     Totp
-    .findOneAndUpdate(query, {
-      verifiedAt: now
-    })
+    .findOne(query)
     .then((totp: ITotp) => {
-      let query: any = {}
-
-      switch (totp.type) {
-        case 'mobile':
-          query.mobile = totp.value
-        break
+      if (!totp) {
+        res.status(400).json({ message: ERRORS.USER.NO_VALID_TOTP_ISSUED })
+        return null    
       }
-
-      Consumer
-      .findOne(query)
-      .then((user: IUser) => {
-        if (user) {
-          res.status(200).json(UTIL.getSignedUser(user))
-        } else {
-          let user: IUser = new Consumer(query)
-          this.createConsumer(user, req, res)
-        }
-      })
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-
-  /**
-   * Gets user with populated sublist
-   *
-   * @class ConsumerRouter
-   * @method sublist
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public sublist = (req: Request, res: Response): void => {
-    let id: string = req.user._id,
-      path = req.params.sublist,
-      model = UTIL.getModelNameFromPath(path),
-      opt: any = UTIL.assembleSearchParams(req)
-
-    Consumer
-    .findById(id)
-    .select('handle')
-    .populate({
-      path,
-      model,
-      options: {
-        sort: opt.sort,
-        limit: opt.limit,
-        skip: opt.skip
-      },
-      populate: ({
-        path: 'target',
-        select: 'slug title excerpt commentCount totalRatings averageRating'
-      })
-    })
-    .lean()
-    .exec()
-    .then((data: IUser) => {
-      if (data) {
-        res.status(200).json(data)
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-
-  /**
-   * Gets user with populated sublist
-   *
-   * @class ConsumerRouter
-   * @method content
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public content = (req: Request, res: Response): void => {
-    let creator: string = req.user._id,
-      path = req.params.sublist,
-      slug = req.params.slug,
-      Model = UTIL.getModelFromKey(UTIL.getModelNameFromPath(path))
-
-    Model
-    .findOne({
-      creator,
-      slug
-    })
-    .exec()
-    .then((data: any) => {
-      if (data) {
-        res.status(200).json(data)
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-
-  /**
-   * Submit content by id
-   *
-   * @class ConsumerRouter
-   * @method submit
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public submit = (req: Request, res: Response): void => {
-    const user: IUser = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      _id: Schema.Types.ObjectId = req.body.id,
-      targetRef: string = req.body.type,
-      Model: any = UTIL.getModelFromKey(targetRef)
-
-    let log: any = {
-      creator,
-      creatorRef: user.ref,
-      target: _id,
-      targetRef,
-      action: CONST.USER_ACTIONS.CONSUMER.SUBMIT,
-      ua: req.body.ua || req.ua
-    }
-
-    Model
-    .findOne({creator, _id})
-    .then((data: IContent) => {
-      if (data) {
-        if (data.status === CONST.STATUSES.CONTENT.PENDING || data.status === CONST.STATUSES.CONTENT.APPROVED) {
-          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_ALREADY_SUMMITED })
-        } else if (validator.isEmpty(data.slug)) {
-          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
-        } else if (validator.isEmpty(data.slug)) {
-          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
-        } else if (validator.isEmpty(data.content)) {
-          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CONTENT_REQUIRED })
-        } else {
-          // approval ? pending : approved
-          switch (targetRef) {
-            case CONST.ACTION_TARGETS.POST:
-              data.status = CONFIG.POST_REQURIES_APPROVAL ? CONST.STATUSES.CONTENT.PENDING : CONST.STATUSES.CONTENT.APPROVED
-            break
-
-            case CONST.ACTION_TARGETS.EVENT:
-              data.status = (data.isPublic && CONFIG.PUBLIC_EVENT_REQURIES_APPROVAL) ? CONST.STATUSES.CONTENT.PENDING : CONST.STATUSES.CONTENT.APPROVED
-            break
-
-            default:
-              data.status = CONST.STATUSES.CONTENT.APPROVED
-            break
-          }
-
-          return data.save()
-        }
-      }
-
-      res.status(404).send({ message: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
-      return null
-    })
-    .then((data: IContent) => {
-      if (data) {
-        res.status(200).json(data)
-        new Logger(log)
   
-        let init: IActivity = new Activity({
-          creator: log.creator,
-          creatorRef: log.creatorRef,
-          target: log.target,
-          targetRef: log.targetRef,
-          action: log.action,
-          initStatus: data.status
-        })
-
-        // create submission/approval process if required
-        if (
-          // submitting post (always public)
-          (targetRef === CONST.ACTION_TARGETS.POST && CONFIG.POST_REQURIES_APPROVAL) || 
-          // submitting public event
-          (targetRef === CONST.ACTION_TARGETS.EVENT && CONFIG.PUBLIC_EVENT_REQURIES_APPROVAL && data.isPublic)
-        ) {
-          new Processor(init, CONST.PROCESS_TYPES.APPROVAL)
-        }
-      }
-    })
-    .catch((err: Error) => {
-      new Err(res, err, log)
-    })
-  }
-  
-  /**
-   * Retract entry by params of 'slug'
-   *
-   * @class PostRouter
-   * @method retract
-   * @param {Request} req
-   * @param {Response} res
-   * @return {void}
-   */
-  public retract = (req: Request, res: Response): void => {
-    const user: IUser = req.user,
-      creator: Schema.Types.ObjectId = user._id,
-      _id: Schema.Types.ObjectId = req.body.id,
-      targetRef: string = req.body.type,
-      Model: any = UTIL.getModelFromKey(targetRef)
-
-    let log: any = {
-      creator,
-      creatorRef: user.ref,
-      target: _id,
-      targetRef,
-      action: CONST.USER_ACTIONS.CONSUMER.RETRACT,
-      ua: req.body.ua || req.ua          
-    }
-
-    Model
-    .findOne({creator, _id})
-    .then((data: IContent) => {
-      if (data) {
-        if (data.status === CONST.STATUSES.CONTENT.EDITING) {
-          res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CANNOT_BE_RETRACTED })
-          return null
-        } else {
-          data.status = CONST.STATUSES.CONTENT.EDITING
-          return data.save()
-        }
-      }
-
-      res.status(404).send({ message: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
-      return null
-    })
-    .then((data: IContent) => {
-      res.status(200).json(data)
-      new Logger(log)
-
-      // retract submission/approval process if required
-      if (CONFIG.POST_REQURIES_APPROVAL) {
-        return Process
-        .findOneAndUpdate({
-          creator: log.creator,
-          creatorRef: log.creatorRef,
-          target: log.target,
-          targetRef: log.targetRef,
-          type: CONST.PROCESS_TYPES.APPROVAL
-        }, {
-          status: CONST.STATUSES.PROCESS.CANCELLED,
-          completed: UTIL.getTimestamp()
-        })
-        .sort({_id: -1})
-      } else {
+      if (totp.expireAt <= now) {
+        res.status(400).json({ message: ERRORS.USER.TOTP_CODE_EXPIRED })
         return null
       }
+  
+      totp.verifiedAt = now        
+      return totp.save()
+    })
+    .then((totp: ITotp) => {
+      if (totp) {
+        let query: any = {}
+        
+        switch (totp.type) {
+          case CONST.TOTP_TYPES.SMS:
+            query.mobile = totp.value
+          break
+
+          case CONST.TOTP_TYPES.EMAIL:
+            query.email = totp.value
+          break
+        }
+  
+        Consumer
+        .findOne(query)
+        .then((user: IConsumer) => {
+          if (user) {
+            res.status(200).json(UTIL.getSignedUser(user))
+          } else {
+            // creates a new user if matching credentials not found
+            let user: IConsumer = new Consumer(query)
+            this.createUser(user, req, res)
+          }
+        })
+      }
     })
     .catch((err: Error) => {
-      new Err(res, err, log)
+      res.status(res.statusCode).send()
+      console.log(err)
     })
+  }
+
+  /**
+   * Middleware to set route variables
+   *
+   * @method setRouteVar
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
+   * @return {void}
+   */
+  private setRouteVar: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+    req.routeVar = {
+      userType: CONST.USER_TYPES.CONSUMER
+    }
+
+    next()
   }
 
   routes() {
+    UserController.createRoutes(this.router, passport.authenticate('consumerJwt', {
+      session: false
+    }), this.setRouteVar)
+
     // list route
-    this.router.get('/users', this.list)
     this.router.get('/users/:handle', this.get)
     
     // create route
     this.router.post('/users', this.create)
     
-    // route to check unique values
-    this.router.post('/users/unique', this.unique)
+    // local login route via user handle/password
+    this.router.post('/login/local', this.local, UserController.login)
 
-    // login routes
-    // local login routes - user handle/password
-    this.router.post('/login/local', this.local, this.login)
-
-    // TOTP login routes
-    this.router.post('/login/totp', this.initTotp)
+    // login routes via TOTP
     this.router.patch('/login/totp', this.verifyTotp)
-
-    // JWT login route
-    this.router.get('/mine', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.login)
-
-    // update route
-    this.router.patch('/mine', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.update)
-
-    // delete route
-    this.router.delete('/mine', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.delete)
-
-    // sublist route
-    this.router.get('/mine/:sublist', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.sublist)
-
-    // user content route
-    this.router.get('/mine/:sublist/:slug', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.content)
-
-    // user submit content route
-    this.router.post('/mine/submit', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.submit)
-
-    // user retract content route
-    this.router.post('/mine/retract', passport.authenticate('consumerJwt', {
-      session: false
-    }), this.retract)
   }
 }
 

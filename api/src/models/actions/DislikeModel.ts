@@ -63,7 +63,7 @@ DislikeSchema.virtual('TargetModel', {
 })
 
 DislikeSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.targetRef)
+  let TargetModel = UTIL.getModelFromName(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {dislikeCount: 1}})
@@ -75,7 +75,7 @@ DislikeSchema.post('save', function(action: IAction) {
 
 DislikeSchema.post('findOneAndRemove', function(action: IAction) {
   if (action) {
-    let TargetModel = UTIL.getModelFromKey(action.targetRef)
+    let TargetModel = UTIL.getModelFromName(action.targetRef)
     
     TargetModel
     .findByIdAndUpdate(action.target, {$inc: {dislikeCount: -1}})

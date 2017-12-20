@@ -1,0 +1,69 @@
+{
+  "nav": {
+
+  },
+  "splash": {
+    "Start": "开始",
+    "Back": "上一步",
+    "Next": "下一步",
+    "Done": "完成",
+    "Skip": "跳过"
+  },
+  "login": {
+
+  },
+  "tab": {
+    
+  },
+  "user": {
+    "info": {
+      "Handle": "网名",
+      "Nickname": "昵称",
+      "MobilePhoneNumber": "手机号码",
+      "Gallery": "个人图库"
+    },
+    "edit": {
+
+    }
+  },
+  "post": {
+    "info": {
+      "Author": "作者",
+      "PublishedAt": "发布于{{datetime}}",
+      "LastUpdatedAt": "最近更新于{{datetime}}",
+      "AddComment": "添加评论"
+    },
+    "edit": {
+      "Slug": "固定链接",
+      "Title": "标题",
+      "Subhead": "副标题",
+      "Content": "内容",
+      "Excerpt": "摘录",
+      "Hero": "主视觉",
+      "Tags": "标签",
+      "PublishTime": "发布时间"
+    }
+  },
+  "event": {
+    "info": {
+      "Organizer": "组织人"
+    },
+    "edit": {
+
+    },
+    "signup": {
+
+    }
+  },
+  "product": {
+    "info": {
+
+    },
+    "edit": {
+
+    },
+    "purchase": {
+
+    }
+  }
+}

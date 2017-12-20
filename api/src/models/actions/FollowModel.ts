@@ -63,7 +63,7 @@ FollowSchema.virtual('TargetModel', {
 })
 
 FollowSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.targetRef)
+  let TargetModel = UTIL.getModelFromName(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {followCount: 1}})
@@ -75,7 +75,7 @@ FollowSchema.post('save', function(action: IAction) {
 
 FollowSchema.post('findOneAndRemove', function(action: IAction) {
   if (action) {
-    let TargetModel = UTIL.getModelFromKey(action.targetRef)
+    let TargetModel = UTIL.getModelFromName(action.targetRef)
     
     TargetModel
     .findByIdAndUpdate(action.target, {$inc: {followCount: -1}})

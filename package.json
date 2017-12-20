@@ -9,13 +9,13 @@
   "scripts": {
     "setup": "$npm_package_config_init && ./devops/setup.sh",
     "mongo": "docker exec -it singular-db mongo db -u user -p UserPassWord",
-    "remove": "docker rmi -f $(docker images -qf since=singular/mongo)",
+    "rmi": "docker rmi -f $(docker images -qf since=singular/mongo)",
     "api": "cd api && webpack",
     "build": "$npm_package_config_init && docker-compose build",
     "start": "$npm_package_config_init && docker-compose up -d",
     "stop": "$npm_package_config_init && docker-compose down",
     "restart": "npm run stop && npm run start",
-    "reset": "npm stop && npm run remove && npm run build && npm start",
+    "reset": "npm stop && npm run rmi && npm run build && npm start",
     "logs": "$npm_package_config_init && docker-compose logs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

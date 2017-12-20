@@ -7,7 +7,15 @@ declare module "*.json" {
 // adds user agent type to express Request
 declare namespace Express {
   export interface Request {
-      ua?: any
+    routeVar: {
+      userType?: string
+      creatorType?: string
+      userHandleKey?: string
+      contentType?: string
+      contentCounter?: string
+      keywordFields?: string
+    }
+    ua?: any
   }
 }
 

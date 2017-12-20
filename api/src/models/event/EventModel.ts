@@ -7,7 +7,7 @@ import Consumer, { IConsumer } from '../users/ConsumerModel'
 
 import Agenda from './AgendaModel'
 import Attendee from './AttendeeModel'
-import Photo from '../share/PhotoModel'
+import Media from '../share/MediaModel'
 import Point from '../share/PointModel'
 import Subset from './SubsetModel'
 
@@ -20,7 +20,7 @@ let EventSchema: Schema = new Schema({
     required: true
   },
   // organizer type
-  ref: {
+  creatorRef: {
     type: String,
     required: true,
     enum: CONST.USER_TYPES_ENUM,
@@ -89,8 +89,8 @@ let EventSchema: Schema = new Schema({
   },
   // list of notes
   notes: [String],
-  // photo gallery
-  photos: [Photo],
+  // media gallery
+  gallery: [Media],
   // list of gears to bring
   gears: [Schema.Types.Mixed],
   // city
@@ -273,7 +273,7 @@ EventSchema.virtual('averageRating').get(function() {
 
 EventSchema.pre('save', function(next: Function): void {
   // Set last modified time when values of only following props are changed
-  UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish', 'isPublic', 'requireApproval', 'misc', 'destination', 'photos', 'notes', 'gears', 'city', 'country', 'expenses', 'contacts', 'schedule', 'subsets'])
+  UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish', 'isPublic', 'requireApproval', 'misc', 'destination', 'gallery', 'notes', 'gears', 'city', 'country', 'expenses', 'contacts', 'schedule', 'subsets'])
   this.wasNew = this.isNew
 
   next()

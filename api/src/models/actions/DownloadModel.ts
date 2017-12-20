@@ -54,7 +54,7 @@ DownloadSchema.virtual('TargetModel', {
 })
 
 DownloadSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.targetRef)
+  let TargetModel = UTIL.getModelFromName(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {downloadCount: 1}})

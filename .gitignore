@@ -1,6 +1,8 @@
 # node.js
 #
 
+**/common/options/ignored.ts
+
 !**/node_modules/
 **/node_modules/*
 

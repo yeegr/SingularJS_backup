@@ -10,7 +10,7 @@ import { Logger, Err } from '../modules'
 import Consumer from '../models/users/ConsumerModel'
 import IUser from '../interfaces/users/IUser'
 
-import Comment, { IComment } from '../models/share/CommentModel'
+import Comment, { IComment } from '../models/actions/CommentModel'
 
 /**
  * CommentRouter class
@@ -212,12 +212,12 @@ class CommentRouter {
    * Deletes entry by id
    *
    * @class CommentRouter
-   * @method delete
+   * @method remove
    * @param {Request} req
    * @param {Response} res
    * @return {void}
    */
-  public delete = (req: Request, res: Response): void => {
+  public remove = (req: Request, res: Response): void => {
     const user: IUser = req.user,
       creator: Schema.Types.ObjectId = user._id,
       creatorRef: string = user.ref,
@@ -269,7 +269,7 @@ class CommentRouter {
     // delete route
     this.router.delete('/:id', passport.authenticate('consumerJwt', {
       session: false
-    }), this.delete)
+    }), this.remove)
   }
 }
 

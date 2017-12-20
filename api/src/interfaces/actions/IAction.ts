@@ -6,4 +6,6 @@ export default interface IAction extends Document {
   creatorRef: string
   target: Schema.Types.ObjectId
   targetRef: string
+
+  wasNew: boolean
 }

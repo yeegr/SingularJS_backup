@@ -63,7 +63,7 @@ LikeSchema.virtual('TargetModel', {
 })
 
 LikeSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.targetRef)
+  let TargetModel = UTIL.getModelFromName(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {likeCount: 1}})
@@ -75,7 +75,7 @@ LikeSchema.post('save', function(action: IAction) {
 
 LikeSchema.post('findOneAndRemove', function(action: IAction) {
   if (action) {
-    let TargetModel = UTIL.getModelFromKey(action.targetRef)
+    let TargetModel = UTIL.getModelFromName(action.targetRef)
     
     TargetModel
     .findByIdAndUpdate(action.target, {$inc: {likeCount: -1}})

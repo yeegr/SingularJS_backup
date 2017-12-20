@@ -57,6 +57,7 @@ interface IUserRoles {
     GUEST: string
     MEMBER: string
     CONTRIBUTOR: string
+    AUTHOR: string
     ORGANIZER: string
   }
   SUPPLIER: {
@@ -76,6 +77,7 @@ export const USER_ROLES: IUserRoles = {
     GUEST: 'guest',
     MEMBER: 'member',
     CONTRIBUTOR: 'contributor',
+    AUTHOR: 'author',
     ORGANIZER: 'organizer'
   },
   SUPPLIER: {
@@ -93,6 +95,22 @@ export const USER_ROLES: IUserRoles = {
 export const CONSUMER_USER_ROLES_ENUM: string[] = obj2enum(USER_ROLES.CONSUMER)
 export const SUPPLIER_USER_ROLES_ENUM: string[] = obj2enum(USER_ROLES.SUPPLIER)
 export const PLATFORM_USER_ROLES_ENUM: string[] = obj2enum(USER_ROLES.PLATFORM)
+
+interface ICreatorRoles {
+  [key: string]: string[]
+  POST: string[]
+  EVENT: string[]
+}
+
+export const CONTENT_CREATOR_ROLES: ICreatorRoles = {
+  POST: [
+    USER_ROLES.CONSUMER.CONTRIBUTOR,
+    USER_ROLES.CONSUMER.AUTHOR
+  ],
+  EVENT: [
+    USER_ROLES.CONSUMER.ORGANIZER
+  ]
+}
 
 /**
  * User action types
@@ -124,10 +142,15 @@ interface IUserActions {
     UNSUBSCRIBE: string
     SUBMIT: string
     RETRACT: string
+    REPORT: string
+    CHAT: string
   }
   SUPPLIER: {
     ENROLL: string
     UNDO_ENROLL: string
+    SUBMIT: string
+    RETRACT: string
+    CHAT: string
   }
   PLATFORM: {
     REQUEST: string
@@ -166,11 +189,16 @@ export const USER_ACTIONS: IUserActions = {
     SUBSCRIBE: 'SUBSCRIBE',
     UNSUBSCRIBE: 'UNSUBSCRIBE',
     SUBMIT: 'SUBMIT',
-    RETRACT: 'RETRACT'
+    RETRACT: 'RETRACT',
+    REPORT: 'REPORT',
+    CHAT: 'CHAT'
   },
   SUPPLIER: {
     ENROLL: 'ENROLL',
-    UNDO_ENROLL: 'UNDO_ENROLL'
+    UNDO_ENROLL: 'UNDO_ENROLL',
+    SUBMIT: 'SUBMIT',
+    RETRACT: 'RETRACT',
+    CHAT: 'CHAT'
   },
   PLATFORM: {
     REQUEST: 'REQUEST',
@@ -411,6 +439,11 @@ export const PAYMENT_METHODS_ENUM = obj2enum(PAYMENT_METHODS)
  * Consumer user default handle prefix
  */
 export const CONSUMER_HANDLE_PREFIX: string = 'User_'
+
+/**
+ * Platform user default handle prefix
+ */
+export const PLATFORM_HANDLE_PREFIX: string = 'User_'
 
 /**
  * Default number of list items per page

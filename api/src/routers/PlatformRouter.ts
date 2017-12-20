@@ -1,10 +1,7 @@
-import { NextFunction, Request, Response, Router } from 'express'
+import { NextFunction, Request, Response, RequestHandler, Router } from 'express'
 import * as moment from 'moment-timezone'
-import * as jwt from 'jsonwebtoken'
 import * as passport from 'passport'
 import '../config/passport/platform'
-import * as validator from 'validator'
-import * as randomstring from 'randomstring'
 
 import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
 import { Logger, Err } from '../modules'
@@ -12,7 +9,7 @@ import { Logger, Err } from '../modules'
 import Platform, { IPlatform } from '../models/users/PlatformModel'
 import Totp, { ITotp } from '../models/users/TotpModel'
 
-import SMS from '../modules/sms'
+import * as UserController from '../controllers/UserController'
 
 /**
  * PlatformRouter class
@@ -34,40 +31,7 @@ class PlatformRouter {
   }
 
   /**
-   * List search results
-   *
-   * @class PlatformRouter
-   * @method list
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public list = (req: Request, res: Response): void => {
-    let params = UTIL.assembleSearchParams(req, {
-      }, 'username, name')
-
-    Platform
-    .find(params.query)
-    .skip(params.skip)
-    .limit(params.limit)
-    .sort(params.sort)
-    .lean()
-    .exec()
-    .then((arr: IPlatform[]) => {
-      if (arr) {
-        res.status(200).json(arr)
-      } else {
-        res.status(404).send()
-      }
-    })
-    .catch((err: Error) => {
-      res.status(res.statusCode).send()
-      console.log(err)
-    })
-  }
-
-  /**
-   * Gets single entry by param of 'username', 
+   * Gets single entry by param of 'handle', 
    * without private information
    *
    * @class PlatformRouter
@@ -78,7 +42,7 @@ class PlatformRouter {
    */
   public get = (req: Request, res: Response): void => {
     Platform
-    .findOne({username: req.params.username})
+    .findOne({handle: req.params.handle})
     .lean()
     .then((user: IPlatform) => {
       if (user) {
@@ -91,61 +55,6 @@ class PlatformRouter {
       res.status(res.statusCode).send()
       console.log(err)
     })
-  }
-  
-  /**
-   * Check if unique field is available to user
-   *
-   * @class PlatformRouter
-   * @method unique
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public unique = (req: Request, res: Response): void => {
-    let query = {},
-      tuple: any = UTIL.kvp2tuple(req.body),
-      key: string = tuple[0],
-      value: any = tuple[1]
-
-    if (key.length > 0 && value.length > 0) {
-      switch (key) {
-        case 'username':
-        default:
-          // validate user username
-          if (UTIL.validateUsername(value)) {
-            query = {username: value}
-          }
-        break
-  
-        case 'email':
-          // validate email address
-          if (validator.isEmail(value)) {
-            query = {email: value}
-          }
-        break
-  
-        case 'mobile':
-          value = UTIL.normalizeMobile(value)
-
-          // validate mobile phone number
-          if (validator.isMobilePhone(value, CONFIG.DEFAULT_LOCALE)) {
-            query = {mobile: value}
-          }
-        break
-      }
-
-      Platform
-      .findOne(query)
-      .then((data: IPlatform) => {
-        let isAvailable: boolean = !(data)
-        res.status(200).json({isAvailable})
-      })
-      .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
-      })
-    }
   }
   
   /**
@@ -171,137 +80,40 @@ class PlatformRouter {
           username,
           password,
           status: 'active'  // to be removed
-        }),
-        log = {
-          action: CONST.USER_ACTIONS.COMMON.CREATE,
-          targetRef: CONST.ACTION_TARGETS.PLATFORM,
-          ua: req.body.ua || req.ua
-        }
+        })
 
-      user
-      .save()
-      .then((data: IPlatform) => {
-        res.status(201).json(UTIL.getSignedUser(data))
-  
-        new Logger(Object.assign({}, log, {
-          creator: data._id,
-          creatorRef: CONST.USER_TYPES.PLATFORM,
-          target: data._id
-        }))     
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
+      this.createUser(user, req, res)
     }
   }
   
   /**
-   * Updates entry by params of 'username'
-   *
-   * @class PlatformRouter
-   * @method update
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
+   * Creates a single user
+   * 
+   * @param {IPlatform} user 
+   * @param {Request} req 
+   * @param {Response} res 
    */
-  public update = (req: Request, res: Response): void => {
-    const username: string = req.params.username,
-      _id: string = req.user._id
-    
-    if (username !== req.user.username) {
-      res.status(401).json({ message: ERRORS.USER.PERMISSION_DENIED })
-    } else {
-      let log = {
-        creator: _id,
-        creatorRef: CONST.USER_TYPES.PLATFORM,
-        action: CONST.USER_ACTIONS.COMMON.UPDATE,
-        targetRef: CONST.ACTION_TARGETS.PLATFORM,
-        target: _id,
-        ua: req.body.ua || req.ua
-      }
-
-      Platform
-      .findByIdAndUpdate(_id, req.body, {new: true})
-      .then((user: IPlatform) => {
-        if (user) {
-          res.status(200).json(UTIL.getSignedUser(user))
-          new Logger(log)
-        } else {
-          res.status(404).send()
-        }
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
-    }
-  }
-  
-  /**
-   * Deletes entry by params of 'username'
-   *
-   * @class PlatformRouter
-   * @method delete
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public delete = (req: Request, res: Response): void => {
-    const username: string = req.params.username,
-      _id: string = req.user._id
-    
-    if (username !== req.user.username) {
-      res.status(401).json({ message: ERRORS.USER.PERMISSION_DENIED })
-    } else {
-      let log = {
-        creator: _id,
-        creatorRef: CONST.USER_TYPES.PLATFORM,
-        action: CONST.USER_ACTIONS.COMMON.DELETE,
-        targetRef: CONST.ACTION_TARGETS.PLATFORM,
-        target: _id,
-        ua: req.body.ua || req.ua
-      }
-
-      Platform
-      .findByIdAndRemove(_id)
-      .then((user: IPlatform) => {
-        if (user) {
-          res.status(204).end()
-          new Logger(log)        
-        } else {
-          res.status(404).send()
-        }
-      })
-      .catch((err: Error) => {
-        new Err(res, err, log)
-      })
-    }
-  }
-
-  /**
-   * Login user
-   *
-   * @class PlatformRouter
-   * @method login
-   * @param {Request} req
-   * @param {Response} res
-   * @returns {void}
-   */
-  public login = (req: Request, res: Response): void => {
-    const user: IPlatform = req.user
-
-    res.status(200).json(UTIL.getSignedUser(user))
-
-    new Logger({
-      creator: user._id,
+  public createUser(user: IPlatform, req: Request, res: Response): void {
+    let log = {
       creatorRef: CONST.USER_TYPES.PLATFORM,
-      action: CONST.USER_ACTIONS.COMMON.LOGIN,
-      targetRef: CONST.ACTION_TARGETS.PLATFORM,
-      target: user._id,
-      state: req.authInfo,
+      action: CONST.USER_ACTIONS.COMMON.CREATE,
       ua: req.body.ua || req.ua
+    }
+
+    user
+    .save()
+    .then((data: IPlatform) => {
+      res.status(201).json(UTIL.getSignedUser(data))
+
+      new Logger(Object.assign({}, log, {
+        creator: data._id,
+      }))        
+    })
+    .catch((err: Error) => {
+      new Err(res, err, log)
     })
   }
-
+  
   /**
    * Login via username/password
    *
@@ -335,87 +147,101 @@ class PlatformRouter {
   }
 
   /**
-   * Gets user with populated sublist
+   * Login via TOTP 
    *
-   * @class PlatformRouter
-   * @method sublist
+   * @class ConsumerRouter
+   * @method verifyTotp
    * @param {Request} req
    * @param {Response} res
+   * @param {NextFunction} next
    * @returns {void}
    */
-  public sublist = (req: Request, res: Response): void => {
-    let username = req.params.username,
-      id: string = req.user._id,
-      path = req.params.sublist,
-      model = UTIL.getModelNameFromPath(path),
-      opt: any = UTIL.assembleSearchParams(req)
+  public verifyTotp = (req: Request, res: Response, next: NextFunction): void => {
+    let query: any = req.body,
+      now: number = moment().valueOf()
 
-    if (username !== req.user.username) {
-      res.status(422).json({ message: ERRORS.USER.PERMISSION_DENIED })
-    } else {
-      Platform
-      .findOne({username})
-      .select('_id username')
-      .populate({
-        path,
-        model,
-        options: {
-          sort: opt.sort,
-          limit: opt.limit,
-          skip: opt.skip
-        },
-        populate: ({
-          path: 'target'
-        })
-      })
-      .exec()
-      .then((data: IPlatform) => {
-        if (data) {
-          res.status(200).json(data)
-        } else {
-          res.status(404).send()
+    query.verifiedAt = null
+
+    Totp
+    .findOne(query)
+    .then((totp: ITotp) => {
+      if (!totp) {
+        res.status(400).json({ message: ERRORS.USER.NO_VALID_TOTP_ISSUED })
+        return null    
+      }
+  
+      if (totp.expireAt <= now) {
+        res.status(400).json({ message: ERRORS.USER.TOTP_CODE_EXPIRED })
+        return null
+      }
+  
+      totp.verifiedAt = now        
+      return totp.save()
+    })
+    .then((totp: ITotp) => {
+      if (totp) {
+        let query: any = {}
+        
+        switch (totp.type) {
+          case CONST.TOTP_TYPES.SMS:
+            query.mobile = totp.value
+          break
+
+          case CONST.TOTP_TYPES.EMAIL:
+            query.email = totp.value
+          break
         }
-      })
-      .catch((err: Error) => {
-        res.status(res.statusCode).send()
-        console.log(err)
-      })
+  
+        Platform
+        .findOne(query)
+        .then((user: IPlatform) => {
+          if (user) {
+            res.status(200).json(UTIL.getSignedUser(user))
+          } else {
+            res.status(404).json({ message: ERRORS.USER.USER_NOT_FOUND })
+          }
+        })
+      }
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
+  /**
+   * Middleware to set route variables
+   *
+   * @method setRouteVar
+   * @param {Request} req
+   * @param {Response} res
+   * @param {NextFunction} next
+   * @return {void}
+   */
+  private setRouteVar: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+    req.routeVar = {
+      userType: CONST.USER_TYPES.PLATFORM
     }
+
+    next()
   }
 
   routes() {
-    // list route
-    this.router.get('/', this.list)
-    this.router.get('/:username', this.get)
+    UserController.createRoutes(this.router, passport.authenticate('platformJwt', {
+      session: false
+    }), this.setRouteVar)
+
+    // this.router.get('/users', this.setRouteVar, UserController.list)
+    this.router.get('/users/:username', this.get)
     
     // create route
-    this.router.post('/', this.create)
+    this.router.post('/users/', this.create)
     
-    // route to check unique values
-    this.router.post('/unique', this.unique)
+    // local login route via username/password
+    this.router.post('/login/local', this.local, UserController.login)
 
-    // local login routes - username/password
-    this.router.post('/login/local', this.local, this.login)
-
-    // JWT login routes
-    this.router.get('/login/token', passport.authenticate('platformJwt', {
-      session: false
-    }), this.login)
-
-    // sublist route
-    this.router.get('/:username/:sublist', passport.authenticate('platformJwt', {
-      session: false
-    }), this.sublist)
-
-    // update route
-    this.router.patch('/:username', passport.authenticate('platformJwt', {
-      session: false
-    }), this.update)
-
-    // delete route
-    this.router.delete('/:username', passport.authenticate('platformJwt', {
-      session: false
-    }), this.delete)
+    // login routes via TOTP
+    this.router.patch('/login/totp', this.verifyTotp)
   }
 }
 

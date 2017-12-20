@@ -13,7 +13,7 @@ let PostSchema: Schema = new Schema({
     required: true
   },
   // author type
-  ref: {
+  creatorRef: {
     type: String,
     required: true,
     enum: CONST.USER_TYPES_ENUM,
@@ -22,7 +22,6 @@ let PostSchema: Schema = new Schema({
   // slug: http://domain/posts/{{slug}}
   slug: {
     type: String,
-    default: '',
     unique: true,
     lowercase: true
   },
@@ -31,6 +30,10 @@ let PostSchema: Schema = new Schema({
     type: String,
     default: '',
     required: true
+  },
+  // subhead | secondary title
+  subhead: {
+    type: String
   },
   // content
   content: {
@@ -49,7 +52,7 @@ let PostSchema: Schema = new Schema({
   },
   // tags
   tags: [String],
-  // TODO: publish date
+  // TODO: publish time
   publish: {
     type: Number
   },
@@ -181,6 +184,11 @@ PostSchema.virtual('averageRating').get(function() {
 PostSchema.pre('save', function(next: Function): void {
   // Set last modified time when values of only following props are changed
   UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish'])
+
+  if (!this.slug) {
+    this.slug = this.title
+  }
+
   this.wasNew = this.isNew
 
   next()

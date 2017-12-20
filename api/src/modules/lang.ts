@@ -8,7 +8,7 @@ i18next
 .init({
   lng: 'zh',
   fallbackLng: 'en',
-  ns: ['base', 'api'],
+  ns: ['base', 'api', 'consumer'],
   defaultNS: 'api',
   resources: {
     zh,

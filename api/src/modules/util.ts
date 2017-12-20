@@ -1,4 +1,4 @@
-import { Document, Schema, NativeError } from 'mongoose'
+import { Document, Schema, NativeError, Model } from 'mongoose'
 import { Request, Response } from 'express'
 import * as moment from 'moment-timezone'
 import * as jwt from 'jsonwebtoken'
@@ -14,6 +14,7 @@ import Platform from '../models/users/PlatformModel'
 import Post from '../models/post/PostModel'
 import Event from '../models/event/EventModel'
 
+import Comment from '../models/actions/CommentModel'
 import Like from '../models/actions/LikeModel'
 import Dislike from '../models/actions/DislikeModel'
 import Save from '../models/actions/SaveModel'
@@ -106,20 +107,24 @@ export function getModelFromAction(action: string): any {
  * @param {string} key 
  * @returns {any}
  */
-export function getModelFromKey(key: string): any {
-  let modelName = key.toLowerCase(),
-    dataModel = null
+export function getModelFromName(key: string): Model<any> {
+  let modelName = this.capitalizeFirstLetter(key),
+    dataModel: Model<any> = null
 
   switch (modelName) {
-    case 'consumer':
+    case CONST.USER_TYPES.CONSUMER:
       dataModel = Consumer
     break
 
-    case 'post':
+    case CONST.USER_TYPES.PLATFORM:
+      dataModel = Platform
+    break
+
+    case CONST.ACTION_TARGETS.POST:
       dataModel = Post
     break
 
-    case 'event':
+    case CONST.ACTION_TARGETS.EVENT:
       dataModel = Event
     break
 
@@ -131,7 +136,7 @@ export function getModelFromKey(key: string): any {
       // dataModel = Order
     break
 
-    case 'comment':
+    case CONST.ACTION_TARGETS.COMMENT:
       dataModel = Comment
     break
 }
@@ -172,6 +177,65 @@ export function getModelNameFromPath(path: string): string|any {
   }
 
   return model
+}
+
+
+/**
+ * Returns data model name from object key
+ * 
+ * @param {string} path
+ * @returns {string}
+ */
+export function getSelectFieldsFromPath(path: string): string|any {
+  let key = getModelNameFromPath(path),
+    select = ''
+
+  switch (key) {
+    case 'posts':
+    case 'events':
+      select = 'slug title excerpt commentCount totalRatings averageRating'
+    break
+  }
+
+  return select
+}
+
+/**
+ * Returns creator and content data model
+ * 
+ * @param {Request} req
+ * @returns {[Model<IUser>, Model<IContent>]}
+ */
+export function getModels(req: Request): [Model<IUser>, Model<IContent>] {
+  const UserModel = this.getModelFromName(req.routeVar.creatorType),
+    DataModel = this.getModelFromName(req.routeVar.contentType)
+  return [UserModel, DataModel]
+}
+
+/**
+ * Returns an increment object for findOneAndUpdate (get)
+ * 
+ * @param {Request} req 
+ * @param {any} inc 
+ */
+export function getIncrement(req: Request, inc: number = 1): any {
+  let $inc: any = {}
+  $inc[req.routeVar.contentCounter] = inc
+  return {$inc}
+}
+
+/**
+ * Returns user id and reference
+ * 
+ * @param {Request} req
+ * @returns {[Schema.Types.ObjectId, string]} 
+ */
+export function getLoginedUser(req: Request): [Schema.Types.ObjectId, string] {
+  const user: IUser = req.user,
+    id: Schema.Types.ObjectId = user._id,
+    ref: string = user.ref
+
+  return [id, ref]
 }
 
 /***********************************
@@ -236,7 +300,7 @@ export function removeComment(doc: any, rating: number): void {
  * @param {string[]]} keys 
  */
 export function sanitizeInput(model: string, body: any): any {
-  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount,ua',
+  let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount',
     keyArray: string[] = []
   
   switch (model) {
@@ -454,7 +518,7 @@ interface ISearchParams {
   query: any      // search query
   skip: number    // page index
   limit: number   // items per list page
-  sort: any       // sort key and order
+  sort: any       // sort key and ordxer
 }
 
 export function assembleSearchParams(req: Request, query: any = {}, keyFields?: string): ISearchParams {
@@ -520,6 +584,7 @@ export function getAverageRating(doc: IContent): number {
 /**
  * Signs a token using user id
  * 
+ * @func signToken
  * @param {IUser} user 
  */
 export function signToken(user: IUser): string {
@@ -545,4 +610,23 @@ export function getSignedUser(user: IUser): object {
   let data: any = user.toJSON(),
     token: string = signToken(user)
   return Object.assign({}, data, {token})
+}
+
+export function matchAnyInArray(arr1: any[], arr2: any[]): boolean {
+  let found = false
+
+  for (let i = 0, j = arr1.length; i < j; i++) {
+    if (arr2.indexOf(arr1[i]) > -1) {
+      found = true
+    }
+  }
+
+  return found
+}
+
+export function checkUserCreateRight(user: IUser, contentType: string): boolean {
+  const userRoles = user.roles,
+    creatorRoles = CONST.CONTENT_CREATOR_ROLES[contentType.toUpperCase()]
+
+  return matchAnyInArray(userRoles, creatorRoles)
 }

@@ -2,7 +2,7 @@ import { NativeError, Schema, model } from 'mongoose'
 
 import { CONST, UTIL } from '../../../../common'
 
-import IComment from '../../interfaces/share/IComment'
+import IComment from '../../interfaces/actions/IComment'
 
 let CommentSchema: Schema = new Schema({
   // creator
@@ -29,6 +29,11 @@ let CommentSchema: Schema = new Schema({
     type: String,
     enum: CONST.ACTION_TARGETS_ENUM,
     required: true
+  },
+  // parent comment
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: 'Comment'
   },
   // comment rating
   rating: {
@@ -74,8 +79,8 @@ CommentSchema.pre('save', function(next: Function) {
 })
 
 CommentSchema.post('save', function(comment: IComment) {
-  let CreatorModel = UTIL.getModelFromKey(comment.creatorRef),
-    TargetModel = UTIL.getModelFromKey(comment.targetRef),
+  let CreatorModel = UTIL.getModelFromName(comment.creatorRef),
+    TargetModel = UTIL.getModelFromName(comment.targetRef),
     wasNew = this.wasNew
 
   TargetModel
@@ -100,8 +105,8 @@ CommentSchema.post('save', function(comment: IComment) {
 })
 
 CommentSchema.post('findOneAndRemove', function(comment: IComment) {
-  let CreatorModel = UTIL.getModelFromKey(comment.creatorRef),
-    TargetModel = UTIL.getModelFromKey(comment.targetRef)
+  let CreatorModel = UTIL.getModelFromName(comment.creatorRef),
+    TargetModel = UTIL.getModelFromName(comment.targetRef)
   
   TargetModel
   .findById(comment.target)
@@ -109,7 +114,10 @@ CommentSchema.post('findOneAndRemove', function(comment: IComment) {
     UTIL.removeComment(doc, comment.rating)
 
     CreatorModel
-    .findByIdAndUpdate(comment.creator, {$inc: {commentCount: -1}})
+    .findOneAndUpdate({
+      _id: comment.creator,
+      commentCount: {$gt: 0}
+    }, {$inc: {commentCount: -1}})
     .then()
     .catch((err: NativeError) => {
       console.log(err)

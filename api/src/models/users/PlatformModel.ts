@@ -15,6 +15,14 @@ let PlatformSchema: Schema = new Schema({
     enum: [CONST.USER_TYPES.PLATFORM],
     required: true
   },
+  // user handle
+  handle: {
+    type: String,
+    default: () => CONST.PLATFORM_HANDLE_PREFIX + UTIL.getTimestamp(),
+    unique: true,
+    trim: true,
+    index: true
+  },
   // user password, hashed
   password: {
     type: String,
@@ -124,13 +132,6 @@ let PlatformSchema: Schema = new Schema({
     trim: true,
     index: true
   },
-  // user nickname
-  nickname: {
-    type: String,
-    default: '',
-    trim: true,
-    index: true
-  },
   // number of activities completed by user
   activityCount: {
     type: Number,
@@ -142,6 +143,16 @@ let PlatformSchema: Schema = new Schema({
   },
   toJSON: {
     virtuals: true
+  }
+})
+
+/** 
+ * Removes password from return JSON
+*/
+PlatformSchema.set('toJSON', {
+  transform: function(doc: any, ret: any, opt: any) {
+    delete ret.password
+    return ret
   }
 })
 

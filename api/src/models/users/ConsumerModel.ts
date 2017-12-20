@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose'
 import * as bcrypt from 'bcrypt-nodejs'
 import * as moment from 'moment-timezone'
 import * as validator from 'validator'
+import * as randomstring from 'randomstring'
 
 import { CONFIG, CONST, UTIL } from '../../../../common'
 
@@ -14,6 +15,17 @@ let ConsumerSchema: Schema = new Schema({
     default: CONST.USER_TYPES.CONSUMER,
     enum: [CONST.USER_TYPES.CONSUMER],
     required: true
+  },
+  // user handle or user name
+  handle: {
+    type: String,
+    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
+    required: true,
+    unique: true,
+    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
+    trim: true,
+    index: true
   },
   // user password, may or may not required
   password: {
@@ -97,7 +109,10 @@ let ConsumerSchema: Schema = new Schema({
   roles: {
     type: [String],
     required: true,
-    default: [CONST.USER_ROLES.CONSUMER.MEMBER]
+    default: [
+      CONST.USER_ROLES.CONSUMER.MEMBER,
+      CONST.USER_ROLES.CONSUMER.CONTRIBUTOR
+    ]
   },
   // current user status
   status: {
@@ -113,17 +128,6 @@ let ConsumerSchema: Schema = new Schema({
   // user verification expiration time
   expires: {
     type: Number
-  },
-  // user handle or user name
-  handle: {
-    type: String,
-    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
-    required: true,
-    unique: true,
-    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
-    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
-    trim: true,
-    index: true
   },
   // user self introduction
   intro: {
@@ -167,36 +171,43 @@ let ConsumerSchema: Schema = new Schema({
   // number of posts authored by user
   postCount: {
     type: Number,
+    min: 0,
     default: 0
   },
   // number of events created by user
   eventCount: {
     type: Number,
+    min: 0,
     default: 0
   },
   // number events signuped by user
   signupCount: {
     type: Number,
+    min: 0,
     default: 0
   },
   // number of orders placed by user
   orderCount: {
     type: Number,
+    min: 0,
     default: 0
   },
   // number of comments posted by user
   commentCount: {
     type: Number,
+    min: 0,
     default: 0
   },
   // number of followers | fans
   totalFollowers: {
     type: Number,
+    min: 0,
     default: 0
   },
   // number of followings
   totalFollowings: {
     type: Number,
+    min: 0,
     default: 0
   }
 }, {
@@ -205,6 +216,16 @@ let ConsumerSchema: Schema = new Schema({
   },
   toJSON: {
     virtuals: true
+  }
+})
+
+/** 
+ * Removes password from return JSON
+*/
+ConsumerSchema.set('toJSON', {
+  transform: function(doc: any, ret: any, opt: any) {
+    delete ret.password
+    return ret
   }
 })
 
@@ -367,7 +388,7 @@ ConsumerSchema.pre('save', function(next: Function): void {
   // generate a salt then run callback
   if (user.isNew) {
     bcrypt
-    .genSalt(10, (err: Error, salt: string) => {
+    .genSalt(CONFIG.USER_SALT_LENGTH, (err: Error, salt: string) => {
       if (err) { return next(err) }
 
       // encrypt password with salt

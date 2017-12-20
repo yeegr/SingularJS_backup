@@ -4,6 +4,7 @@ export default interface IConsumer extends Document {
   [key: string]: any
   _id: Schema.Types.ObjectId
   ref: string
+  handle: string
   password: string
   name: string
   gender?: number

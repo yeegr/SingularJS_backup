@@ -54,7 +54,7 @@ ShareSchema.virtual('TargetModel', {
 })
 
 ShareSchema.post('save', function(action: IAction) {
-  let TargetModel = UTIL.getModelFromKey(action.targetRef)
+  let TargetModel = UTIL.getModelFromName(action.targetRef)
 
   TargetModel
   .findByIdAndUpdate(action.target, {$inc: {shareCount: 1}})

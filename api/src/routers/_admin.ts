@@ -32,7 +32,7 @@ class AdminRouter {
    */
   public routes(): void {
     // user router
-    this.router.use('/users', PlatformRouter)
+    this.router.use('/', PlatformRouter)
 
     // process router
     this.router.use('/processes', ProcessRouter)

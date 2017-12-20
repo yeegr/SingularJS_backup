@@ -6,7 +6,7 @@ export default interface IContent extends Document {
 
   // user created content
   creator: Schema.Types.ObjectId
-  ref: string
+  creatorRef: string
   slug: string
   title: string
   content: string

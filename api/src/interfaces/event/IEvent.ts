@@ -4,7 +4,7 @@ import IContent from '../share/IContent'
 import IAgenda from './IAgenda'
 import IAttendee from './IAttendee'
 import ISubset from './ISubset'
-import IPhoto from '../share/IPhoto'
+import IMedia from '../share/IMedia'
 import IPoint from '../share/IPoint'
 
 export default interface IEvent extends IContent {
@@ -15,7 +15,7 @@ export default interface IEvent extends IContent {
     value: string
   }]
   destination?: string
-  photos: IPhoto[]
+  gallery: IMedia[]
   notes: string[]
   gears: Schema.Types.Mixed[]
   city?: string

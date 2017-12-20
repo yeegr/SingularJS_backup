@@ -1,5 +1,109 @@
 {
   "app": {
-    "name": "SingularJS"
+    "name": "SingularJS",
+    "company": "北京蓝光移客信息技术有限公司",
+    "icp": "京ICP备17011684号"
+  },
+  "gender": {
+    "Male": "男",
+    "Female": "女",
+    "Unknown": "未知"
+  },
+  "unit": {
+    "length": {
+      "km": "{{value}}公里",
+      "m": "{{value}}米",
+      "dm": "{{value}}分米",
+      "cm": "{{value}}厘米",
+      "mm": "{{value}}毫米",
+      "um": "{{value}}微米",
+      "nm": "{{value}}纳米",
+      "mi": "{{value}}英里",
+      "yd": "{{value}}码",
+      "ft": "{{value}}英尺",
+      "in": "{{value}}英寸",
+      "li": "{{value}}里",
+      "zh": "{{value}}丈",
+      "ch": "{{value}}尺",
+      "cn": "{{value}}寸"
+    },
+    "area": {
+      "km2": "{{value}}平方公里",
+      "hm2": "{{value}}公顷",
+      "m2": "{{value}}平方米",
+      "cm2": "{{value}}平方厘米",
+      "mm2": "{{value}}平方毫米",
+      "mi2": "{{value}}平方英里",
+      "ac": "{{value}}英亩",
+      "ft2": "{{value}}平方英尺",
+      "in2": "{{value}}平方英寸",
+      "qn": "{{value}}顷",
+      "mu": "{{value}}亩",
+      "fn": "{{value}}分"
+    },
+    "mass": {
+      "kg": "{{value}}公斤",
+      "g": "{{value}}克",
+      "mg": "{{value}}毫克",
+      "lb": "{{value}}磅",
+      "oz": "{{value}}盎司",
+      "jn": "{{value}}斤",
+      "ln": "{{value}}两"
+    },
+    "time": {
+      "h": "{{value}}小时",
+      "m": "{{value}}分钟",
+      "s": "{{value}}秒"
+    },
+    "temperature": {
+      "c": "{{value}}摄氏度",
+      "f": "{{value}}华氏度"
+    },
+    "speed": {
+      "kmph": "{{value}}公里每小时",
+      "mph": "{{value}}英里每小时",
+      "mpm": "每分钟{{value}}米",
+      "mps": "每秒{{value}}米"
+    }
+  },
+  "action": {
+    "CREATE": "添加",
+    "UPDATE": "更新",
+    "DELETE": "删除",
+    "LIKE": "点赞",
+    "UNDO_LIKE": "取消点赞",
+    "DISLIKE": "狂踩",
+    "UNDO_DISLIKE": "取消狂踩",
+    "SAVE": "收藏",
+    "UNDO_SAVE": "取消收藏",
+    "SHARE": "分享",
+    "FOLLOW": "关注",
+    "UNFOLLOW": "取消关注"
+  },
+  "operation": {
+    "Add": "添加",
+    "Edit": "编辑",
+    "Save": "保存",
+    "Delete": "删除",
+    "Remove": "移除",
+    "Undo": "恢复"
+  },
+  "navigation": {
+    "Skip": "跳过",
+    "Back": "返回",
+    "Next": "下一步",
+    "Goto": "第{{index}页"
+  },
+  "search": {
+    "Search": "搜索",
+    "Reset": "重置",
+    "Hide": "隐藏",
+    "Filter": "过滤"
+  },
+  "button": {
+    "Confirm": "确定",
+    "Cancel": "取消",
+    "Okay": "OK",
+    "Discard": "放弃"
   }
 }

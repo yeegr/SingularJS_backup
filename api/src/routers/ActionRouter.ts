@@ -57,7 +57,7 @@ class ActionRouter {
       res.status(400).json({ message: ERRORS.ACTION.ACTION_TYPE_NOT_FOUND })
     } else {
       let ActionModel = UTIL.getModelFromAction(action),
-        TargetModel = UTIL.getModelFromKey(targetRef),
+        TargetModel = UTIL.getModelFromName(targetRef),
         query = {
           creator,
           creatorRef,

@@ -87,7 +87,7 @@ ProcessSchema.virtual('TargetModel', {
  * @returns {void}
  */
 ProcessSchema.methods.finalize = function(status: string): Promise<IProcess> {
-  let TargetModel = UTIL.getModelFromKey(this.targetRef)
+  let TargetModel = UTIL.getModelFromName(this.targetRef)
 
   return TargetModel
   .findByIdAndUpdate(this.target, {status})

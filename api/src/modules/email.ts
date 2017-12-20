@@ -4,21 +4,33 @@ import { Transporter, SendMailOptions, SentMessageInfo } from 'nodemailer'
 import * as CONFIG from '../../../common/options/config'
 
 class Emailer {
-  constructor(mailOptions: SendMailOptions, serverOptions: any = CONFIG.DEFAULT_EMAIL_SERVICE) {
-    let transporter: Transporter = nodemailer.createTransport(serverOptions)
+  serverOptions: any
+  mailOptions: SendMailOptions
+  transporter: Transporter
 
+  constructor(mailOptions: SendMailOptions, serverOptions: any = CONFIG.DEFAULT_EMAIL_SERVICE) {
     if (!mailOptions.hasOwnProperty('from')) {
       mailOptions.from = serverOptions.auth.user
     }
-    
-    transporter.sendMail(mailOptions, (err: Error, info: SentMessageInfo) => {
-      if (err) {
-        console.log(err)
-        return
-      }
 
-      transporter.close()
-      return info
+    this.transporter = nodemailer.createTransport(serverOptions)
+    this.mailOptions = mailOptions
+  }
+
+  public send = () => {
+    return new Promise((resolve, reject) => {
+      this.transporter.sendMail(this.mailOptions, (err: Error, info: SentMessageInfo) => {
+        if (err) {
+          reject(err)
+        }
+  
+        if (info.response.indexOf('250') < 0) {
+          reject(err)
+        }
+
+        this.transporter.close()
+        resolve()
+      })
     })
   }
 }
