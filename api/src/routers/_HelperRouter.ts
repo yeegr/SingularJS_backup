@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose'
 
 import { UTIL } from '../../../common'
 
+import Consumer from '../models/users/ConsumerModel'
 import IAction from '../interfaces/actions/IAction'
 import Log, { ILog } from '../models/LogModel'
 import Err, { IErr } from '../models/ErrModel'
@@ -162,8 +163,25 @@ class HelperRouter {
     })
   }
 
+  public consumers = (req: Request, res: Response): void => {
+    Consumer
+    .find()
+    .select('username handle email mobile')
+    .sort({_id: -1})
+    .lean()
+    .exec()
+    .then((data) => {
+      res.status(200).json(data)
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  }
+
   routes() {
     this.router.purge('/drop/:table', this.drop)
+    this.router.get('/consumers', this.consumers)
     this.router.get('/logs', this.logs)
     this.router.get('/errs', this.errs)
     this.router.get('/totp', this.totp)

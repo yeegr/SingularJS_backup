@@ -15,11 +15,13 @@ let PlatformSchema: Schema = new Schema({
     enum: [CONST.USER_TYPES.PLATFORM],
     required: true
   },
-  // user handle
-  handle: {
+  // user name
+  username: {
     type: String,
-    default: () => CONST.PLATFORM_HANDLE_PREFIX + UTIL.getTimestamp(),
+    required: true,
     unique: true,
+    minlength: CONFIG.INPUT_LIMITS.MIN_USERNAME_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_USERNAME_LENGTH,
     trim: true,
     index: true
   },
@@ -28,6 +30,16 @@ let PlatformSchema: Schema = new Schema({
     type: String,
     default: '',
     required: true
+  },
+  // user handle
+  handle: {
+    type: String,
+    default: () => CONST.PLATFORM_HANDLE_PREFIX + UTIL.getTimestamp(),
+    unique: true,
+    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
+    trim: true,
+    index: true
   },
   // user actual name
   name: {
@@ -111,7 +123,7 @@ let PlatformSchema: Schema = new Schema({
   status: {
     type: String,
     enum: CONST.PLATFORM_STATUSES_ENUM,
-    default: CONST.STATUSES.PLATFORM.SUSPENDED
+    default: CONST.STATUSES.PLATFORM.ACTIVE
   },
   // user verification
   verified: {
@@ -121,16 +133,6 @@ let PlatformSchema: Schema = new Schema({
   // user verification expiration time
   expires: {
     type: Number
-  },
-  // user name
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    minlength: CONFIG.INPUT_LIMITS.MIN_USERNAME_LENGTH,
-    maxlength: CONFIG.INPUT_LIMITS.MAX_USERNAME_LENGTH,
-    trim: true,
-    index: true
   },
   // number of activities completed by user
   activityCount: {

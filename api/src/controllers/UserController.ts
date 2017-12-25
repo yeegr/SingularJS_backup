@@ -3,13 +3,15 @@ import { Schema, Model } from 'mongoose'
 import * as moment from 'moment-timezone'
 import * as randomstring from 'randomstring'
 import * as validator from 'validator'
+import * as passport from 'passport'
+import '../config/passport/consumer'
+import '../config/passport/platform'
 
 import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
 import { Logger, Err, LANG } from '../modules'
 
 import IUser from '../interfaces/users/IUser'
 import IContent from '../interfaces/share/IContent'
-
 import Totp, { ITotp } from '../models/users/TotpModel'
 import SMS from '../modules/sms'
 import Emailer from '../modules/email'
@@ -40,9 +42,10 @@ export function list(req: Request, res: Response): void {
   .sort(params.sort)
   .lean()
   .exec()
-  .then((arr: IUser[]) => {
-    if (arr) {
-      res.status(200).json(arr)
+  .then((data: IUser[]) => {
+    if (data) {
+      console.log(data)
+      res.status(200).json(data)
     } else {
       res.status(404).send()
     }
@@ -54,53 +57,84 @@ export function list(req: Request, res: Response): void {
 }
 
 /**
- * Check if unique field is available to user
- *
- * @func unique
- * @param {Request} req
- * @param {Response} res
- * @returns {void}
+ * Reads a key/value pair, validates the value 
+ * and returns a normalized kvp
+ * 
+ * @param {any} body
+ * @returns {[boolean, any]} 
  */
-export function unique (req: Request, res: Response): void {
-  let query = {},
-    tuple: any = UTIL.kvp2tuple(req.body),
+export function validateQuery(body: any): [boolean, any] {
+  let result = false,
+    query = null,
+    tuple: any = UTIL.kvp2tuple(body),
     key: string = tuple[0],
-    value: any = tuple[1]
+    value: string = tuple[1].toString().trim()
 
-  if (key.length > 0 && value.length > 0) {
+  if (['username', 'handle', 'email', 'mobile'].indexOf(key) < 0) {
+    return [result, { message: ERRORS.USER.UNKNOWN_QUERY }]
+  } else {
     switch (key) {
-      case 'handle':
-      default:
-        // validate user handle
-        if (UTIL.validateHandle(value)) {
-          query = {handle: value}
-        }
-      break
-
+      // validate user username
       case 'username':
-        // validate user username
         if (UTIL.validateUsername(value)) {
+          result = true
           query = {username: value}
+        } else {
+          query = { message: ERRORS.USER.VALID_USER_NAME_REQUIRED }
         }
       break
 
+      // validate user handle
+      case 'handle':
+        if (UTIL.validateHandle(value)) {
+          result = true
+          query = {handle: value}
+        } else {
+          query = { message: ERRORS.USER.VALID_USER_HANDLE_REQUIRED }
+        }
+      break
+
+      // validate email address
       case 'email':
-        // validate email address
         if (validator.isEmail(value)) {
+          result = true
           query = {email: value}
+        } else {
+          query = { message: ERRORS.USER.VALID_EMAIL_ADDRESS_REQUIRED }
         }
       break
 
+      // validate mobile phone number
       case 'mobile':
         value = UTIL.normalizeMobile(value)
 
-        // validate mobile phone number
         if (validator.isMobilePhone(value, CONFIG.DEFAULT_LOCALE)) {
+          result = true
           query = {mobile: value}
+        } else {
+          query = { message: ERRORS.USER.VALID_MOBILE_PHONE_NUMBER_REQUIRED }
         }
       break
     }
 
+    return [result, query]
+  }
+}
+
+/**
+ * Check if unique field is available to user
+ *
+ * @func isUnique
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {void}
+ */
+export function isUnique(req: Request, res: Response): void {
+  let [result, query] = validateQuery(req.body)
+
+  if (!result) {
+    res.status(400).send(query)
+  } else {
     const UserModel: Model<IUser> = UTIL.getModelFromName(req.routeVar.userType)
 
     UserModel
@@ -119,90 +153,461 @@ export function unique (req: Request, res: Response): void {
 /**
  * Initializes TOTP 
  *
- * @class ConsumerRouter
+ * @export
  * @func initTotp
  * @param {Request} req
  * @param {Response} res
  * @param {NextFunction} next
  * @returns {void}
  */
-export function initTotp(req: Request, res: Response, next: NextFunction): void{
-  let body = req.body
+export function initTotp(req: Request, res: Response, next: NextFunction): void {
+  let body = req.body,
+    UserModel: Model<IUser> = UTIL.getModelFromName(req.routeVar.userType)
   
-  if (!body.hasOwnProperty('type')) {
-    res.status(400).send(ERRORS.USER.TOTP_TYPE_REQUIRED)
+  if (!body.hasOwnProperty('action')) {
+    res.status(400).send({
+      message: ERRORS.USER.TOTP_ACTION_REQUIRED
+    })
+  } else if (!body.hasOwnProperty('type')) {
+    res.status(400).send({
+      message: ERRORS.USER.TOTP_TYPE_REQUIRED
+    })
   } else if (CONST.TOTP_TYPES_ENUM.indexOf(body.type) < 0) {
-    res.status(400).send(ERRORS.USER.TOTP_TYPE_INVALID)
+    res.status(400).send({
+      message: ERRORS.USER.TOTP_TYPE_INVALID
+    })
   } else if (body.type === CONST.TOTP_TYPES.EMAIL && !validator.isEmail(body.value)) {
-    res.status(400).send(ERRORS.USER.VALID_EMAIL_ADDRESS_REQUIRED)
+    res.status(400).send({
+      message: ERRORS.USER.VALID_EMAIL_ADDRESS_REQUIRED
+    })
   } else if (body.type === CONST.TOTP_TYPES.SMS && !validator.isMobilePhone(body.value, CONFIG.DEFAULT_LOCALE)) {
-    res.status(400).send(ERRORS.USER.VALID_MOBILE_PHONE_NUMBER_REQUIRED)
+    res.status(400).send({
+      message: ERRORS.USER.VALID_MOBILE_PHONE_NUMBER_REQUIRED
+    })
+  } else if (body.action === CONST.USER_ACTIONS.COMMON.UPDATE) {
+    let query: any = {}
+    query[body.type] = body.value
+
+    UserModel
+    .findOne(query)
+    .then((data: IUser) => {
+      if (!data) {
+        return next()
+      }
+
+      res.status(200).json({isAvailable: false})
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
+  } else if (body.action === CONST.USER_ACTIONS.COMMON.RESET_PASSWORD) {
+    let query: any = {}
+    query[body.type] = body.value
+
+    UserModel
+    .findOne(query)
+    .then((data: IUser) => {
+      if (!data) {
+        res.status(404).json({ message: ERRORS.USER.USER_NOT_FOUND })
+        return false
+      }
+
+      next()
+    })
+    .catch((err: Error) => {
+      res.status(res.statusCode).send()
+      console.log(err)
+    })
   } else {
-    let totp: ITotp = new Totp(Object.assign({}, body, {
-        action: CONST.USER_ACTIONS.COMMON.LOGIN,
-        code: randomstring.generate({
-          length: CONFIG.TOTP_CODE_LENGTH,
-          charset: CONFIG.TOTP_CODE_CHARSET
-        })
-      })),
-      mobileTemplate = CONFIG.ALIYUN_SMS_TEMPLATE_CODE
-
-    switch (totp.type) {
-      case CONST.TOTP_TYPES.EMAIL:
-        let email = new Emailer({
-          to: totp.value,
-          subject: LANG.t('user.login.totp.email.subject'),
-          text: LANG.t('user.login.totp.email.text', {
-            code: totp.code,
-            expiration: moment(totp.expireAt).format(CONFIG.DEFAULT_DATETIME_FORMAT)
-          }),
-          html: LANG.t('user.login.totp.email.html', {
-            code: totp.code,
-            expiration: moment(totp.expireAt).tz(CONFIG.DEFAULT_TIMEZONE).format(CONFIG.DEFAULT_DATETIME_FORMAT)
-          })
-        })
-
-        email
-        .send()
-        .then(() => {
-          return totp.save()
-        })
-        .then(() => {
-          res.status(201).json({ message: ERRORS.SUCCESS })
-        })
-        .catch((err: Error) => {
-          res.status(400).send()
-          console.log(err)
-        })
-      break
-
-      case CONST.TOTP_TYPES.SMS:
-        let sms = new SMS({
-          'mobile': totp.value,
-          'template': mobileTemplate,
-          'code': totp.code
-        })
-
-        sms
-        .send()
-        .then(() => {
-          return totp.save()
-        })
-        .then(() => {
-          res.status(201).json({ message: ERRORS.SUCCESS })
-        })
-        .catch((err: Error) => {
-          res.status(400).send()
-          console.log(err)
-        })
-      break
-    }
+    next()
   }
 }
 
 /**
+ * Sends a time-based one-time passcode (TOTP)
+ * 
+ * @export
+ * @func sendTotp
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {NextFunction} next 
+ * @returns {void}
+ */
+export function sendTotp(req: Request, res: Response, next: NextFunction): void {
+  const body = req.body,
+    totp: ITotp = new Totp(Object.assign({}, body, {
+      code: randomstring.generate({
+        length: CONFIG.TOTP_CODE_LENGTH,
+        charset: CONFIG.TOTP_CODE_CHARSET
+      })
+    })),
+    templateList = (CONFIG.SMS_PROVIDER === 'ALIYUN') ? CONFIG.ALIYUN_SMS_TEMPLATES : null
+
+  let subject = '',
+    text = '',
+    html = '',
+    smsTemplate = ''
+
+  switch (totp.type) {
+    case CONST.TOTP_TYPES.EMAIL:
+      switch (totp.action) {
+        case CONST.USER_ACTIONS.COMMON.LOGIN:
+          subject = LANG.t('user.login.totp.email.subject')
+          text = LANG.t('user.login.totp.email.text', {
+            code: totp.code,
+            expiration: moment(totp.expireAt).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+          })
+          html = LANG.t('user.login.totp.email.html', {
+            code: totp.code,
+            expiration: moment(totp.expireAt).tz(CONFIG.DEFAULT_TIMEZONE).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+          })
+        break
+
+        case CONST.USER_ACTIONS.COMMON.RESET_PASSWORD:
+          subject = LANG.t('user.reset_password.totp.email.subject')
+          text = LANG.t('user.reset_password.totp.email.text', {
+            code: totp.code,
+            expiration: moment(totp.expireAt).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+          })
+          html = LANG.t('user.reset_password.totp.email.html', {
+            code: totp.code,
+            expiration: moment(totp.expireAt).tz(CONFIG.DEFAULT_TIMEZONE).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+          })
+        break
+
+        case CONST.USER_ACTIONS.COMMON.UPDATE:
+          subject = LANG.t('user.update.totp.email.subject')
+          text = LANG.t('user.update.totp.email.text', {
+            code: totp.code,
+            expiration: moment(totp.expireAt).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+          })
+          html = LANG.t('user.update.totp.email.html', {
+            code: totp.code,
+            expiration: moment(totp.expireAt).tz(CONFIG.DEFAULT_TIMEZONE).format(CONFIG.DEFAULT_DATETIME_FORMAT)
+          })
+        break
+      }
+
+      let email = new Emailer({
+        to: totp.value,
+        subject,
+        text,
+        html
+      })
+
+      email
+      .send()
+      .then(() => {
+        return totp.save()
+      })
+      .then(() => {
+        res.status(201).json({ message: ERRORS.SUCCESS })
+      })
+      .catch((err: Error) => {
+        res.status(400).send()
+        console.log(err)
+      })
+    break
+
+    case CONST.TOTP_TYPES.SMS:
+      switch (totp.action) {
+        case CONST.USER_ACTIONS.COMMON.LOGIN:
+          smsTemplate = templateList.LOGIN_SIGNUP
+        break
+
+        case CONST.USER_ACTIONS.COMMON.RESET_PASSWORD:
+          smsTemplate = templateList.RESET_PASSWORD
+        break
+
+        case CONST.USER_ACTIONS.COMMON.UPDATE:
+          smsTemplate = templateList.UPDATE_MOBILE_NUMBER
+        break
+      }
+
+      let sms = new SMS({
+        'mobile': totp.value,
+        'template': smsTemplate,
+        'code': totp.code
+      })
+
+      sms
+      .send()
+      .then(() => {
+        return totp.save()
+      })
+      .then(() => {
+        res.status(201).json({ message: ERRORS.SUCCESS })
+      })
+      .catch((err: Error) => {
+        res.status(400).send()
+        console.log(err)
+      })
+    break
+  }
+}
+
+/**
+ * Verifies passwords inputs
+ * 
+ * @export
+ * @func verifyPasswords
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {NextFunction} next 
+ * @returns {void}
+ */
+export function verifyPasswords(req: Request, res: Response, next: NextFunction): void {
+  if (req.body.action === CONST.USER_ACTIONS.COMMON.RESET_PASSWORD) {
+    let password1 = req.body.password1,
+      password2 = req.body.password2
+
+    if (password1 && password2) {
+      if (password1 !== password2) {
+        res.status(406).json({ message: ERRORS.USER.PASSWORDS_DO_NOT_MATCH })
+      } else if (!UTIL.validatePassword(password1)) {
+        res.status(406).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
+      } else {
+        next()
+      }
+    } else {
+      res.status(406).json({ message: ERRORS.USER.MISSING_CREDENTIALS })
+    }
+  } else {
+    next()
+  }
+}
+
+/**
+ * Assembles user query using TOTP info
+ * 
+ * @export
+ * @func assembleQuery
+ * @param {ITotp} totp 
+ * @returns {*} 
+ */
+export function assembleQuery(totp: ITotp): any {
+  let query: any = {}
+        
+  switch (totp.type) {
+    case CONST.TOTP_TYPES.SMS:
+      query.mobile = totp.value
+    break
+
+    case CONST.TOTP_TYPES.EMAIL:
+      query.email = totp.value
+    break
+  }
+
+  return query
+}
+
+/**
+ * Verifies time-based one-time passcode (TOTP),
+ * and process request by TOTP action and type
+ *
+ * @export
+ * @func verifyTotp
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {void}
+ */
+export function verifyTotp(req: Request, res: Response, next: NextFunction): void {
+  let log: any = {
+      creatorRef: req.routeVar.userType,
+      action: req.body.action,
+      ua: req.body.ua || req.ua
+    },
+    query: any = {
+      action: req.body.action,
+      type: req.body.type,
+      value: req.body.value,
+      code: req.body.code,
+      verifiedAt: null
+    }
+
+  const UserModel: Model<IUser> = UTIL.getModelFromName(req.routeVar.userType),
+    now: number = moment().valueOf()
+
+  Totp
+  .findOne(query)
+  .then((totp: ITotp) => {
+    if (!totp) {
+      res.status(400).json({ message: ERRORS.USER.NO_VALID_TOTP_ISSUED })
+      return null    
+    }
+
+    if (totp.expireAt <= now) {
+      res.status(400).json({ message: ERRORS.USER.TOTP_CODE_EXPIRED })
+      return null
+    }
+
+    totp.verifiedAt = now
+    return totp.save()
+  })
+  .then((totp: ITotp) => {
+    if (totp) {
+      let q: any = assembleQuery(totp)
+
+      if (totp.action === CONST.USER_ACTIONS.COMMON.UPDATE) {
+        q.updated = now
+
+        return UserModel
+          .findByIdAndUpdate(req.user._id, q, {new: true})
+      } else {
+        return UserModel
+        .findOne(q)
+        .then((user: IUser) => {
+          if (totp.action === CONST.USER_ACTIONS.COMMON.LOGIN) {
+            if (user) {
+              req.user = user
+              req.authInfo = totp.type
+              next()
+            } else if (req.routeVar.userType === CONST.USER_TYPES.CONSUMER) {
+              // creates a new user if matching credentials not found
+              let user: IUser = new UserModel(q)
+              createUser(user, req, res)
+            }
+            return null
+          } else if (totp.action === CONST.USER_ACTIONS.COMMON.RESET_PASSWORD) {
+            // update user password
+            // due to bcrypt document middleware, cannot use update() methods, must use save()
+            user.password = req.body.password1
+            return user.save()
+          }
+        })            
+      }
+    }
+  })
+  .then((user: IUser) => {
+    if (user) {
+      res.status(200).json(UTIL.getSignedUser(user))
+
+      log.creator = user._id
+      log.creatorRef = user.ref
+      new Logger(log)
+    }
+  })
+  .catch((err: Error) => {
+    new Err(res, err, log)
+  })
+}
+ 
+/**
+ * Creates a single user with handle/password
+ *
+ * @export
+ * @func create
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {void}
+ */
+export function create(req: Request, res: Response, next: NextFunction): void {
+  let body: any = req.body
+
+  console.log(req.routeVar.userType)
+
+  const UserModel: Model<IUser> = UTIL.getModelFromName(req.routeVar.userType)
+
+  if (!body.hasOwnProperty('username') || !UTIL.validateUsername(body.username)) {
+    res.status(401).json({ message: ERRORS.USER.MISSING_CREDENTIALS })      
+  } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(body.password)) {
+    res.status(401).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
+  } else {
+    let user: IUser = new UserModel({
+      username: body.username,
+      password: body.password
+    })
+
+    createUser(user, req, res)
+  }
+}
+
+/**
+ * Creates a single user
+ * 
+ * @export
+ * @func createUser
+ * @param {IUser} user 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @returns {void}
+ */
+export function createUser(user: IUser, req: Request, res: Response): void {
+  let log = {
+    creatorRef: user.ref,
+    action: CONST.USER_ACTIONS.COMMON.CREATE,
+    ua: req.body.ua || req.ua
+  }
+
+  user
+  .save()
+  .then((data: IUser) => {
+    req.user = data
+    res.status(201).json(UTIL.getSignedUser(data))
+
+    new Logger(Object.assign({}, log, {
+      creator: data._id,
+    }))        
+  })
+  .catch((err: Error) => {
+    new Err(res, err, log)
+  })
+}
+
+/**
+ * Login via handle/password
+ *
+ * @export
+ * @func local
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {void}
+ */
+export function local(req: Request, res: Response, next: NextFunction): void {
+  let strategy: string
+
+  switch (req.routeVar.userType) {
+    case CONST.USER_TYPES.CONSUMER:
+      strategy = 'consumerLocal'
+    break
+
+    case CONST.USER_TYPES.SUPPLIER:
+      strategy = 'supplierLocal'
+    break
+
+    case CONST.USER_TYPES.PLATFORM:
+      strategy = 'platformLocal'
+    break
+  }
+
+  passport.authenticate(strategy, {
+    session: false,
+    badRequestMessage: ERRORS.USER.MISSING_CREDENTIALS
+  }, (err: Error, user: IUser, info: object) => {
+    if (err) {
+      res.status(400).send(err) 
+      return
+    }
+
+    if (!user) {
+      res.status(401).send(info)
+      return
+    }
+
+    req.user = user
+    req.authInfo = 'local'
+
+    next()
+  })(req, res, next)
+}
+/**
  * Login user
  *
+ * @export
  * @func login
  * @param {Request} req
  * @param {Response} res
@@ -227,6 +632,7 @@ export function login(req: Request, res: Response): void {
 /**
  * Gets user with populated list of user created content
  *
+ * @export
  * @func sublist
  * @param {Request} req
  * @param {Response} res
@@ -275,6 +681,7 @@ export function sublist(req: Request, res: Response): void {
  * Gets specific user created content,
  * discarding wether has been approved
  *
+ * @export
  * @func content
  * @param {Request} req
  * @param {Response} res
@@ -309,6 +716,7 @@ export function content(req: Request, res: Response): void {
 /**
  * Updates user
  *
+ * @export
  * @func update
  * @param {Request} req
  * @param {Response} res
@@ -318,23 +726,27 @@ export function update(req: Request, res: Response): void {
   const [creator, creatorRef] = UTIL.getLoginedUser(req)
   
   let log = {
-    creator,
-    creatorRef,
-    action: CONST.USER_ACTIONS.COMMON.UPDATE,
-    ua: req.body.ua || req.ua
-  }
-
+      creator,
+      creatorRef,
+      action: CONST.USER_ACTIONS.COMMON.UPDATE,
+      ua: req.body.ua || req.ua
+    },
+    update = UTIL.sanitizeObject(req.body,
+      CONST.USER_UNUPDATABLE_FIELDS,
+      true
+    )
+  
   const UserModel: Model<IUser> = UTIL.getModelFromName(creatorRef)
 
   UserModel
-  .findByIdAndUpdate(creator, req.body, {new: true})
+  .findByIdAndUpdate(creator, update, {new: true})
   .then((user: IUser) => {
     if (user) {
       res.status(200).json(UTIL.getSignedUser(user))
       new Logger(log)
+    } else {
+      res.status(404).send()
     }
-
-    res.status(404).send()
   })
   .catch((err: Error) => {
     new Err(res, err, log)
@@ -382,14 +794,14 @@ export function remove(req: Request, res: Response): void {
  * @func submit
  * @param {Request} req
  * @param {Response} res
- * @return {void}
+ * @returns {void}
  */
 export function submit(req: Request, res: Response): void {
   const [creator, creatorRef] = UTIL.getLoginedUser(req),
     roles: string[] = req.user.roles,
     target: Schema.Types.ObjectId = req.body.id,
     targetRef: string = req.body.type,
-    DataModel: Model<any> = UTIL.getModelFromName(targetRef)
+    DataModel: Model<IContent> = UTIL.getModelFromName(targetRef)
 
   let log: any = {
     creator,
@@ -490,13 +902,13 @@ export function submit(req: Request, res: Response): void {
  * @func retract
  * @param {Request} req
  * @param {Response} res
- * @return {void}
+ * @returns {void}
  */
 export function retract(req: Request, res: Response): void {
   const [creator, creatorRef] = UTIL.getLoginedUser(req),
     target: Schema.Types.ObjectId = req.body.id,
     targetRef: string = req.body.type,
-    DataModel: any = UTIL.getModelFromName(targetRef)
+    DataModel: Model<IContent> = UTIL.getModelFromName(targetRef)
 
   let log: any = {
     creator,
@@ -559,28 +971,40 @@ export function retract(req: Request, res: Response): void {
  * @func createRoutes
  * @param {Router} router
  * @param {RequestHandler} auth
- * @return {void}
+ * @returns {void}
  */
-export function createRoutes(router: Router, auth: RequestHandler, setRouteVar: RequestHandler): void {
+export function createRoutes(router: Router, setRouteVar: RequestHandler, auth: RequestHandler): void {
   // list route
   router.get('/users', setRouteVar, list)
 
   // route to check unique values
-  router.post('/users/unique', setRouteVar, unique)
+  router.post('/users/unique', setRouteVar, isUnique)
 
-  // TOTP login routes
-  router.post('/login/totp', setRouteVar, initTotp)
+  // create route
+  router.post('/users', setRouteVar, create)
 
-  // verifies TOTP and login
-  // router.patch('/login/totp', setRouteVar, verifyTotp)
+  // TOTP login route - create
+  router.post('/login/totp', setRouteVar, initTotp, sendTotp)
+
+  // TOTP login route - login/signup
+  router.patch('/login/totp', setRouteVar, verifyTotp, login)
+
+  // reset password routes via TOTP
+  router.patch('/login/reset', setRouteVar, verifyPasswords, verifyTotp)
+
+  // update routes via TOTP
+  router.patch('/self/totp', setRouteVar, auth, verifyTotp)
+
+  // login routes via username/passport
+  router.post('/login/local', setRouteVar, local, login)
 
   // JWT login routes
-  router.get('/login/token', auth, login)
+  router.get('/self', auth, login)
 
   // sublist route
   router.get('/self/:sublist', auth, sublist)
 
-  // user content route
+  // user created content route
   router.get('/self/:sublist/:slug', auth, content)
 
   // update route

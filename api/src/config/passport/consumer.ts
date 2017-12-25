@@ -30,11 +30,11 @@ passport.use('consumerJwt', new JwtStrategy({
 )
 
 passport.use('consumerLocal', new LocalStrategy({
-    usernameField: 'handle'
-  }, (handle: string, password: string, done: Function) => {
+    usernameField: 'username'
+  }, (username: string, password: string, done: Function) => {
     Consumer
     .findOne({
-      handle,
+      username,
       status: CONST.STATUSES.CONSUMER.ACTIVE
     })
     .then((user: IConsumer) => {

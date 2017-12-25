@@ -81,7 +81,7 @@ export function validateHandle(handle: string): boolean {
  * @param {string} password
  * @returns {boolean}
  */
-export function validatePassword(password: string): boolean {
+export function validatePassword(password: any): boolean {
   return validateRange(password.length, CONFIG.INPUT_LIMITS.MIN_PASSWORD_LENGTH, CONFIG.INPUT_LIMITS.MAX_PASSWORD_LENGTH)
 }
 

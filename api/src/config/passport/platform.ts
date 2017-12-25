@@ -29,7 +29,9 @@ passport.use('platformJwt', new JwtStrategy({
   })
 )
 
-passport.use('platformLocal', new LocalStrategy((username: string, password: string, done: Function) => {
+passport.use('platformLocal', new LocalStrategy({
+  usernameField: 'username'
+}, (username: string, password: string, done: Function) => {
     Platform
     .findOne({
       username,

@@ -125,6 +125,7 @@ interface IUserActions {
     DELETE: string
     LOGIN: string
     LOGOUT: string
+    RESET_PASSWORD: string
   }
   CONSUMER: {
     LIKE: string
@@ -173,6 +174,7 @@ export const USER_ACTIONS: IUserActions = {
     DELETE: 'DELETE',
     LOGIN: 'LOGIN',
     LOGOUT: 'LOGOUT',
+    RESET_PASSWORD: 'RESET_PASSWORD'
   },
   CONSUMER: {
     LIKE: 'LIKE',
@@ -491,3 +493,13 @@ export const COMMENT_PARENT_FIELD_LIST: string = 'creator slug title excerpt com
 export const LIKE_PARENT_FIELD_LIST: string = 'creator slug title excerpt likes likeCount'
 
 export const SUBLISTS: string[] = ['likes', 'dislikes', 'saves', 'shares', 'downloads']
+
+/**
+ * User information not directly updatable via API
+ */
+export const USER_UNUPDATABLE_FIELDS: string = '_id id ref updated roles status verified expires history points level balance viewCount commentCount postCount eventCount signupCount orderCount'
+
+/**
+ * Content information not directly updatable via API
+ */
+export const CONTENT_UNUPDATABLE_FIELDS: string = '_id id status updated totalRating commentCount viewCount likeCount dislikeCount saveCount shareCount downloadCount'

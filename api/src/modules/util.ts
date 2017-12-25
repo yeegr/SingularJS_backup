@@ -319,8 +319,34 @@ export function sanitizeInput(model: string, body: any): any {
 }
 
 /**
+ * Returns a santized object, by either
+ * 1. keeping properties in keyList, or 
+ * 2. removing properties in keyList
+ * 
+ * @export
+ * @func sanitizeObject
+ * @param {*} obj 
+ * @param {string} keyList 
+ * @param {boolean} [remove=false] 
+ * @returns {*} 
+ */
+export function sanitizeObject(obj: any, keyList: string, remove: boolean = false): any {
+  let keyArray: string[] = keyList.split(' '),
+    tmp: any = {}
+
+  for (let key in obj) {
+    if ((!remove && keyArray.indexOf(key) > -1) || (remove && keyArray.indexOf(key) < 0)) {
+      tmp[key] = obj[key]
+    }
+  }
+
+  return tmp
+}
+
+/**
  * Gets value by key
  * 
+ * @export
  * @param {Request} req 
  * @param {string} key 
  * @param {boolean} [isInteger = false] 
@@ -365,7 +391,7 @@ export function getListCountPerPage(req: Request): number {
  * 
  * @param {Request} req 
  * @param {string} [key = 'sortOn']
- * @returns {any} 
+ * @returns {*} 
  */
 export function getListSort(req: Request, key: string = 'sortOn'): any {
   let sort: any = {},
@@ -458,7 +484,7 @@ export function getPropKey(input: string): string {
  * 
  * @param {Request} req 
  * @param {string} fields
- * @returns {any} 
+ * @returns {*} 
  */
 export function getListKeywordQuery(req: Request, fields: string): any {
   let keywords = getRequestParam(req, 'keywords')
@@ -557,14 +583,14 @@ export function getTimeFromObjectId(id: string, isUnix: boolean = true): number 
  * Set updated timestamp
  * 
  * @export
- * @param {IContent} doc 
+ * @param {IUser|IContent} doc 
  * @param {string[]]} keys 
  */
-export function setUpdateTime(doc: IContent, keys: string[]): void {
+export function setUpdateTime(doc: IUser|IContent, keys: string[]): void {
   let toUpdate = false
 
   keys.map((key: string) => {
-    toUpdate = (doc.isModified(key)) ? true : toUpdate
+    toUpdate = (doc.getUpdate()[key]) ? true : toUpdate
   })
 
   if (toUpdate) {

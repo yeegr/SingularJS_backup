@@ -8,8 +8,11 @@ import ITotp from '../../interfaces/users/ITotp'
 
 let TotpSchema: Schema = new Schema({
   action: {
-    type: String,
+    type: String,    
     required: true
+  },
+  user: {
+    type: Schema.Types.ObjectId
   },
   type: {
     type: String,

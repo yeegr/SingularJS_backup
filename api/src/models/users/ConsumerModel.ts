@@ -16,11 +16,11 @@ let ConsumerSchema: Schema = new Schema({
     enum: [CONST.USER_TYPES.CONSUMER],
     required: true
   },
-  // user handle or user name
-  handle: {
+  // user name
+  username: {
     type: String,
-    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
     required: true,
+    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
     unique: true,
     minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
     maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
@@ -32,6 +32,17 @@ let ConsumerSchema: Schema = new Schema({
     type: String,
     default: '',
     trim: true
+  },
+  // user handle
+  handle: {
+    type: String,
+    required: true,
+    default: () => CONST.CONSUMER_HANDLE_PREFIX + UTIL.getTimestamp(),
+    unique: true,
+    minlength: CONFIG.INPUT_LIMITS.MIN_HANDLE_LENGTH,
+    maxlength: CONFIG.INPUT_LIMITS.MAX_HANDLE_LENGTH,
+    trim: true,
+    index: true
   },
   // user actual name
   name: {
@@ -55,16 +66,18 @@ let ConsumerSchema: Schema = new Schema({
   // mobile phone number
   mobile: {
     type: String,
-    default: '',
     trim: true,
+    unique: true,
+    sparse: true,
     validation: (val: string) => validator.isMobilePhone(val, CONFIG.DEFAULT_LOCALE)
   },
   // user email address
   email: {
     type: String,
-    default: '',
     lowercase: true,
     trim: true,
+    unique: true,
+    sparse: true,
     validation: (val: string) => validator.isEmail(val)
   },
   // user avatar url
@@ -215,17 +228,11 @@ let ConsumerSchema: Schema = new Schema({
     virtuals: true
   },
   toJSON: {
-    virtuals: true
-  }
-})
-
-/** 
- * Removes password from return JSON
-*/
-ConsumerSchema.set('toJSON', {
-  transform: function(doc: any, ret: any, opt: any) {
-    delete ret.password
-    return ret
+    virtuals: true,
+    transform: function(doc: any, ret: any, opt: any) {
+      delete ret.password
+      return ret
+    }
   }
 })
 
@@ -385,28 +392,23 @@ ConsumerSchema.methods.comparePassword = function(candidatePassword: string, cal
 ConsumerSchema.pre('save', function(next: Function): void {
   let user = this
 
+  if (user.isModified('password')) {
   // generate a salt then run callback
-  if (user.isNew) {
-    bcrypt
-    .genSalt(CONFIG.USER_SALT_LENGTH, (err: Error, salt: string) => {
-      if (err) { return next(err) }
-
-      // encrypt password with salt
-      bcrypt.hash(user.password, salt, null, (err, hash) => {
-        if (err) { return next(err) }
-
-        // overwrite plain text password with encrypted password
-        user.password = hash
-
-        next()
-      })
-    })
-  } else {
-    UTIL.setUpdateTime(user, ['handle', 'password', 'name', 'gender', 'intro', 'mobile', 'email', 'pid', 'avatar', 'background', 'locale', 'city', 'country'])
-    user.wasNew = user.isNew
-
-    next()
+    let salt = bcrypt.genSaltSync(CONFIG.USER_SALT_LENGTH)
+    user.password = bcrypt.hashSync(user.password, salt)
+    user.updated = UTIL.getTimestamp()
   }
+  
+  if (user.isNew) {
+    user.wasNew = user.isNew
+  }
+
+  next()
+})
+
+ConsumerSchema.pre('findOneAndUpdate', function(next: Function): void {
+  UTIL.setUpdateTime(this, ['username', 'handle', 'name', 'gender', 'intro', 'mobile', 'email', 'pid', 'avatar', 'background', 'locale', 'city', 'country'])
+  next()
 })
 
 export { IConsumer }

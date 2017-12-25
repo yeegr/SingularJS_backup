@@ -7,7 +7,11 @@ export * from './ignored'
  * 
 export const ALIYUN_SMS_ACCESS_ID: string = ''
 export const ALIYUN_SMS_ACCESS_KEY: string = ''
-export const ALIYUN_SMS_TEMPLATE_CODE: string = ''
+export const ALIYUN_SMS_TEMPLATES: any = {
+  LOGIN_SIGNUP: '',
+  RESET_PASSWORD: '',
+  UPDATE_MOBILE_NUMBER: ''  
+}
 */
 
 export const COMPANY_NAME: string = '蓝光移客'
@@ -102,7 +106,7 @@ export const INPUT_LIMITS: IInputLimits = {
   MIN_HANDLE_LENGTH: 2,
   MAX_HANDLE_LENGTH: 20,
   MIN_PASSWORD_LENGTH: 6,
-  MAX_PASSWORD_LENGTH: 16,
+  MAX_PASSWORD_LENGTH: 20,
   MIN_NAME_LENGTH: 0,
   MAX_NAME_LENGTH: 50,
 

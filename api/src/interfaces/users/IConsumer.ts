@@ -3,7 +3,6 @@ import IUser from './IUser'
 import IHistory from './IHistory'
 
 export default interface IConsumer extends IUser {
-  handle: string
   intro?: string
   wechat: string
   contacts: Schema.Types.ObjectId[]

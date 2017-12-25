@@ -603,16 +603,16 @@ macOS中安装Node.js
 
 ```sh
 brew update
-brew install node@6
-brew link node@6
+brew install node@8
+brew link node@8
 ```
 
 macOS中升级Node.js
 
 ```sh
 brew update
-brew upgrade node@6
-brew link node@6
+brew upgrade node@8
+brew link node@8
 ```
 
 #### [npm](https://npmjs.com "npm")
@@ -628,11 +628,12 @@ npm i -g npm
 
 * `$ npm ls -g --depth 0` 列表全局域的包
 * `$ npm outdated -g` 列表全局域中已落后的包
-* `$ npm i -g <package name>` 安装包到全局域中
 * `$ npm up -g` 升级全局域中所有的包到最新版
+* `$ npm i -g <package name>` 安装包到全局域中
 
 下面是我们将用于的全局域的包
 
+* [apidoc](https://http://apidocjs.com/ "apiDoc")
 * [babel-cli](https://babeljs.io/ "Babel")
 * [code-push-cli](https://microsoft.github.io/code-push/ "CodePush")
 * [eslint](http://eslint.org/ "ESLint")
@@ -643,11 +644,6 @@ npm i -g npm
 * [typescript](https://www.typescriptlang.org/ "TypeScript")
 * [typings](https://github.com/typings/typings "Typings")
 * [webpack](https://webpack.js.org/ "webpack")
-* [npm-check-updates](https://github.com/tjunnone/npm-check-updates "npm-check-updates")
-
-安装了npm-check-updates之后，我们可以在全局域中用以下指令
-
-* `$ ncu -g` 列表全局域中已落后的包
 
 #### 文件夹结构
 
@@ -743,6 +739,7 @@ SingularJS
   └───redux
 ```
 
+* api、consumer、supplier和platform分别对应API接口和消费者、服务商和平台三个前端。
 * consumer、supplier和platform文件夹下都有各自的redux文件夹，用以统一处理app逻辑
 * 各级app工程下都有android和ios两个文件夹，用以分别保存Android和iOS代码
 * 各级web工程下都有dev、dist和src三个文件夹，分别用以保存开发环境代码、生产环境代码和源代码
@@ -770,23 +767,9 @@ SingularJS
 
 #### Webpack
 
-ACL
+### SingularJS components
 
-consumer
-guest
-member
-
-supplier
-staff
-editor
-supervisor
-manager
-
-platform
-admin
-super
-
-SingularJS components
+SingularJS将平行开发大量插件，以前端为主。
 
 * singular-textview
 * singular-h1 ... h6
@@ -818,3 +801,25 @@ SingularJS components
 
 * Replace Express with Restify for the API server
 mongoose-delete
+
+## 开发详情
+
+### 用户分类
+
+既然已明确将用户分为消费者、服务商和平台三类，API也相对应的分别设立了Consumer、Supplier和Platform三个表（collections）。有人会问，虽然有三类用户，但所需的绝大部分功能都是同样的，如登录、注册、验证手机、邮箱等，所不同的主要是权限，那么为什么不使用单一的用户表，利用用户角色区分权限呢？这里主要的考虑是，有的用户会有双重身份，如司机也可以是乘客，卖家也可以是买家。使用统一的用户表，就要为不同的身份设立不同的用户名、密码、昵称等，更为复杂。而且，三类用户各自也都有不同权限的角色，搅到一起就太混乱了。而代码重复的问题可以通过抽象化解决，如在API项目下，UserController和ContentController就分别将用户和内容中相同或相近的代码进行了抽象化，被抽象化的几个路由文件(router)就几乎空无一物了。
+
+ACL
+
+consumer
+guest
+member
+
+supplier
+staff
+editor
+supervisor
+manager
+
+platform
+admin
+super

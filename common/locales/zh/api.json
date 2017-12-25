@@ -4,8 +4,26 @@
       "totp": {
         "email": {
           "subject": "来自$t(base:app.name)的验证码",
-          "text": "您的登录/注册验证码是{{code}}，请在{{expiration}}之前完成操作。",
-          "html": "<h1>您正在登录$t(base:app.name)</h1><p>您的登录/注册验证码是<strong>{{code}}</strong>，请在<strong>{{expiration}}</strong>之前完成操作。</p>"
+          "text": "您的验证码是{{code}}，请在{{expiration}}之前完成 - 登录/注册。",
+          "html": "<h1>$t(base:app.name)</h1><p>您的验证码是<strong>{{code}}</strong>，请在<strong>{{expiration}}</strong>之前完成<strong>登录/注册</strong>的操作。</p>"
+        }
+      }
+    },
+    "reset_password": {
+      "totp": {
+        "email": {
+          "subject": "来自$t(base:app.name)的验证码",
+          "text": "您的验证码是{{code}}，请在{{expiration}}之前完成 - 修改密码。",
+          "html": "<h1>$t(base:app.name)</h1><p>您的验证码是<strong>{{code}}</strong>，请在<strong>{{expiration}}</strong>之前完成<strong>修改密码</strong>的操作。</p>"
+        }
+      }
+    },
+    "update": {
+      "totp": {
+        "email": {
+          "subject": "来自$t(base:app.name)的验证码",
+          "text": "您的验证码是{{code}}，请在{{expiration}}之前完成 - 修改邮箱。",
+          "html": "<h1>$t(base:app.name)</h1><p>您的验证码是<strong>{{code}}</strong>，请在<strong>{{expiration}}</strong>之前完成<strong>修改邮箱</strong>的操作。</p>"
         }
       }
     }
