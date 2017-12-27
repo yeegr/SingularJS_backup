@@ -244,7 +244,7 @@ export function sublist(req: Request, res: Response): void {
  * @param {Response} res
  * @returns {void}
  */
-export function slug(req: Request, res: Response): void {
+export function isUnique(req: Request, res: Response): void {
   let slug: string = req.body.slug
 
   if (slug.length < 1) {
@@ -439,7 +439,7 @@ export function createRoutes(router: Router, auth: RequestHandler, setRouteVar: 
   router.get('/:slug/:sublist', setRouteVar, sublist)
   
   // check if slug available
-  router.post('/slug', setRouteVar, slug)
+  router.post('/unique', setRouteVar, isUnique)
 
   // create route
   router.post('/', auth, setRouteVar, create)

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, RequestHandler, Router } from 'express'
+import { Request, Response, NextFunction, RequestHandler, Router } from 'express'
 import * as moment from 'moment-timezone'
 import * as passport from 'passport'
 import '../config/passport/consumer'

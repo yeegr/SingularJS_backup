@@ -1,4 +1,4 @@
-import { RequestHandler, NextFunction, Request, Response, Router } from 'express'
+import { RequestHandler, Request, Response, NextFunction, Router } from 'express'
 import * as passport from 'passport'
 import '../config/passport/consumer'
 
@@ -22,7 +22,6 @@ class PostRouter {
    */
   constructor() {
     this.router = Router()
-    this.routes()
   }
 
   /**

@@ -16,6 +16,9 @@ function obj2enum(obj: any): string[] {
   return arr
 }
 
+export const UPLOAD_SERVER: string = 'http://upload:3000/'
+export const STATIC_SERVER: string = 'http://static/'
+
 /**
  * TOTP types
  */

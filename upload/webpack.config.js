@@ -2,6 +2,18 @@ const webpack = require('webpack'),
   fs = require('fs'),
   path = require('path')
 
+
+let nodeModules = {}
+
+fs
+.readdirSync('node_modules')
+.filter(function(x) {
+  return ['.bin'].indexOf(x) === -1
+})
+.forEach(function(mod) {
+  nodeModules[mod] = 'commonjs ' + mod
+})
+    
 module.exports = {
   devtool: 'source-map',
   target: 'node',
@@ -37,7 +49,7 @@ module.exports = {
   plugins: [
     new webpack.IgnorePlugin(/vertx/),
     // global.GENTLY = false is necessary for formidable to be packed
-    new webpack.DefinePlugin({ 'global.GENTLY' : false})
+    new webpack.DefinePlugin({ 'global.GENTLY': false})
     // new webpack.optimize.UglifyJsPlugin({
     //   output: {
     //     comments: false

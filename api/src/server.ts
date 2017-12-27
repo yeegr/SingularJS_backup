@@ -16,7 +16,7 @@ import * as uaParser from 'ua-parser-js'
 
 import * as CONFIG from '../../common/options/config'
 
-import _HelperRouter from './routers/_HelperRouter'
+import _HelperRouter from './routers/_helper'
 import AdminRouter from './routers/_admin'
 
 import ConsumerRouter from './routers/ConsumerRouter'
@@ -170,7 +170,7 @@ class Server {
     this.app.use(root + 'comments', CommentRouter)
 
     // platform administrator router
-    this.app.use('/api/v1/admin/', AdminRouter)
+    this.app.use(root + 'admin', AdminRouter)
   }
 }
 

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from 'express'
+import { Request, Response, NextFunction, Router } from 'express'
 import { Schema, NativeError } from 'mongoose'
 
 import * as passport from 'passport'

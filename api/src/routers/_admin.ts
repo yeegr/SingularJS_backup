@@ -20,7 +20,6 @@ class AdminRouter {
    */
   constructor() {
     this.router = Router()
-    this.routes()
   }
 
   /**

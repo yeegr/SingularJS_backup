@@ -1,11 +1,16 @@
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { Schema, Model } from 'mongoose'
+import * as fs from 'fs'
 import * as moment from 'moment-timezone'
 import * as randomstring from 'randomstring'
 import * as validator from 'validator'
 import * as passport from 'passport'
+import * as path from 'path'
+import * as request from 'request'
+import * as util from 'util'
 import '../config/passport/consumer'
 import '../config/passport/platform'
+import { IncomingForm, Fields, Files } from 'formidable'
 
 import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
 import { Logger, Err, LANG } from '../modules'
@@ -507,8 +512,6 @@ export function verifyTotp(req: Request, res: Response, next: NextFunction): voi
 export function create(req: Request, res: Response, next: NextFunction): void {
   let body: any = req.body
 
-  console.log(req.routeVar.userType)
-
   const UserModel: Model<IUser> = UTIL.getModelFromName(req.routeVar.userType)
 
   if (!body.hasOwnProperty('username') || !UTIL.validateUsername(body.username)) {
@@ -751,6 +754,72 @@ export function update(req: Request, res: Response): void {
   .catch((err: Error) => {
     new Err(res, err, log)
   })
+}
+
+/**
+ * Updates user
+ *
+ * @export
+ * @func update
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {void}
+ */
+export function avatar(req: Request, res: Response): void {
+  const [creator, creatorRef] = UTIL.getLoginedUser(req),
+    UserModel: Model<IUser> = UTIL.getModelFromName(creatorRef),
+    now = UTIL.getTimestamp().toString()
+  
+  let form: IncomingForm = new IncomingForm(),
+    filePath = path.join(UTIL.getRootFolderFromModelName(creatorRef), creator.toString(), now),
+    log = {
+      creator,
+      creatorRef,
+      action: CONST.USER_ACTIONS.COMMON.UPDATE,
+      ua: req.body.ua || req.ua
+    }
+
+  form.multiples = false
+
+  form
+  .on('file', (fields: Fields, file: any) => {
+    let formData = {
+      file: {
+        value: fs.createReadStream(file.path),
+        options: {
+          filename: UTIL.renameFile(file.name)
+        }
+      },
+      path: filePath
+    }
+
+    request.post({
+      url: CONST.UPLOAD_SERVER,
+      formData
+    }, (err: Error, response, body) => {
+      if (err) console.log(err)
+
+      let fileName = JSON.parse(body).files[0],
+        filePath = path.join(now, fileName)
+
+      UserModel
+      .findByIdAndUpdate(creator, {avatar: filePath}, {new: true})
+      .then((user: IUser) => {
+        if (user) {
+          res.status(200).json(UTIL.getSignedUser(user))
+          new Logger(log)
+        }
+      })
+      .catch((err: Error) => {
+        new Err(res, err, log)
+      })
+    })
+  })
+  .on('error', (err: Error) => {
+    res.status(500).json({err})
+  })
+
+  form.parse(req)
 }
 
 /**
@@ -1009,6 +1078,9 @@ export function createRoutes(router: Router, setRouteVar: RequestHandler, auth: 
 
   // update route
   router.patch('/self', auth, update)
+
+  // update user avatar
+  router.put('/self/avatar', setRouteVar, auth, avatar)
 
   // delete route
   router.delete('/self', auth, remove)

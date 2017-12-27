@@ -182,15 +182,18 @@ PostSchema.virtual('averageRating').get(function() {
 })
 
 PostSchema.pre('save', function(next: Function): void {
-  // Set last modified time when values of only following props are changed
-  UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish'])
-
   if (!this.slug) {
     this.slug = this.title
   }
 
   this.wasNew = this.isNew
 
+  next()
+})
+
+PostSchema.pre('findOneAndUpdate', function(next: Function): void {
+  // Set last modified time when values of only following props are changed
+  UTIL.setUpdateTime(this, ['slug', 'title', 'content', 'excerpt', 'hero', 'tags', 'publish'])
   next()
 })
 

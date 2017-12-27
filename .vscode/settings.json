@@ -4,7 +4,8 @@
     "**/.DS_Store": true,
     "**/node_modules/": true,
     "**/dist/": true,
-    "**/dev/": true
+    "**/dev/": true,
+    "**/uploads/": true
   },
   "editor.fontSize": 16,
   "editor.mouseWheelZoom": false,

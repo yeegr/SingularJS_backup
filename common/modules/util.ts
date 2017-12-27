@@ -4,21 +4,6 @@ import * as CONST from '../options/constants'
 export * from '../../api/src/modules/util'
 
 /**
- * Capitalizes first letter of the string
- *
- * @param {string} str
- * @param {boolean} [lowerCaseRest = true]
- * @returns {string}
- */
-export function capitalizeFirstLetter(str: string, lowerCaseRest: boolean = true): string {
-  if (lowerCaseRest) {
-    str = str.toLowerCase() 
-  }
-
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-/**
  * Returns current timestamp
  *
  * @export
@@ -78,6 +63,7 @@ export function validateHandle(handle: string): boolean {
 /**
  * Check if user password is formatted correctly
  *
+ * @export
  * @param {string} password
  * @returns {boolean}
  */
@@ -88,6 +74,7 @@ export function validatePassword(password: any): boolean {
 /**
  * Check if China personal id number is formatted correctly
  *
+ * @export
  * @param {string} pid
  * @returns {boolean}
  */
@@ -99,6 +86,7 @@ export function isChinaPid(pid: string): boolean {
 /**
  * Check if locale code is formatted correctly
  *
+ * @export
  * @param {string} code
  * @returns {boolean}
  */
@@ -110,7 +98,7 @@ export function isLocaleCode(code: string): boolean {
 /**
  * Check if country code is formatted correctly
  *
- *
+ * @export
  * @param {string} code
  * @returns {boolean}
  */
@@ -143,11 +131,15 @@ export function obj2enum(obj: any): string[] {
 /**
  * Converts a key-value-pair object to a tuple
  *
- *
- * @param {any} obj
- * @returns {any[]}
+ * @export
+ * @param {IKvp} obj
+ * @returns {[string, any]}
  */
-export function kvp2tuple(obj: any): any[] {
+interface IKvp {
+  [key: string]: any
+}
+
+export function kvp2tuple(obj: IKvp): [string, any] {
   let arr = [],
     tmp = {}
 
@@ -206,18 +198,45 @@ export function zerorize(n: number, digit: number = 2): string {
 }
 
 /**
- * Interface for setting the options of the random alphanumeric string
- *
- * @interface ICharOptions
+ * Split string into two at specified position
+ * 
+ * @export
+ * @param {string} str 
+ * @param {number} pos 
+ * @returns {[string, string]} 
  */
-interface ICharOptions {
-  type?: string
-  upper?: boolean
-  lower?: boolean
-  numeric?: boolean
-  specials?: boolean
-  space?: boolean
-  custom?: string
+export function splitString(str: string, pos: number): [string, string] {
+  return [str.substring(0, pos), str.substring(pos)]
+}
+
+/**
+ * Insert string into another at specified position
+ * 
+ * @export
+ * @param {string} str 
+ * @param {number} pos 
+ * @param {string} insert 
+ * @returns {string} 
+ */
+export function spliceString(str: string, pos: number, insert: string): string {
+  let [first, last] = splitString(str, pos)
+  return first + insert + last
+}
+
+/**
+ * Capitalizes first letter of the string
+ *
+ * @export
+ * @param {string} str
+ * @param {boolean} [lowerCaseRest = true]
+ * @returns {string}
+ */
+export function capitalizeFirstLetter(str: string, lowerCaseRest: boolean = true): string {
+  if (lowerCaseRest) {
+    str = str.toLowerCase() 
+  }
+
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 /**********************************************
@@ -226,7 +245,6 @@ interface ICharOptions {
 
 /**
  * Sorts an object's properties alphabetically by key
- *
  *
  * @export
  * @param {object} obj
@@ -259,16 +277,4 @@ export function sortObjectPropsByKey(obj: object): object {
   }
 
   return tmp
-}
-
-/**
- * Check if input is NOT undefined, null, or empty string
- *
- *
- * @export
- * @param {any} input
- * @returns {boolean}
- */
-export function isNotUndefinedNullEmpty(input: any): boolean {
-  return (input !== undefined) && (input !== null) && (input.toString().length > 0)
 }

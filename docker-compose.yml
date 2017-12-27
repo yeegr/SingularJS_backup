@@ -23,14 +23,37 @@ services:
     image: ${APP_TITLE}/api
     depends_on:
       - mongo
-    #expose:
-    #  - "3000"
     ports:
       - "3000:3000"
     volumes:
       - "./api/dev/root.js:/usr/app/root.js"
+      - "./uploads:/uploads"
     env_file:
       - ./docker/env/${NODE_ENV}/api.env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    tty: true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50k"
+        max-file: "1"
+
+  upload:
+    container_name: ${APP_TITLE}-upload
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/${NODE_ENV}/upload.dockerfile
+    image: ${APP_TITLE}/upload
+    depends_on:
+      - mongo
+    ports:
+      - "3001:3000"
+    volumes:
+      - "./upload/dev/root.js:/usr/app/root.js"
+      - "./uploads:/uploads"
+    env_file:
+      - ./docker/env/${NODE_ENV}/upload.env
     environment:
       - NODE_ENV=${NODE_ENV}
     tty: true

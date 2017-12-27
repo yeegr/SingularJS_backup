@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response, Router } from 'express'
+import { Request, Response, NextFunction, Router } from 'express'
 
 import * as debug from 'debug'
 import * as mongoose from 'mongoose'
@@ -27,7 +27,6 @@ class HelperRouter {
    */
   constructor() {
     this.router = Router()
-    this.routes()
   }
 
   /**

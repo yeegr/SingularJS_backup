@@ -1,7 +1,8 @@
 import { Document, Schema, NativeError, Model } from 'mongoose'
 import { Request, Response } from 'express'
-import * as moment from 'moment-timezone'
 import * as jwt from 'jsonwebtoken'
+import * as moment from 'moment-timezone'
+import * as randomstring from 'randomstring'
 
 import { CONFIG, CONST, ERRORS } from '../../../common'
 
@@ -25,9 +26,12 @@ import Download from '../models/actions/DownloadModel'
 /**
  * Formats MongoDB native error to string
  * 
+ * @export 
  * @param {Response} res 
  * @param {NativeError} err 
- * @param {string} action 
+ * @param {string} [act=''] 
+ * @param {string} [db=''] 
+ * @returns {void}
  */
 export function formatError(res: Response, err: NativeError, act: string = '', db: string = ''): void {
   let status: number = 500,
@@ -60,8 +64,9 @@ export function formatError(res: Response, err: NativeError, act: string = '', d
 }
 
 /**
- * Returns data model from action
+ * Gets data model from action
  * 
+ * @export
  * @param {string} action
  * @returns {any}
  */
@@ -102,10 +107,11 @@ export function getModelFromAction(action: string): any {
 }
 
 /**
- * Returns data model from name
+ * Gets data model from model name
  * 
+ * @exports
  * @param {string} key 
- * @returns {any}
+ * @returns {Model<any>}
  */
 export function getModelFromName(key: string): Model<any> {
   let modelName = this.capitalizeFirstLetter(key),
@@ -145,10 +151,11 @@ export function getModelFromName(key: string): Model<any> {
 }
 
 /**
- * Returns data model name from object key
+ * Gets data model name from object key
  * 
+ * @export
  * @param {string} path
- * @returns {string}
+ * @returns {string|any}
  */
 export function getModelNameFromPath(path: string): string|any {
   let key = path.toLowerCase(),
@@ -179,14 +186,55 @@ export function getModelNameFromPath(path: string): string|any {
   return model
 }
 
+/**
+ * Gets asset root folder name from data model
+ * 
+ * @export
+ * @param {string} name 
+ * @returns {string} 
+ */
+export function getRootFolderFromModelName(name: string): string {
+  let root = ''
+
+  switch (name) {
+    case CONST.USER_TYPES.CONSUMER:
+      root = 'consumers'
+    break
+
+    case CONST.USER_TYPES.SUPPLIER:
+      root = 'suppliers'
+    break
+
+    case CONST.USER_TYPES.PLATFORM:
+      root = 'platforms'
+    break
+
+    case CONST.ACTION_TARGETS.POST:
+      root = 'posts'
+    break
+
+    case CONST.ACTION_TARGETS.EVENT:
+      root = 'events'
+    break
+
+    case CONST.ACTION_TARGETS.PRODUCT:
+      root = 'products'
+    break
+
+  }
+
+  return root
+}
+
 
 /**
- * Returns data model name from object key
+ * Gets list of keys to be populated from path
  * 
+ * @export
  * @param {string} path
  * @returns {string}
  */
-export function getSelectFieldsFromPath(path: string): string|any {
+export function getSelectFieldsFromPath(path: string): string {
   let key = getModelNameFromPath(path),
     select = ''
 
@@ -203,6 +251,7 @@ export function getSelectFieldsFromPath(path: string): string|any {
 /**
  * Returns creator and content data model
  * 
+ * @export
  * @param {Request} req
  * @returns {[Model<IUser>, Model<IContent>]}
  */
@@ -213,20 +262,43 @@ export function getModels(req: Request): [Model<IUser>, Model<IContent>] {
 }
 
 /**
- * Returns an increment object for findOneAndUpdate (get)
+ * Returns a signed user
  * 
- * @param {Request} req 
- * @param {any} inc 
+ * @export
+ * @param {IUser} user 
+ * @return {object}
  */
-export function getIncrement(req: Request, inc: number = 1): any {
-  let $inc: any = {}
-  $inc[req.routeVar.contentCounter] = inc
-  return {$inc}
+export function getSignedUser(user: IUser): object {
+  let data: any = user.toJSON(),
+    token: string = signToken(user)
+  return Object.assign({}, data, {token})
+}
+
+/**
+ * Signs a token using user id
+ * 
+ * @export
+ * @param {IUser} user 
+ * @returns {string}
+ */
+export function signToken(user: IUser): string {
+  let now: moment.Moment = moment(),
+    ref: string = user.ref.toUpperCase(),
+    duration: [number, moment.unitOfTime.DurationConstructor] = CONFIG.USER_TOKEN_EXPIRATION[ref]
+  
+  return jwt.sign({
+    iss: CONFIG.PROJECT_TITLE,
+    sub: user._id,
+    ref,
+    iat: now.valueOf(),
+    exp: now.add(duration[0], duration[1]).valueOf()
+  }, CONFIG.JWT_SECRETS[ref])
 }
 
 /**
  * Returns user id and reference
  * 
+ * @export
  * @param {Request} req
  * @returns {[Schema.Types.ObjectId, string]} 
  */
@@ -236,6 +308,20 @@ export function getLoginedUser(req: Request): [Schema.Types.ObjectId, string] {
     ref: string = user.ref
 
   return [id, ref]
+}
+
+/**
+ * Returns an increment object for findOneAndUpdate (get)
+ * 
+ * @export
+ * @param {Request} req 
+ * @param {number} [inc=1] 
+ * @returns {*} 
+ */
+export function getIncrement(req: Request, inc: number = 1): any {
+  let $inc: any = {}
+  $inc[req.routeVar.contentCounter] = inc
+  return {$inc}
 }
 
 /***********************************
@@ -260,6 +346,7 @@ export function addComment(doc: any, rating: number): void {
 /**
  * Updates total rating when a comment is updated 
  * 
+ * @export
  * @param {any} doc 
  * @param {number} diff 
  * @returns {void}
@@ -296,8 +383,9 @@ export function removeComment(doc: any, rating: number): void {
  * certain fields can only be updated via program
  * 
  * @export
- * @param {Document} doc 
- * @param {string[]]} keys 
+ * @param {string} model 
+ * @param {*} body
+ * @returns {*}
  */
 export function sanitizeInput(model: string, body: any): any {
   let keyList: string = '_id,status,updated,totalRating,commentCount,viewCount,likeCount,dislikeCount,saveCount,shareCount,downloadCount',
@@ -482,6 +570,7 @@ export function getPropKey(input: string): string {
 /**
  * Gets query keywords
  * 
+ * @export
  * @param {Request} req 
  * @param {string} fields
  * @returns {*} 
@@ -509,6 +598,7 @@ export function getListKeywordQuery(req: Request, fields: string): any {
 /**
  * Assembles query keyword regexp
  * 
+ * @export
  * @param {string} str 
  * @param {string} [type = 'AND']
  * @returns {RegExp}
@@ -607,52 +697,73 @@ export function getAverageRating(doc: IContent): number {
   return (doc.commentCount > 0) ? Math.round(doc.totalRating / doc.commentCount * 2) / 2 : null
 }
 
-/**
- * Signs a token using user id
- * 
- * @func signToken
- * @param {IUser} user 
- */
-export function signToken(user: IUser): string {
-  let now: moment.Moment = moment(),
-    ref: string = user.ref.toUpperCase(),
-    duration: [number, moment.unitOfTime.DurationConstructor] = CONFIG.USER_TOKEN_EXPIRATION[ref]
-  
-  return jwt.sign({
-    iss: CONFIG.PROJECT_TITLE,
-    sub: user._id,
-    ref,
-    iat: now.valueOf(),
-    exp: now.add(duration[0], duration[1]).valueOf()
-  }, CONFIG.JWT_SECRETS[ref])
-}
 
 /**
- * Returs a signed user
+ * Check if any element in array 1 is also in array 2
  * 
- * @param {IUser} user 
+ * @export
+ * @param {any[]} arr1 
+ * @param {any[]} arr2 
+ * @returns {boolean} 
  */
-export function getSignedUser(user: IUser): object {
-  let data: any = user.toJSON(),
-    token: string = signToken(user)
-  return Object.assign({}, data, {token})
-}
-
 export function matchAnyInArray(arr1: any[], arr2: any[]): boolean {
   let found = false
 
   for (let i = 0, j = arr1.length; i < j; i++) {
     if (arr2.indexOf(arr1[i]) > -1) {
       found = true
+      break
     }
   }
 
   return found
 }
 
+/**
+ * Check if user has roles that include roles to create content
+ * 
+ * @export
+ * @param {IUser} user 
+ * @param {string} contentType 
+ * @returns {boolean} 
+ */
 export function checkUserCreateRight(user: IUser, contentType: string): boolean {
   const userRoles = user.roles,
     creatorRoles = CONST.CONTENT_CREATOR_ROLES[contentType.toUpperCase()]
 
   return matchAnyInArray(userRoles, creatorRoles)
+}
+
+
+
+
+/**
+ * Normalizes file name
+ * 
+ * @export
+ * @param {string} fileName 
+ * @returns {string} 
+ */
+export function normalizeFilename(fileName: string): string {
+  let tmpName = fileName.replace(/\.jpeg$/, '.jpg')
+  return tmpName
+}
+
+/**
+ * Renames file with random string
+ * 
+ * @export
+ * @param {string} fileName 
+ * @returns {string} 
+ */
+export function renameFile(fileName: string): string {
+  let tmpName = normalizeFilename(fileName),
+    ext = tmpName.substring(tmpName.lastIndexOf('.')),
+    str = randomstring.generate({
+      length: CONFIG.UPLOAD_FILENAME_LENGTH,
+      charset: CONFIG.UPLOAD_FILENAME_CHARSET,
+      capitalization: 'lowercase'
+    })
+
+  return str + ext
 }
