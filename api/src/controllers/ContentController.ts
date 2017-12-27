@@ -1,16 +1,22 @@
 import { NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import { Schema, Model } from 'mongoose'
 import * as validator from 'validator'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as request from 'request'
+import { IncomingForm, Fields, Files } from 'formidable'
 
 import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
 import { Logger, Err } from '../modules'
 
+import Media, { IMedia } from '../models/share/MediaModel'
 import IUser from '../interfaces/users/IUser'
 import IContent from '../interfaces/share/IContent'
 
 /**
  * Initializes listing 
  * 
+ * @export
  * @func list
  * @param {Request} req 
  * @param {Response} res
@@ -45,6 +51,7 @@ export function list(req: Request, res: Response): void {
 /**
  * Returns listing results
  *
+ * @export
  * @func search
  * @param {Request} req
  * @param {Response} res
@@ -89,6 +96,7 @@ const search = (req: Request, res: Response, creator?: Schema.Types.ObjectId) =>
 /**
  * Gets single entry by param of 'slug'
  *
+ * @export
  * @func get
  * @param {Request} req
  * @param {Response} res
@@ -134,6 +142,7 @@ export function get(req: Request, res: Response): void {
 /**
  * Lists comments on item
  * 
+ * @export
  * @func comments
  * @param {Request} req 
  * @param {Response} res 
@@ -187,6 +196,7 @@ export function comments(req: Request, res: Response): void {
 /**
  * Gets likes, dislikes, saves, shares and downloads of item
  * 
+ * @export
  * @func sublist
  * @param {Request} req 
  * @param {Response} res 
@@ -239,6 +249,7 @@ export function sublist(req: Request, res: Response): void {
 /**
  * Check proposed slug is available to user
  *
+ * @export
  * @func slug
  * @param {Request} req
  * @param {Response} res
@@ -268,6 +279,7 @@ export function isUnique(req: Request, res: Response): void {
 /**
  * Creates single new entry
  *
+ * @export
  * @func create
  * @param {Request} req
  * @param {Response} res
@@ -320,6 +332,7 @@ export function create(req: Request, res: Response): void {
 /**
  * Updates entry by params of 'slug'
  *
+ * @export
  * @func update
  * @param {Request} req
  * @param {Response} res
@@ -370,8 +383,112 @@ export function update(req: Request, res: Response): void {
 }
 
 /**
+ * Clears entire gallery
+ * 
+ * @export
+ * @func clear
+ * @param {Request} req 
+ * @param {Response} res 
+ */
+export function clear(req: Request, res: Response, next: NextFunction): void {
+  req.body = {
+    gallery: []
+  }
+
+  next()
+}
+
+/**
+ * Upload media to gallery
+ * 
+ * @export
+ * @func upload
+ * @param {Request} req 
+ * @param {Response} res 
+ */
+export function upload(req: Request, res: Response): void {
+  const [creator, creatorRef] = UTIL.getLoginedUser(req),
+    DataModel: Model<IContent> = UTIL.getModelFromName(req.routeVar.contentType),
+    root: string = UTIL.getRootFolderFromModelName(req.routeVar.contentType),
+    slug: string = req.params.slug
+
+  DataModel
+  .findOne({
+    creator,
+    slug
+  })
+  .then((data: IContent) => {
+    if (data) {
+      let form: IncomingForm = new IncomingForm(),
+        formData: any = {
+          type: CONST.IMAGE_TYPES.PHOTO,
+          path: path.join(root,data._id.toString())
+        },
+        log: any = {
+          creator,
+          creatorRef,
+          target: data._id,
+          targetRef: req.routeVar.contentType,
+          action: CONST.USER_ACTIONS.COMMON.UPLOAD,
+          ua: req.body.ua || req.ua
+        }
+      
+      form.multiples = true
+    
+      form
+      .on('file', (fields: Fields, file: any) => {
+        let fileName = UTIL.renameFile(file.name),
+          key = fileName.substring(0, fileName.lastIndexOf('.'))
+
+        formData[key] = {
+          value: fs.createReadStream(file.path),
+          options: {
+            filename: UTIL.renameFile(file.name)
+          }
+        }
+      })
+      .on('end', () => {
+        request
+        .post({
+          url: CONST.UPLOAD_SERVER,
+          formData
+        }, (err: Error, response, body) => {
+          if (err) console.log(err)
+
+          let gallery: any[] = data.gallery || [],
+            fileList = JSON.parse(body).files
+
+          fileList.forEach((m: IMedia) => {
+            gallery.push(m)
+          })
+
+          DataModel
+          .findByIdAndUpdate(data._id, {gallery}, {new: true})
+          .then((updated: IContent) => {
+            res.status(201).json(updated)
+            new Logger(log)
+          })
+        })
+      })
+      .on('error', (err: Error) => {
+        console.log(err)
+      })
+
+      form.parse(req)
+
+    } else {
+      res.status(404).send()
+    }
+  })
+  .catch((err: Error) => {
+    console.log(err)
+  })
+}
+
+/**
  * Deletes entry by params of 'slug'
  *
+ * @export
  * @func remove
  * @param {Request} req
  * @param {Response} res
@@ -379,8 +496,8 @@ export function update(req: Request, res: Response): void {
  */
 export function remove(req: Request, res: Response): void {
   const [creator, creatorRef] = UTIL.getLoginedUser(req),
-    slug: string = req.params.slug,
-    [UserModel, DataModel] = UTIL.getModels(req)
+    [UserModel, DataModel] = UTIL.getModels(req),
+    slug: string = req.params.slug
 
   let log: any = {
     creator,
@@ -443,6 +560,12 @@ export function createRoutes(router: Router, auth: RequestHandler, setRouteVar: 
 
   // create route
   router.post('/', auth, setRouteVar, create)
+
+  // create gallery
+  router.put('/:slug/gallery', auth, setRouteVar, upload)
+
+  // clear gallery
+  router.delete('/:slug/gallery', auth, setRouteVar, clear, update)
 
   // update route
   router.patch('/:slug', auth, setRouteVar, update)

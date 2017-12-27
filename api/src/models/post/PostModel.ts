@@ -4,6 +4,8 @@ import { CONST, UTIL } from '../../../../common'
 
 import Consumer, { IConsumer } from '../users/ConsumerModel'
 
+import Media from '../../models/share/MediaModel'
+
 import IPost from '../../interfaces/post/IPost'
 
 let PostSchema: Schema = new Schema({
@@ -52,6 +54,8 @@ let PostSchema: Schema = new Schema({
   },
   // tags
   tags: [String],
+  // media gallery
+  gallery: [Media],
   // TODO: publish time
   publish: {
     type: Number

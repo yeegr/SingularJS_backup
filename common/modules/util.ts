@@ -4,6 +4,17 @@ import * as CONST from '../options/constants'
 export * from '../../api/src/modules/util'
 
 /**
+ * Check if value is NOT undefined, null or an empty string
+ * 
+ * @export
+ * @param {*} input 
+ * @returns {boolean} 
+ */
+export function isNotUndefinedNullEmpty(input: any): boolean {
+  return (input !== undefined) && (input !== null) && (typeof(input) === 'string' && input.length > 0)
+}
+
+/**
  * Returns current timestamp
  *
  * @export

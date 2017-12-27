@@ -19,6 +19,58 @@ function obj2enum(obj: any): string[] {
 export const UPLOAD_SERVER: string = 'http://upload:3000/'
 export const STATIC_SERVER: string = 'http://static/'
 
+/** 
+ * .75x | ldpi    | 120dpi | 240px
+ * 1x   | mdpi    | 160dpi | 320px
+ * 1.5x | hdpi    | 240dpi | 480px
+ * 2x   | xhdpi   | 320dpi | 720px
+ * 3x   | xxhdpi  | 480dpi | 1080px
+ * 4x   | xxxhdpi | 640dpi | 1440px 
+*/
+
+export const IMAGE_TYPES = {
+  AVATAR: 'avatar',
+  PHOTO: 'photo'
+}
+
+export const THUMBNAIL = '.thumb'
+
+interface IImageSizes {
+  [key: string]: [[number, number, boolean]] 
+  AVATAR: [[number, number, boolean]] 
+  PHOTO: [[number, number, boolean]] 
+}
+
+export const IMAGE_SIZES: IImageSizes = {  
+  AVATAR: [
+    [48, 48, true],
+    // for Android
+    [32, 32, false],
+    [48, 48, false],
+    [64, 64, false],
+    [96, 96, false],
+    [128, 128, false],
+    // for iOS
+    [40, 40, false],
+    [80, 80, false],
+    [120, 120, false]
+  ],
+  PHOTO: [
+    [240, null, true],
+    // for Android
+    [320, null, false],
+    [480, null, false],
+    [720, null, false],
+    [1080, null, false],
+    [1440, null, false],
+    // for iOS
+    [640, null, false],  // iPhone SE
+    [750, null, false],  // iPhone 6/7/8
+    [1125, null, false], // iPhone X
+    [1242, null, false]  // iPhone 6/7/8 Plus
+  ]
+}
+
 /**
  * TOTP types
  */
@@ -125,6 +177,7 @@ interface IUserActions {
     UNIQUE: string
     CREATE: string
     UPDATE: string
+    UPLOAD: string
     DELETE: string
     LOGIN: string
     LOGOUT: string
@@ -174,6 +227,7 @@ export const USER_ACTIONS: IUserActions = {
     UNIQUE: 'UNIQUE',
     CREATE: 'CREATE',
     UPDATE: 'UPDATE',
+    UPLOAD: 'UPLOAD',
     DELETE: 'DELETE',
     LOGIN: 'LOGIN',
     LOGOUT: 'LOGOUT',

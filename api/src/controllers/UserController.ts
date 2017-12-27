@@ -49,7 +49,6 @@ export function list(req: Request, res: Response): void {
   .exec()
   .then((data: IUser[]) => {
     if (data) {
-      console.log(data)
       res.status(200).json(data)
     } else {
       res.status(404).send()
@@ -768,10 +767,11 @@ export function update(req: Request, res: Response): void {
 export function avatar(req: Request, res: Response): void {
   const [creator, creatorRef] = UTIL.getLoginedUser(req),
     UserModel: Model<IUser> = UTIL.getModelFromName(creatorRef),
-    now = UTIL.getTimestamp().toString()
+    root: string = UTIL.getRootFolderFromModelName(creatorRef),
+    now: string = UTIL.getTimestamp().toString()
   
   let form: IncomingForm = new IncomingForm(),
-    filePath = path.join(UTIL.getRootFolderFromModelName(creatorRef), creator.toString(), now),
+    filePath = path.join(root, creator.toString(), now),
     log = {
       creator,
       creatorRef,
@@ -784,13 +784,14 @@ export function avatar(req: Request, res: Response): void {
   form
   .on('file', (fields: Fields, file: any) => {
     let formData = {
+      type: CONST.IMAGE_TYPES.AVATAR,
+      path: filePath,
       file: {
         value: fs.createReadStream(file.path),
         options: {
           filename: UTIL.renameFile(file.name)
         }
-      },
-      path: filePath
+      }
     }
 
     request.post({

@@ -7,7 +7,7 @@ import { Fields, Files, IncomingForm } from 'formidable'
 import * as mv from 'mv'
 import * as randomstring from 'randomstring'
 
-import { CONFIG, UTIL, ERRORS } from '../../common/'
+import { CONST, UTIL, ERRORS } from '../../common/'
 
 /**
  * FileRouter class
@@ -27,28 +27,37 @@ class FileRouter {
     this.router = Router()
   }
 
-  private resizer = (initPath: string, type: string = 'AVATAR') => {
-    let arr = CONFIG.IMAGE_SIZES[type.toUpperCase()],
-      [first, last] = UTIL.splitString(initPath, initPath.lastIndexOf('.'))
+  private resizer = (initPath: string, set: [number, number, boolean]) => {
+    let [width, height, isThumb] = set,
+      [first, last] = UTIL.splitString(initPath, initPath.lastIndexOf('.')),
+      txt = (height === null) ? '' : ('x' + height.toString()),
+      tmp = isThumb ? CONST.THUMBNAIL : ('@' + width.toString() + txt),
+      finalPath = first + tmp + last
 
-    arr.forEach((set: number[]) => {
-      let filePath = first + '@' + set[0].toString() + 'x' + set[1].toString() + last
-
-      sharp(initPath)
-      .resize(set[0], set[1])
-      .toFile(filePath, (err, info) => {
-        if (err) console.log(err)
-      })
+    sharp(initPath)
+    .resize(width, height)
+    .toFile(finalPath, (err, info) => {
+      if (err) console.log(err)
     })
   }
 
-  private upload = (req: Request, res: Response, next: NextFunction) => {
+  private processor = (initPath: string, type: string = 'AVATAR') => {
+    let that = this,
+      arr = CONST.IMAGE_SIZES[type.toUpperCase()],
+      [first, last] = UTIL.splitString(initPath, initPath.lastIndexOf('.'))
+
+    arr.forEach((set: [number, number, boolean]) => {
+      that.resizer(initPath, set)
+    })
+  }
+
+  private post = (req: Request, res: Response, next: NextFunction) => {
     const that = this
 
     let form: IncomingForm = new IncomingForm(),
-      files: string[] = [],
+      files: any[] = [],
       fields: any = {
-        type: 'avatar',
+        type: CONST.IMAGE_TYPES.AVATAR,
         path: '/'
       }
 
@@ -67,11 +76,14 @@ class FileRouter {
         if (err) {
           console.log(err)
         } else {
-          that.resizer(dest, fields.type)
+          that.processor(dest, fields.type)
         }
       })
 
-      files.push(file.name)
+      files.push({
+        path: file.name,
+        thumb: UTIL.spliceString(file.name, file.name.lastIndexOf('.'), CONST.THUMBNAIL)
+      })
     })
     .on('end', () => {
       res.status(201).json({ files })
@@ -91,8 +103,8 @@ class FileRouter {
    * @return {void}
    */
   public routes(): void {
-    // user router
-    this.router.post('/', this.upload)
+    // post router
+    this.router.post('/', this.post)
   }
 }
 

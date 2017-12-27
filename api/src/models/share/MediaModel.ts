@@ -20,4 +20,6 @@ let MediaSchema: Schema = new Schema({
   _id: false
 })
 
+export { IMedia }
+
 export default MediaSchema
