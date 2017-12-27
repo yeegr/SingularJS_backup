@@ -27,7 +27,7 @@ services:
       - "3000:3000"
     volumes:
       - "./api/dev/root.js:/usr/app/root.js"
-      - "./uploads:/uploads"
+      - "./public:/public"
     env_file:
       - ./docker/env/${NODE_ENV}/api.env
     environment:
@@ -51,7 +51,7 @@ services:
       - "3001:3000"
     volumes:
       - "./upload/dev/root.js:/usr/app/root.js"
-      - "./uploads:/uploads"
+      - "./public:/public"
     env_file:
       - ./docker/env/${NODE_ENV}/upload.env
     environment:

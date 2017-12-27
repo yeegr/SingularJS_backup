@@ -545,16 +545,15 @@ Windows
 
 SingularJS将会开发、使用以下几个容器
 
-| 名称 | 地址 | 类型 | 功能 |
-| :- | :- | :- | :- |
-| 数据库 |  | MongoDB | 负责保存服务和用户数据 |
-| API | api.domain.com | Node.js | 负责前后端之间的主要通讯传输 |
-| 消费者App | app.domain.com | Node.js | 负责host消费者的web app |
-| 服务商APP | sp.domain.com | Node.js | 负责host服务商的web app |
-| 管理员APP | admin.domain.com | Node.js | 负责host管理员的web app |
-| 静态文件 | static.domain.com | Nginx | 负责host静态文件，如UI图片、CSS等 |
-| 文件处理 | file.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、PDF等 |
-| 用户文件 | uploads.domain.com | Nginx | 负责host处理过的用户文件 |
+| 名称 | 说明 | 网址 | 类型 | 功能 |
+| :- | :- | :- | :- | :- |
+| db | 数据库 | MongoDB | 负责保存服务和用户数据 |
+| api | API | api.domain.com | Node.js | 负责前后端之间的主要通讯传输 |
+| app | 消费者App | app.domain.com | Node.js | 负责host消费者的web app |
+| sp | 服务商APP | sp.domain.com | Node.js | 负责host服务商的web app |
+| admin | 管理员APP | admin.domain.com | Node.js | 负责host管理员的web app |
+| static | 静态文件 | static.domain.com | Nginx | 负责host静态文件，如UI图片、CSS以及用户上传的文件等 |
+| upload | 文件处理 | upload.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、PDF等 |
 
 signup to docker image
 
@@ -671,13 +670,15 @@ SingularJS
 ├─┬─common          // 静态文件夹，用以保存各级服务共享的代码
 │ ├───locales       // 语言包
 │ ├─┬─modules       // 共享的模块
+│ │ ├───util        // 共享的函数
 │ │ ├───app
 │ │ └───web
 │ ├─┬─options       // 项目设置
-│ │ ├───config      // 项目变量
-│ │ └───constants   // 共享的常量
-│ ├───...
-│ └───util          // 共享的函数
+│ │ ├───config      // 项目常量
+│ │ ├───constants   // 共享的常量
+│ │ ├───errors      // 错误常量
+│ │ └───ignored     // Git ignored，用于保存敏感信息，如第三方服务的用户名和密码等
+│ └───...
 │
 ├─┬─devops          // 静态文件夹，用以保存服务器脚本
 │ ├───staging
@@ -697,12 +698,12 @@ SingularJS
 │   ├───production
 │   └───staging
 │
-├─┬─file            // 后端服务，用以处理用户上传的文件
+├─┬─upload          // 后端服务，用以处理用户上传的文件
 │ ├───dev
 │ ├───dist
 │ └───src
 │
-├─┬─uploads         // 静态文件夹，用以保存用户上传的文件
+├─┬─public          // 静态文件夹，用以保存用户上传的文件
 │ ├───events
 │ ├───products
 │ ├───...

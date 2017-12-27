@@ -5,7 +5,7 @@
     "**/node_modules/": true,
     "**/dist/": true,
     "**/dev/": true,
-    "**/uploads/": true
+    "**/public/": true
   },
   "editor.fontSize": 16,
   "editor.mouseWheelZoom": false,

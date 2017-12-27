@@ -69,7 +69,7 @@ class FileRouter {
       fields[field.toString()] = value
     })
     .on('file', (field: Fields, file: any) => {
-      let dest: string = path.join(__dirname, 'uploads', fields.path, file.name)
+      let dest: string = path.join(__dirname, 'public', fields.path, file.name)
 
       // move file from /tmp to destination, retaining original name
       mv(file.path, dest, {mkdirp: true}, (err: Error) => {
