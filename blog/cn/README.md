@@ -809,6 +809,12 @@ mongoose-delete
 
 既然已明确将用户分为消费者、服务商和平台三类，API也相对应的分别设立了Consumer、Supplier和Platform三个表（collections）。有人会问，虽然有三类用户，但所需的绝大部分功能都是同样的，如登录、注册、验证手机、邮箱等，所不同的主要是权限，那么为什么不使用单一的用户表，利用用户角色区分权限呢？这里主要的考虑是，有的用户会有双重身份，如司机也可以是乘客，卖家也可以是买家。使用统一的用户表，就要为不同的身份设立不同的用户名、密码、昵称等，更为复杂。而且，三类用户各自也都有不同权限的角色，搅到一起就太混乱了。而代码重复的问题可以通过抽象化解决，如在API项目下，UserController和ContentController就分别将用户和内容中相同或相近的代码进行了抽象化，被抽象化的几个路由文件(router)就几乎空无一物了。
 
+### TypeScript vs. Flow
+
+99%的代码，或者说，100%的JavaScript代码，采用了TypeScript。既然SingularJS大量采用了React，为什么不使用同是Facebook开发的Flow做类型强制，而要采用来自Microsoft，被广泛利用在Angular 2/4上的TypeScript呢？一是TypeScript年头比较久了，相对Flow来说，TypeScript的开发环境更为成熟、资源更为丰富，而我自己也更熟悉。二是因为有API和upload两个后端服务，采用TypeScript更适合SingularJS这种复杂的项目。
+
+更详细的比较可以参考[TypeScript vs Flow](https://github.com/niieani/typescript-vs-flowtype "TypeScript vs Flow")
+
 ACL
 
 consumer
