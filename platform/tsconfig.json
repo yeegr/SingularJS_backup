@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "outDir": "./build/",
+    "rootDir": "./src/",
+    "target": "es6",
+    "module": "es6",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "allowJs": true,
+    "jsx": "react",
+    "experimentalDecorators": true,
+    "preserveConstEnums": true
+  },
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "index.android.js",
+    "index.ios.js",
+    "build",
+    "node_modules",
+    "__tests__"
+  ]
+}

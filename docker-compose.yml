@@ -1,26 +1,33 @@
 version: '2'
 
+networks:
+  api-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+
 services:
   mongo:
     container_name: ${APP_TITLE}-${DB_NAME}
     image: ${APP_TITLE}/mongo
+    labels:
+      com.singularjs.db: ${DB_NAME}
     build:
       context: .
       dockerfile: ./docker/dockerfiles/${NODE_ENV}/mongo.dockerfile
-    labels:
-      com.singularjs.db: ${DB_NAME}
+    command: "--auth"
     expose:
       - "27017"
     volumes:
       - /data/${DB_PATH}:/data/${DB_NAME}:rw
-    command: --auth
 
   api:
     container_name: ${APP_TITLE}-api
+    image: ${APP_TITLE}/api
     build:
       context: .
       dockerfile: ./docker/dockerfiles/${NODE_ENV}/api.dockerfile
-    image: ${APP_TITLE}/api
     depends_on:
       - mongo
     ports:
@@ -41,10 +48,10 @@ services:
 
   upload:
     container_name: ${APP_TITLE}-upload
+    image: ${APP_TITLE}/upload
     build:
       context: .
       dockerfile: ./docker/dockerfiles/${NODE_ENV}/upload.dockerfile
-    image: ${APP_TITLE}/upload
     depends_on:
       - mongo
     ports:

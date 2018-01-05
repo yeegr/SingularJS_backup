@@ -11,10 +11,6 @@ import * as path from 'path'
 import * as CONFIG from '../../common/options/config'
 import FileRouter from './file'
 
-import {
-  USER_NAME, USER_PASSWORD, HOST, PORT, DB_NAME
-} from '../../docker/env/development/init'
-
 /**
  * Server class
  *

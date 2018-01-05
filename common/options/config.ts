@@ -14,6 +14,9 @@ export const ALIYUN_SMS_TEMPLATES: any = {
 }
 */
 
+export const DB_CONNECTION_RETRIES: number = 10
+export const DB_CONNECTION_INTERVAL: number = 500  // milliseconds
+
 export const COMPANY_NAME: string = '蓝光移客'
 export const COMPANY_FULL_NAME: string = '北京蓝光移客信息技术有限公司'
 export const PROJECT_TITLE: string = 'SingularJS'

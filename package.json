@@ -18,17 +18,16 @@
     "restart": "npm run stop && npm run start",
     "reset": "npm stop && npm run rmi && npm run build && npm start",
     "logs": "$npm_package_config_init && docker-compose logs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "ps": "$npm_package_config_init && docker-compose ps"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/yeegr/singularjs.git"
   },
-  "keywords": [],
+  "keywords": [
+    "Full-stack"
+  ],
   "author": "Stone Chen",
   "license": "ISC",
-  "devDependencies": {
-    "debug": "^3.1.0"
-  },
   "dependencies": {}
 }

@@ -1,10 +1,11 @@
 #!/bin/bash
 
-export NODE_ENV="development"
-export APP_TITLE="singular"
-export HOST="localhost"
-export PORT="27017"
-export DB_PATH="db2"
-export DB_NAME="db"
-export USER_NAME="user"
-export USER_PASSWORD="UserPassWord"
+source ./docker/env/development/init.env
+
+export NODE_ENV=$NODE_ENV
+export APP_TITLE=$APP_TITLE
+export PORT=$PORT
+export DB_PATH=$DB_PATH
+export DB_NAME=$DB_NAME
+export USER_NAME=$USER_NAME
+export USER_PASSWORD=$USER_PASSWORD

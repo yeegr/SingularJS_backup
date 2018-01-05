@@ -7,7 +7,7 @@
     "**/dev/": true,
     "**/public/": true
   },
-  "editor.fontSize": 16,
+  "editor.fontSize": 12,
   "editor.mouseWheelZoom": false,
   "editor.renderIndentGuides": false,
   "editor.tabSize": 2

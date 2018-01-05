@@ -553,9 +553,11 @@ SingularJS将会开发、使用以下几个容器
 | sp | 服务商APP | sp.domain.com | Node.js | 负责host服务商的web app |
 | admin | 管理员APP | admin.domain.com | Node.js | 负责host管理员的web app |
 | static | 静态文件 | static.domain.com | Nginx | 负责host静态文件，如UI图片、CSS以及用户上传的文件等 |
-| upload | 文件处理 | upload.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、PDF等 |
+| upload | 文件处理 | upload.domain.com | Node.js | 负责处理、保存用户提交的文件，如图片、视频、PDF等 |
 
-signup to docker image
+###### 注册Docker账户
+
+###### 注册阿里账户
 
 ##### Postman
 
@@ -587,18 +589,23 @@ signup to docker image
 
 关于Visual Studio Code的使用，我会另开博客详细介绍。
 
-
-
-
-
-
-
-
 ### Setup
 
-#### Node.js
+#### 安装Docker
 
-macOS中安装Node.js
+第一步工作是安装Docker
+
+1. 首先访问[Docker](https://www.docker.com/)并用开发Email建立一个Docker账号（Docker Id）。
+2. 其次访问[Docker社区版](https://www.docker.com/community-edition "Docker Community Edition")，并下载相应的Mac或Windows版本开始安装。
+3. 安装完成后用Docker Id登录。<span style="color: red">**注意**</span>，必须使用Docker Id，目前用Email也能登录界面，但在Terminal进行操作时会返回```unauthorized: incorrect username or password```的错误。
+4. 然后在系统中新建一个文件夹用以储存数据，我的文件夹默认是在根目录下——```/data```
+5. 用Docker界面将数据文件夹加至共享文件下后，“应用并重启”Docker。
+
+#### 安装Node.js
+
+第二步则是安装Node.js
+
+##### 在macOS中安装Node.js
 
 ```sh
 brew update
@@ -613,6 +620,8 @@ brew update
 brew upgrade node@8
 brew link node@8
 ```
+
+##### 在Windows中安装Node.js
 
 #### [npm](https://npmjs.com "npm")
 
@@ -644,9 +653,115 @@ npm i -g npm
 * [typings](https://github.com/typings/typings "Typings")
 * [webpack](https://webpack.js.org/ "webpack")
 
-#### 文件夹结构
+##### [Yarn](https://yarnpkg.com/zh-Hans/ "Yarn")
 
-安装好了Node.js和全局包，现在我们终于可以动手开发了。
+Yarn是一个由Facebook、Exponent、Google和Tilde共同开发的JavaScript包管理器，在2016年10月开源代码，2017年9月正式发布1.0版，还是个小鲜肉。相对于npm，Yarn主打稳定和安全，默认自动锁包，并能平行安装包。
+
+* [Yarn vs npm: Everything You Need to Know](https://www.sitepoint.com/yarn-vs-npm/)
+* [Yarn vs npm - The State of Node.js Package Managers](https://blog.risingstack.com/yarn-vs-npm-node-js-package-managers/)
+
+#### 安装TypeScript
+
+```sh
+npm i -g typescript
+npm i -D typescript
+```
+
+##### TypeScript vs. Flow
+
+99%的SingularJS代码，或者说，100%的JavaScript代码，采用了TypeScript。既然SingularJS大量采用了React，为什么不使用同是Facebook开发的Flow做类型强制，而要采用来自Microsoft，被广泛利用在Angular 2/4上的TypeScript呢？一是TypeScript年头比较久了，相对Flow来说，TypeScript的开发环境更为成熟、资源更为丰富，而我自己也更熟悉。二是因为有API和upload两个后端服务，采用TypeScript更适合SingularJS这种复杂的项目。
+
+更详细的比较可以参考[TypeScript vs Flow](https://github.com/niieani/typescript-vs-flowtype "TypeScript vs Flow")
+
+##### tsconfig.json
+
+##### TypeScript基础知识
+
+###### Type
+
+###### Interface
+
+###### Decorator
+
+#### Webpack
+
+#### Express
+
+##### Restify
+
+#### 安装React Native
+
+首先在全局安装react-native-cli指令
+
+```sh
+npm i -g react-native-cli
+```
+
+之后在项目根目录下执行
+
+```sh
+react-native init <app-name>
+```
+
+##### 报错
+
+首次执行react-native run-ios时，也许会出现下面这个错误
+
+```sh
+curl: (7) Failed to connect to github-production-release-asset-2e65be.s3.amazonaws.com port 443: Connection timed out
+```
+
+或
+
+```sh
+curl: (7) Failed to connect to github-production-release-asset-2e65be.s3.amazonaws.com port 443: Connection refused
+```
+
+很明显，亚马逊AWS被防火墙屏蔽了，一般的VPN软件也未必能下载。这个文件实际是`boost_1_63_0.tar.gz`，最简单的方式是使用浏览器访问[Boost for React Native](https://github.com/react-native-community/boost-for-react-native/releases)从Github下载（多数不需要翻墙）。然后，将文件拖拽到`~/Users/{user}/.rncache`文件夹内。这是个隐藏文件夹，可以用Finder打开`~/Users/{user}/`，然后<kbd>⌘CMD</kbd>+<kbd>⇧SHIFT</kbd>+<kbd>.</kbd>来显示隐藏文件。记着完成后再<kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd>一次以重新隐藏文件。
+
+
+#### Mongoose
+
+mongoose-delete
+
+### SingularJS components
+
+SingularJS将平行开发大量插件，以前端为主。
+
+* singular-textview
+* singular-h1 ... h6
+* singular-gridview ()
+* singular-tileview (1-by-1, 1-by-4, gutter)
+* singular-listview (ol/ul)
+* singular-webview
+* singular-popup
+* singular-glyph
+
+* singular-tag
+* singular-avatar (circle, square, rounded)
+* singular-input
+* singular-range
+* singular-rating
+* singular-selectview (singular-gridview)
+
+* singular-rte
+* singular-icon (top-right indicator)
+* singular-search (search page: history (clear) / suggestions)
+* singular-jumplistview (singular-listview x 2)
+* singular-editable-list
+
+* singular-list-item (icon? | title (indicator) / view | value? | arrow? / control)
+* singular-table: singular-order-item (title / unit / price)
+
+## 开发详情
+
+### 用户分类
+
+既然已明确将用户分为消费者、服务商和平台三类，API也相对应的分别设立了Consumer、Supplier和Platform三个表（collections）。有人会问，虽然有三类用户，但所需的绝大部分功能都是同样的，如登录、注册、验证手机、邮箱等，所不同的主要是权限，那么为什么不使用单一的用户表，利用用户角色区分权限呢？这里主要的考虑是，有的用户会有双重身份，如司机也可以是乘客，卖家也可以是买家。使用统一的用户表，就要为不同的身份设立不同的用户名、密码、昵称等，更为复杂。而且，三类用户各自也都有不同权限的角色，搅到一起就太混乱了。而代码重复的问题可以通过抽象化解决，如在API项目下，UserController和ContentController就分别将用户和内容中相同或相近的代码进行了抽象化，被抽象化的几个路由文件(router)就几乎空无一物了。
+
+### 文件夹结构
+
+安装好了Node.js和全局包，确定了用户分类，现在我们终于可以动手开发了。
 
 1. 在桌面生成一个新的文件夹，`SingularJS`。
 2. 右键点击`SingularJS`文件夹图片→服务→新建位于文件夹位置的终端窗口。
@@ -703,117 +818,48 @@ SingularJS
 │ ├───dist
 │ └───src
 │
-├─┬─public          // 静态文件夹，用以保存用户上传的文件
+├─┬─public          // 静态文件夹，用以保存用户上传的文件和其他网页资源
 │ ├───events
 │ ├───products
 │ ├───...
 │ └───users
 │
 ├─┬─consumer        // 消费者用户APP
-│ ├─┬─app
-│ │ ├───android
-│ │ └───ios
-│ ├─┬─web
-│ │ ├───dev
-│ │ ├───dist
-│ │ └───src
-│ └───redux
+│ ├───android
+│ ├───ios
+│ ├───dev
+│ ├───dist
+│ └─┬─src
+│   ├───native
+│   ├───redux
+│   └───web
 │
 ├─┬─supplier        // 服务商用户APP
-│ ├─┬─app
-│ │ ├───android
-│ │ └───ios
-│ ├─┬─web
-│ │ ├───dev
-│ │ ├───dist
-│ │ └───src
-│ └───redux
+│ ├───android
+│ ├───ios
+│ ├───dev
+│ ├───dist
+│ └─┬─src
+│   ├───native
+│   ├───redux
+│   └───web
 │
 └─┬─platform        // 管理员用户APP
-  ├─┬─app
-  │ ├───android
-  │ └───ios
-  ├─┬─web
-  │ ├───dev
-  │ ├───dist
-  │ └───src
-  └───redux
+  ├───android
+  ├───ios
+  ├───dev
+  ├───dist
+  └─┬─src
+    ├───native
+    ├───redux
+    └───web
 ```
 
-* api、consumer、supplier和platform分别对应API接口和消费者、服务商和平台三个前端。
-* consumer、supplier和platform文件夹下都有各自的redux文件夹，用以统一处理app逻辑
-* 各级app工程下都有android和ios两个文件夹，用以分别保存Android和iOS代码
-* 各级web工程下都有dev、dist和src三个文件夹，分别用以保存开发环境代码、生产环境代码和源代码
+* api、consumer、supplier和platform分别对应API接口和消费者、服务商和平台三个前端
+* 前端和后台工程下都有dev、dist和src三个文件夹，分别用以保存开发环境、生产环境和源代码
+* consumer、supplier和platform三个前端app工程下的src文件夹内都有native和web两个文件夹，用以分别保存React Native和React代码
+* 三个前端app工程下的src文件夹下都有各自的redux文件夹，用以统一处理app逻辑
 
-#### MongoDB
-
-1. 生成文件夹
-2. 用docker interface加入至file sharing
-3. 在terminal跑init (db) scripts - create docker image, run, enter, add user, exit image, stop, remove
-    1. 生成docker镜像
-    2. 启动docker镜像
-    3. 进入docker镜像
-    4. 添加数据库用户
-    5. 退出docker镜像
-    6. 停止docker镜像
-4. 在terminal跑npm run init (build+start)
-
-#### Express
-
-##### Restify
-
-#### Mongoose
-
-#### TypeScript
-
-#### Webpack
-
-### SingularJS components
-
-SingularJS将平行开发大量插件，以前端为主。
-
-* singular-textview
-* singular-h1 ... h6
-* singular-gridview ()
-* singular-tileview (1-by-1, 1-by-4, gutter)
-* singular-listview (ol/ul)
-* singular-webview
-* singular-popup
-* singular-glyph
-
-* singular-tag
-* singular-avatar (circle, square, rounded)
-* singular-input
-* singular-range
-* singular-rating
-* singular-selectview (singular-gridview)
-
-* singular-rte
-* singular-icon (top-right indicator)
-* singular-search (search page: history (clear) / suggestions)
-* singular-jumplistview (singular-listview x 2)
-* singular-editable-list
-
-* singular-list-item (icon? | title (indicator) / view | value? | arrow? / control)
-* singular-table: singular-order-item (title / unit / price)
-
-
-## roadmap
-
-* Replace Express with Restify for the API server
-mongoose-delete
-
-## 开发详情
-
-### 用户分类
-
-既然已明确将用户分为消费者、服务商和平台三类，API也相对应的分别设立了Consumer、Supplier和Platform三个表（collections）。有人会问，虽然有三类用户，但所需的绝大部分功能都是同样的，如登录、注册、验证手机、邮箱等，所不同的主要是权限，那么为什么不使用单一的用户表，利用用户角色区分权限呢？这里主要的考虑是，有的用户会有双重身份，如司机也可以是乘客，卖家也可以是买家。使用统一的用户表，就要为不同的身份设立不同的用户名、密码、昵称等，更为复杂。而且，三类用户各自也都有不同权限的角色，搅到一起就太混乱了。而代码重复的问题可以通过抽象化解决，如在API项目下，UserController和ContentController就分别将用户和内容中相同或相近的代码进行了抽象化，被抽象化的几个路由文件(router)就几乎空无一物了。
-
-### TypeScript vs. Flow
-
-99%的代码，或者说，100%的JavaScript代码，采用了TypeScript。既然SingularJS大量采用了React，为什么不使用同是Facebook开发的Flow做类型强制，而要采用来自Microsoft，被广泛利用在Angular 2/4上的TypeScript呢？一是TypeScript年头比较久了，相对Flow来说，TypeScript的开发环境更为成熟、资源更为丰富，而我自己也更熟悉。二是因为有API和upload两个后端服务，采用TypeScript更适合SingularJS这种复杂的项目。
-
-更详细的比较可以参考[TypeScript vs Flow](https://github.com/niieani/typescript-vs-flowtype "TypeScript vs Flow")
 
 ACL
 
@@ -830,3 +876,24 @@ manager
 platform
 admin
 super
+
+## React Native
+
+
+#### 删除
+
+.flowconfig
+.gitattributes
+.gitignore
+
+.babelrc
+
+#### 重置
+
+1. Docker → Preference... → Reset → Reset to factory defaults
+2. Login using Docker Id (no email address) and password
+3. Docker → Preference... → File Sharing → + → ***desitination database directory***
+4. Terminal → ***working directory***
+5. ```export NODE_ENV=development```
+6. ```./devops/setup.sh```
+7. ```npm start```

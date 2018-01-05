@@ -14,7 +14,7 @@ import * as uaParser from 'ua-parser-js'
 // use native ES6 promises instead of mongoose promise library
 (<any>mongoose).Promise = global.Promise
 
-import * as CONFIG from '../../common/options/config'
+import { UTIL, CONFIG } from '../../common'
 
 import _HelperRouter from './routers/_helper'
 import AdminRouter from './routers/_admin'
@@ -27,9 +27,7 @@ import PostRouter from './routers/PostRouter'
 import ActionRouter from './routers/ActionRouter'
 import CommentRouter from './routers/CommentRouter'
 
-import {
-  USER_NAME, USER_PASSWORD, HOST, PORT, DB_NAME
-} from '../../docker/env/development/init'
+import * as init from '../../docker/env/development/init.env'
 
 /**
  * Server class
@@ -61,16 +59,75 @@ class Server {
    * @class Server
    * @method config
    * @return {void}
+  /**
+   * 
+   * 
+   * @memberof Server
    */
   public config(): void {
     // setup MongoDB connection
-    const AUTH: string = (USER_NAME.length > 0) ? USER_NAME + ":" + USER_PASSWORD + "@" : "",
-      MONGODB_URI: string = "mongodb://" + AUTH + HOST + ":" + PORT + "/" + DB_NAME
+    const env = UTIL.readEnv(init),
+      AUTH: string = (env.USER_NAME.length > 0) ? env.USER_NAME + ":" + env.USER_PASSWORD + "@" : "",
+      MONGODB_URI: string = "mongodb://" + AUTH + env.APP_TITLE + "-db" + ":" + env.PORT + "/" + env.DB_NAME,
+      DB_URI: string = MONGODB_URI || process.env.MONGODB_URI
 
     logger('MONGODB_URI: ' + MONGODB_URI)
 
+    let dbConn = () => mongoose.connect(DB_URI, {
+      useMongoClient: true,
+      autoReconnect: true
+    })
+
+    /** 
+     * 
+    */
+    // CONNECTION EVENTS
+    let db = mongoose.connection,
+      connCounter = 0
+
+    db.on('connecting', () => {
+      console.log('Connecting database...')
+    })
+
+    db.on('connected', () => {
+      console.log('Database connected at ' + MONGODB_URI)
+    })
+
+    db.on('error', (err: Error) => {
+      console.log('Database connection error: ' + err)
+
+      // db service may not be ready before API server starts, 
+      // retry connection if refused
+      if (err.message.indexOf('ECONNREFUSED') > -1 && connCounter < CONFIG.DB_CONNECTION_RETRIES) {
+        connCounter++
+        console.log(`Retry connection number ${connCounter} in ${Math.round(CONFIG.DB_CONNECTION_INTERVAL / 100) / 10}s`)
+        setTimeout(dbConn, CONFIG.DB_CONNECTION_INTERVAL)
+      }
+    })
+
+    db.on('disconnected', () => {
+      console.log('Database disconnected')
+    })
+
+    db.on('reconnected', () => {
+      console.log('Database reconnected')
+    })
+
+    db.on('timeout', () => {
+      console.log('Database connection timeout')
+    })
+
+    db.once('open', () => {
+      console.log('Database connection opened')
+    })
+
+    // event handler for ECONNREFUSED
+    process.on('unhandledRejection', (err: Error) => {
+      console.log(err.message)
+    })
+
     // connect to mongodb via mongoose
-    mongoose.connect(MONGODB_URI || process.env.MONGODB_URI, {useMongoClient: true})
+    dbConn()
 
     // mount query string parser
     this.app.use(bodyParser.urlencoded({
