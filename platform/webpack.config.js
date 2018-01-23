@@ -1,18 +1,40 @@
 const webpack = require('webpack'),
   fs = require('fs'),
-  path = require('path')
+  path = require('path'),
+  ExtractTextPlugin = require('extract-text-webpack-plugin'),
+
+  extractLess = new ExtractTextPlugin({
+    filename: "static/main.css"
+  })
 
 module.exports = {
   devtool: 'source-map',
   target: 'web',
-  entry: './src/web/index.ts',
+  entry: {
+    bundle: path.resolve(__dirname, 'src/dom/')
+  },
   output: {
-    filename: 'root.js',
-    path: path.resolve(__dirname, 'dev')
+    path: path.resolve(__dirname, 'dev'),
+    filename: 'js/bundle.js'
   },
   resolve: {
-    extensions: ['.ts', '.js', '.json']
+    extensions: ['.ts', '.tsx', '.js', 'jsx', '.json']
   },
+  plugins: [
+    extractLess,
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+    }),
+    new webpack.ProvidePlugin({
+      'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+      sourceMap: true,
+      compress: {
+        warnings: false
+      }
+    })
+  ],
   externals: {
     
   },
@@ -20,26 +42,50 @@ module.exports = {
     rules: [
       {
         test: /\.js?$/,
-        exclude: /(node_modules|bower_components)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['es2015']
-          }
-        }
-      },
-      {
-        test: /\.ts?$/,
-        use: ['ts-loader']
+        exclude: /node_modules/,
+        loader: 'source-map-loader',
+        enforce: 'pre'
+      }, {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          'source-map-loader',
+          'babel-loader',
+          'ts-loader'
+        ]
+      }, {
+        test: /\.less$/,
+        exclude: /node_modules/,
+        use: extractLess.extract({
+          use: [{
+            loader: "css-loader",
+            options: {
+              minimize: true,
+              sourceMap: true
+            }
+          }, {
+            loader: "less-loader",
+            options: {
+              sourceMap: true
+            }
+          }, {
+            loader: "less-json-import-loader"
+          }],
+          fallback: "style-loader"
+        })
+      }, {
+        test: /\.html$/,
+        loader: 'file-loader?name=[name].[ext]!extract-loader!html-loader'
+      }, {
+        test: /\.ico$/,
+        loader: 'file-loader?name=[name].[ext]'
+      }, {
+        test: /\.json$/,
+        loader: 'json-loader'
+      }, {
+        test: /\.(jpg|gif|png)$/,
+        loader: 'file-loader?name=[name].[ext]'
       }
     ]
-  },
-  plugins: [
-    new webpack.IgnorePlugin(/vertx/),
-    new webpack.optimize.UglifyJsPlugin({
-      output: {
-        comments: false
-      }
-    })
-  ]
+  }
 }

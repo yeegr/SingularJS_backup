@@ -4,7 +4,8 @@
 source ./docker/env/${NODE_ENV}/init.env
 
 # get base docker images
-docker pull mongo
+docker pull mongo:latest
+docker pull nginx:latest
 docker pull node:8.9.0
 
 # build mongodb docker image from dockerfile

@@ -1,11 +1,11 @@
 version: '2'
 
 networks:
-  api-network:
+  data:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
+
+  web:
+    driver: bridge
 
 services:
   mongo:
@@ -21,6 +21,8 @@ services:
       - "27017"
     volumes:
       - /data/${DB_PATH}:/data/${DB_NAME}:rw
+    networks:
+      - data
 
   api:
     container_name: ${APP_TITLE}-api
@@ -32,19 +34,23 @@ services:
       - mongo
     ports:
       - "3000:3000"
-    volumes:
-      - "./api/dev/root.js:/usr/app/root.js"
-      - "./public:/public"
     env_file:
       - ./docker/env/${NODE_ENV}/api.env
     environment:
       - NODE_ENV=${NODE_ENV}
+    volumes:
+      - "./api/dev/root.js:/usr/app/root.js"
+      - "./public:/public"
+    working_dir: "/usr/app"
     tty: true
     logging:
       driver: "json-file"
       options:
         max-size: "50k"
         max-file: "1"
+    networks:
+      - data
+      - web
 
   upload:
     container_name: ${APP_TITLE}-upload
@@ -56,16 +62,36 @@ services:
       - mongo
     ports:
       - "3001:3000"
-    volumes:
-      - "./upload/dev/root.js:/usr/app/root.js"
-      - "./public:/public"
     env_file:
       - ./docker/env/${NODE_ENV}/upload.env
     environment:
       - NODE_ENV=${NODE_ENV}
+    volumes:
+      - "./upload/dev/root.js:/usr/app/root.js"
+      - "./public:/public"
+    working_dir: "/usr/app"
     tty: true
     logging:
       driver: "json-file"
       options:
         max-size: "50k"
         max-file: "1"
+    networks:
+      - web
+
+  platform:
+    container_name: ${APP_TITLE}-platform
+    image: ${APP_TITLE}/platform
+    build:
+      context: .
+      dockerfile: ./docker/dockerfiles/${NODE_ENV}/platform.dockerfile
+    depends_on:
+      - api
+    ports:
+      - "8082:80"
+    volumes:
+      - "./docker/config/development/platform.conf:/etc/nginx/nginx.conf"
+      - "./platform/dev:/usr/share/nginx/html"
+    working_dir: "/usr/share/nginx/html"
+    networks:
+      - web

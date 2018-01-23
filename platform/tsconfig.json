@@ -1,15 +1,20 @@
 {
   "compilerOptions": {
-    "outDir": "./build/",
-    "rootDir": "./src/",
-    "target": "es6",
-    "module": "es6",
+    "outDir": "./dev/",
+    "rootDirs": [
+      "./src",
+      "./node_modules"
+    ],
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "sourceMap": true,
     "noImplicitAny": true,
     "allowJs": true,
     "jsx": "react",
     "experimentalDecorators": true,
-    "preserveConstEnums": true
+    "preserveConstEnums": true,
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*"
@@ -17,8 +22,10 @@
   "exclude": [
     "index.android.js",
     "index.ios.js",
-    "build",
     "node_modules",
-    "__tests__"
+    "__tests__",
+    "build",
+    "dev",
+    "dist",
   ]
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximun-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="全栈开发, React, React Native, Node, Mongo, MongoDB, Mongoose, Docker, Jest">
+    <meta name="revised" content=" ">
+    <title>SingularJS</title>
+    <link rel="icon" href="./favicon.ico">
+    <link rel="stylesheet" href="static/main.css">
+  </head>
+  <body>
+    <root></root>
+    <script src="js/bundle.js"></script>
+    <div id="info"></div>
+    <script>
+      const body = document.querySelector('body'),
+        root = document.querySelector('root'),
+        info = document.getElementById('info')
+
+      let html = '<br/>window.inner*: ' + window.innerWidth + ' | ' + window.innerHeight
+      html += '<br/>window.scroll*' + window.scrollWidth + ' | ' + window.scrollHeight
+      html += '<br/>body.inner*' + body.innerWidth + ' | ' + body.innerHeight
+      html += '<br/>body.scroll*' + body.scrollWidth + ' | ' + body.scrollHeight
+      html += '<br/>root.inner*' + root.innerWidth + ' | ' + root.innerHeight
+      html += '<br/>root.scroll*' + root.scrollWidth + ' | ' + root.scrollHeight
+      
+      info.innerHTML = html
+    </script>
+  </body>
+</html>

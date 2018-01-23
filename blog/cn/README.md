@@ -726,7 +726,10 @@ mongoose-delete
 
 ### SingularJS components
 
-SingularJS将平行开发大量插件，以前端为主。
+SingularJS将有自己的前端组件库，SingularComponents，将包括以下组件。
+
+* singular-glyph
+* singular-icon (top-right indicator)
 
 * singular-textview
 * singular-h1 ... h6
@@ -735,7 +738,6 @@ SingularJS将平行开发大量插件，以前端为主。
 * singular-listview (ol/ul)
 * singular-webview
 * singular-popup
-* singular-glyph
 
 * singular-tag
 * singular-avatar (circle, square, rounded)
@@ -745,7 +747,6 @@ SingularJS将平行开发大量插件，以前端为主。
 * singular-selectview (singular-gridview)
 
 * singular-rte
-* singular-icon (top-right indicator)
 * singular-search (search page: history (clear) / suggestions)
 * singular-jumplistview (singular-listview x 2)
 * singular-editable-list
