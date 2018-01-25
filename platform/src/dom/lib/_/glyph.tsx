@@ -1,8 +1,8 @@
 import * as React from 'react'
 
-import * as Material from './material'
+import * as MATERIAL from '../styles/material/glyphs'
 
-export interface BadgeProps {
+export interface IBadgeProps {
   text?: string | number
   backgroundColor?: string
 }
@@ -14,15 +14,15 @@ export interface IGlyphProps {
   style?: any
   viewBox?: string
   path?: string
-  badge?: BadgeProps
+  badge?: IBadgeProps
 }
 
-const GlyphDOM: React.SFC<IGlyphProps> = (props) => {
-  const Design = Material
+export const GlyphDOM: React.StatelessComponent<IGlyphProps> = (props) => {
+  const DESIGN = MATERIAL
 
   let className = 'singular-glyph ',
-    viewBox = props.viewBox || Design.DEFAULT_VIEW_BOX,
-    d = props.path || Design.GLYPHS[props.name],
+    viewBox = props.viewBox || DESIGN.DEFAULT_VIEW_BOX,
+    d = props.path || DESIGN.GLYPHS[props.name],
     badge = null
 
   switch (props.type) {
@@ -51,5 +51,3 @@ const GlyphDOM: React.SFC<IGlyphProps> = (props) => {
     </span>
   )
 }
-
-export default GlyphDOM

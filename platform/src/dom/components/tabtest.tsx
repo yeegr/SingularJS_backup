@@ -1,7 +1,6 @@
 import * as React from 'react'
 
-import TabView, { PanelDOM as Panel } from './shared/tabview'
-import Navbar from './shared/navbar'
+import { TabView, Panel, NavBar } from '../lib/components'
 
 class TabTest extends React.Component {
   constructor(props: any) {
@@ -70,7 +69,7 @@ class TabTest extends React.Component {
       <TabView type="icon">
         <Panel title="新闻" glyph={{type: "square", name: "phone", badge: {text: "9"}}}>
           <div className="singular-page">
-            <Navbar 
+            <NavBar 
               title="轨迹"
               nav={{glyph: {name: 'calendar'}, title: "previous"}}
             />
@@ -104,7 +103,7 @@ class TabTest extends React.Component {
         </Panel>
         <Panel title="活动" glyph={{name: "calendar"}}>
           <div className="singular-page">
-            <Navbar 
+            <NavBar 
               title="活动"
               nav={{glyph: {name: 'calendar'}, title: "previous"}}
             />
@@ -112,7 +111,7 @@ class TabTest extends React.Component {
         </Panel>
         <Panel title="轨迹" glyph={{name: "clock"}}>
           <div className="singular-page">
-            <Navbar 
+            <NavBar 
               title="轨迹"
               nav={{glyph: {name: 'calendar'}, title: "previous"}}
             />

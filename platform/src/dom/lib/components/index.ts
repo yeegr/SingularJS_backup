@@ -1,0 +1,6 @@
+export { AvatarDOM as Avatar } from '../_/avatar'
+export { GlyphDOM as Glyph } from '../_/glyph'
+export { IconDOM as Icon } from '../_/icon'
+export { LabelDOM as Label } from '../_/label'
+export { NavBarDOM as NavBar } from '../_/navbar'
+export { PanelDOM as Panel, TabViewDOM as TabView } from '../_/tabview'

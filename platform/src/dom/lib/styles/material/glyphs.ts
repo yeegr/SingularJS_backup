@@ -1,17 +1,6 @@
-import * as PALETTES from '../../styles/_palettes.json'
-import * as MATERIAL from '../../styles/_material.json'
-
-export const PRIMARY_COLOR: string = (<any>PALETTES).primaryColor
-export const SECONDARY_COLOR: string = (<any>PALETTES).secondaryColor
-export const HOVER_COLOR: string = (<any>PALETTES).hoverColor
-export const IDLE_COLOR: string = (<any>PALETTES).idleColor
-export const DEFAULT_FOREGROUND_COLOR: string = (<any>PALETTES).foregroundColor
-export const DEFAULT_UNIT_LENGTH: number = parseInt((<any>MATERIAL).unitLength, 10)
-export const DEFAULT_BASE_LENGTH: number = DEFAULT_UNIT_LENGTH * (<any>MATERIAL).multiplier
-export const DEFAULT_GLYPH_SIDE_LENGTH: number = DEFAULT_BASE_LENGTH * 3
 export const DEFAULT_VIEW_BOX: string = '0 0 48 48'
 
-interface IGlyphs {
+export interface IGlyphs {
   [key: string]: string
 }
 

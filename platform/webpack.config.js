@@ -68,8 +68,8 @@ module.exports = {
             options: {
               sourceMap: true
             }
-          }, {
-            loader: "less-json-import-loader"
+          // }, {
+          //   loader: "less-json-import-loader"
           }],
           fallback: "style-loader"
         })

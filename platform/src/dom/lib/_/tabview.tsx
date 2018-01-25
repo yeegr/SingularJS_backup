@@ -1,12 +1,10 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import * as Material from './material'
+import { IconDOM as Icon } from './icon'
+import { GlyphDOM as Glyph, IGlyphProps } from './glyph'
 
-import Icon from './icon'
-import Glyph, { IGlyphProps } from './glyph'
-
-interface IPanelProps {
+export interface IPanelProps {
   title: string
   key?: number
   glyph?: IGlyphProps
@@ -14,12 +12,12 @@ interface IPanelProps {
   selected?: boolean
 }
 
-interface ITabViewProps {
+export interface ITabViewProps {
   type?: string
   selectedIndex?: number
 }
 
-interface ITabViewState {
+export interface ITabViewState {
   type: string
   selectedIndex: number
 }
@@ -32,7 +30,7 @@ export const PanelDOM: React.StatelessComponent<IPanelProps> = (props) => {
   )
 }
 
-class TabView extends React.PureComponent<ITabViewProps, ITabViewState> {
+export class TabViewDOM extends React.PureComponent<ITabViewProps, ITabViewState> {
   tabbarWrapper: HTMLElement
   tabbar: HTMLElement
   slideList: number[] = []
@@ -146,5 +144,3 @@ class TabView extends React.PureComponent<ITabViewProps, ITabViewState> {
     )
   }
 }
-
-export default TabView

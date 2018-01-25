@@ -1,15 +1,14 @@
 import * as React from 'react'
 
-import * as Material from './material'
-import Icon, { IIconProps } from './icon'
+import { IconDOM as Icon, IIconProps } from './icon'
 
-interface INavBarProps {
+export interface INavBarProps {
   title: string
   nav?: IIconProps
   tools?: IIconProps[]
 }
 
-const NavBarDOM: React.SFC<INavBarProps> = (props) => {
+export const NavBarDOM: React.StatelessComponent<INavBarProps> = (props) => {
   let nav = null,
     tools: any[] = [] 
 
@@ -37,5 +36,3 @@ const NavBarDOM: React.SFC<INavBarProps> = (props) => {
     </div>
   )
 }
-
-export default NavBarDOM

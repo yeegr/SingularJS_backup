@@ -1,9 +1,6 @@
 import * as React from 'react'
 
-import Glyph from './shared/glyph'
-import Icon from './shared/icon'
-import Label from './shared/label'
-import Avatar from './shared/avatar'
+import { Glyph, Icon, Label, Avatar } from '../lib/components'
 
 class Hello extends React.Component {
   constructor(props: any) {

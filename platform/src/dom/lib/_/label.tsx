@@ -1,10 +1,8 @@
 import * as React from 'react'
 
-import * as Material from './material'
+import { GlyphDOM as Glyph, IGlyphProps } from './glyph'
 
-import Glyph, { IGlyphProps } from './glyph'
-
-interface ILabelProps {
+export interface ILabelProps {
   glyph?: IGlyphProps
   text: string
   tl?: boolean
@@ -13,7 +11,7 @@ interface ILabelProps {
   selected?: boolean | string
 }
 
-const LabelDOM: React.SFC<ILabelProps> = (props) => {
+export const LabelDOM: React.SFC<ILabelProps> = (props) => {
   let className = '',
     tl = props.tl || null,
     hl = props.hl || null,
@@ -27,5 +25,3 @@ const LabelDOM: React.SFC<ILabelProps> = (props) => {
     </span>
   )
 }
-
-export default LabelDOM

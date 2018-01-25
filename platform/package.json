@@ -22,6 +22,7 @@
     "@types/react-native-linear-gradient": "^2.3.0",
     "@types/react-native-modal": "^3.1.1",
     "@types/react-redux": "^5.0.14",
+    "@types/react-responsive": "^3.0.0",
     "@types/react-router-dom": "^4.2.3",
     "@types/react-router-native": "^4.0.2",
     "@types/react-router-redux": "^5.0.11",
@@ -81,6 +82,7 @@
     "react-native-wechat": "^1.9.9",
     "react-native-yunpeng-alipay": "^2.0.0",
     "react-redux": "^5.0.6",
+    "react-responsive": "^4.0.3",
     "react-router-dom": "^4.2.2",
     "react-router-native": "^4.2.0",
     "react-router-redux": "^4.0.8",
@@ -89,6 +91,7 @@
     "redux-promise": "^0.5.3",
     "redux-promise-middleware": "^5.0.0",
     "redux-thunk": "^2.2.0",
+    "singular-lib": "file:../lib",
     "ua-parser-js": "^0.7.17"
   },
   "jest": {

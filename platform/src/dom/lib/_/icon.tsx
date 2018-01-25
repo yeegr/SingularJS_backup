@@ -1,8 +1,6 @@
 import * as React from 'react'
 
-import * as Material from './material'
-
-import Glyph, { IGlyphProps } from './glyph'
+import { GlyphDOM as Glyph, IGlyphProps } from './glyph'
 
 export interface IIconProps {
   title: string
@@ -15,7 +13,7 @@ export interface IIconProps {
   onPress?: Function
 }
 
-class IconDOM extends React.PureComponent<IIconProps> {
+export class IconDOM extends React.PureComponent<IIconProps> {
   constructor(props: IIconProps) {
     super(props)
   }
@@ -34,5 +32,3 @@ class IconDOM extends React.PureComponent<IIconProps> {
     )
   }
 }
-
-export default IconDOM

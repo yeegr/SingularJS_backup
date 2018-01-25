@@ -1,14 +1,12 @@
 import * as React from 'react'
 
-import * as Material from './material'
-
-interface IAvatarProps {
+export interface IAvatarProps {
   url: string
   type?: string
   size?: string
 }
 
-const AvatarDOM: React.SFC<IAvatarProps> = (props) => {
+export const AvatarDOM: React.StatelessComponent<IAvatarProps> = (props) => {
   let type = 'circle',
     size = 'm',
     style = {
@@ -40,5 +38,3 @@ const AvatarDOM: React.SFC<IAvatarProps> = (props) => {
     <div className="singular-avatar" data-type={type} data-size={size} style={style}></div>
   )
 }
-
-export default AvatarDOM
