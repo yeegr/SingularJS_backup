@@ -16,22 +16,16 @@ export const NavBarDOM: React.StatelessComponent<INavBarProps> = (props) => {
     nav = <Icon {...props.nav} />
   }
 
-  if (props.tools && props.tools.length > 0) {
-    props.tools.forEach((t: IIconProps) => {
-      tools.push(<Icon {...t} />)
-    })
-  }
-
   return (
     <div className="singular-nav-bar">
       <div className="singular-nav-prev">
-        {nav}
+        { nav }
       </div>
       <div className="singular-nav-title">
-        {props.title}
+        { props.title }
       </div>
       <div className="singular-nav-toolbar">
-        {tools}
+        { props.children }
       </div>
     </div>
   )

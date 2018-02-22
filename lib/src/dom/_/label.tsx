@@ -5,21 +5,22 @@ import { GlyphDOM as Glyph, IGlyphProps } from './glyph'
 export interface ILabelProps {
   glyph?: IGlyphProps
   text: string
-  tl?: boolean
-  hl?: boolean
+  flow?: string
+  highlite?: boolean
   size?: string
   selected?: boolean | string
+  onClick?: Function
 }
 
 export const LabelDOM: React.SFC<ILabelProps> = (props) => {
   let className = '',
-    tl = props.tl || null,
-    hl = props.hl || null,
+    flow = props.flow || null,
+    highlite = props.highlite || null,
     size = props.size || null,
     glyph = <Glyph {...props.glyph} />
 
   return (
-    <span className="singular-label" data-selected={props.selected} data-tl={tl} data-hl={hl} data-size={size}>
+    <span className="singular-label" data-selected={props.selected} data-flow={flow} data-highlite={highlite} data-size={size} onClick={() => props.onClick()}>
       { glyph }
       <span className="singular-label-text">{props.text}</span>
     </span>

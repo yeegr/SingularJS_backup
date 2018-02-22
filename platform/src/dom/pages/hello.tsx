@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Glyph, Icon, Label, Avatar } from '../lib/components'
+import { Glyph, Icon, Label, Avatar } from '../../../../lib/src/dom/components'
 
 class Hello extends React.Component {
   constructor(props: any) {
@@ -13,8 +13,8 @@ class Hello extends React.Component {
       <div>
         <div className="singular-grid" data-col="5">
           
-        <Icon glyph={{name: "destination", badge: {text: ""}}} title="destination" type="square" />
-        <Icon glyph={{name: "destination", badge: {text: "new"}}} title="destination" type="square" />
+        <Icon glyph={{name: "destination"}} badge={{text: ""}} title="destination" type="square" />
+        <Icon glyph={{name: "destination"}} badge={{text: "new"}} title="destination" type="square" />
         <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         </div>
         <div>

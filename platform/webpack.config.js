@@ -4,7 +4,7 @@ const webpack = require('webpack'),
   ExtractTextPlugin = require('extract-text-webpack-plugin'),
 
   extractLess = new ExtractTextPlugin({
-    filename: "static/main.css"
+    filename: "static/css/main.css"
   })
 
 module.exports = {
@@ -15,7 +15,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dev'),
-    filename: 'js/bundle.js'
+    filename: 'js/bundle.js',
+    publicPath: '/'
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', 'jsx', '.json']
@@ -30,6 +31,9 @@ module.exports = {
     }),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
+      output: {
+        comments: false
+      },
       compress: {
         warnings: false
       }
@@ -83,8 +87,8 @@ module.exports = {
         test: /\.json$/,
         loader: 'json-loader'
       }, {
-        test: /\.(jpg|gif|png)$/,
-        loader: 'file-loader?name=[name].[ext]'
+        test: /\.(jpg|gif|png|svg)$/,
+        loader: 'file-loader?name=static/img/[name].[ext]'
       }
     ]
   }

@@ -1,20 +1,22 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
-import { IconDOM as Icon } from './icon'
-import { GlyphDOM as Glyph, IGlyphProps } from './glyph'
+import { Icon, Glyph } from '../components'
+import { IGlyphProps, IBadgeProps } from '../interfaces'
 
 export interface IPanelProps {
   title: string
   key?: number
   glyph?: IGlyphProps
-  badge?: string | number
+  badge?: IBadgeProps
   selected?: boolean
 }
 
 export interface ITabViewProps {
   type?: string
+  size?: string
   selectedIndex?: number
+  box?: string
 }
 
 export interface ITabViewState {
@@ -50,19 +52,12 @@ export class TabViewDOM extends React.PureComponent<ITabViewProps, ITabViewState
   }
 
   componentDidUpdate() {
-    if (this.props.type === "text" && this.tabIndicator) {
-      this.slideIndicator()
-    }
+    this.slideIndicator()
   }
 
   componentDidMount() {
-    if (this.props.type === "text" && this.tabIndicator) {
-      this.setupIndicator()
-
-      window.addEventListener('resize', () => {
-        this.setupIndicator()
-      })
-    }
+    this.setupIndicator()
+    window.addEventListener('resize', this.setupIndicator)
   }
 
   selectedTag(selectedIndex: number) {
@@ -70,35 +65,39 @@ export class TabViewDOM extends React.PureComponent<ITabViewProps, ITabViewState
   }
 
   setupIndicator() {
-    this.slideList = []
+    if (this.props.type === "text" && this.tabIndicator) {
+      this.slideList = []
 
-    let wrapperWidth = this.tabbarWrapper.offsetWidth,
-      tabbarWidth = this.tabbar.offsetWidth,
-      diff = tabbarWidth - wrapperWidth
+      let wrapperWidth = this.tabbarWrapper.offsetWidth,
+        tabbarWidth = this.tabbar.offsetWidth,
+        diff = tabbarWidth - wrapperWidth
 
-    if (diff > 0) {
-      this.tabList.forEach((t: HTMLElement, i: number) => {
-        let offset = t.offsetLeft + (t.offsetWidth - wrapperWidth) / 2
-        offset = (offset < 0) ? 0 : -offset
-        offset = (Math.abs(offset) > diff) ? -diff : offset
+      if (diff > 0) {
+        this.tabList.forEach((t: HTMLElement, i: number) => {
+          let offset = t.offsetLeft + (t.offsetWidth - wrapperWidth) / 2
+          offset = (offset < 0) ? 0 : -offset
+          offset = (Math.abs(offset) > diff) ? -diff : offset
 
-        this.slideList.push(offset)
-      })
+          this.slideList.push(offset)
+        })
+      }
+
+      this.slideIndicator()
     }
-
-    this.slideIndicator()
   }
 
   slideIndicator() {
-    let selectedIndex = this.state.selectedIndex,
-      currentTab = this.tabList[selectedIndex],
-      boundingLeft = currentTab.offsetLeft,
-      boundingWidth = currentTab.offsetWidth
+    if (this.props.type === "text" && this.tabIndicator) {
+      let selectedIndex = this.state.selectedIndex,
+        currentTab = this.tabList[selectedIndex],
+        boundingLeft = currentTab.offsetLeft,
+        boundingWidth = currentTab.offsetWidth
 
-    this.tabIndicator.style.width = currentTab.offsetWidth + 'px'
-    this.tabIndicator.style.left = currentTab.offsetLeft + 'px'
+      this.tabIndicator.style.width = currentTab.offsetWidth + 'px'
+      this.tabIndicator.style.left = currentTab.offsetLeft + 'px'
 
-    this.tabbar.style.left = this.slideList[selectedIndex] + 'px'
+      this.tabbar.style.left = this.slideList[selectedIndex] + 'px'
+    }
   }
 
   render() {
@@ -109,12 +108,17 @@ export class TabViewDOM extends React.PureComponent<ITabViewProps, ITabViewState
 
     React.Children.forEach(this.props.children, (t: React.ReactElement<any>, i: number) => {
       let tab: JSX.Element,
-        selected: boolean = (selectedIndex === i)
+        selected: boolean = (selectedIndex === i),
+        {glyph, title, badge} = t.props
+
+      if (this.props.box && !glyph.box) {
+        glyph.box = this.props.box
+      }
 
       switch (type) {
         case 'icon':
         default:
-          tab = <Icon key={'t'+i} selected={selected} glyph={t.props.glyph} title={t.props.title} onPress={() => this.selectedTag(i)} />
+          tab = <Icon type="icon" key={'i'+i} selected={selected} glyph={glyph} title={title} badge={badge} onPress={() => this.selectedTag(i)} />
           tabbarTabs.push(tab)
         break
 
@@ -137,7 +141,7 @@ export class TabViewDOM extends React.PureComponent<ITabViewProps, ITabViewState
             { tabbarIndicator }
           </div>
         </aside>
-        <div className="singular-tab-wrapper">
+        <div className="singular-tab-content">
           { tabContent }
         </div>
       </div>

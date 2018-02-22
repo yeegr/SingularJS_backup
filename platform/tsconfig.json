@@ -3,7 +3,9 @@
     "outDir": "./dev/",
     "rootDirs": [
       "./src",
-      "./node_modules"
+      "./node_modules",
+      "../../common",
+      "../../lib/src/dom"
     ],
     "target": "es5",
     "module": "commonjs",

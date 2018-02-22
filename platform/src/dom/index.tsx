@@ -6,11 +6,14 @@ import {UAParser} from 'ua-parser-js'
 
 import configureStore from '../redux/store/configureStore'
 
-import Hello from './components/hello'
-import TabTest from './components/tabtest'
+import Hello from './pages/hello'
+import Dashboard from './pages/dashboard'
+import Reviews from './pages/reviews'
 
 import './index.html'
 import './styles/main.less'
+import '../../../assets/logo.png'
+import '../../../assets/logo.svg'
 import '../../../assets/favicon.ico'
 
 var parser = new UAParser()
@@ -22,8 +25,9 @@ render((
   <Provider store={store}>
     <Router>
       <Switch>
-        <Route path='/' exact component={Hello} />
-        <Route path='/tab' component={TabTest} />
+        <Route exact path='/' component={Dashboard} />
+        <Route path='/tasks/reviews' component={Reviews} />
+        <Route path='/hello' component={Hello} />
       </Switch>
     </Router>
   </Provider>

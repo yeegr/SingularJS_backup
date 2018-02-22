@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "outDir": "./dev/",
-    "rootDirs": ["./src/", "../../common"],
+    "rootDirs": [
+      "./src/",
+      "../../common"
+    ],
     "target": "es6",
     "module": "commonjs",
     "sourceMap": true,
