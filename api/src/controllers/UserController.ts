@@ -12,7 +12,7 @@ import '../config/passport/consumer'
 import '../config/passport/platform'
 import { IncomingForm, Fields, Files } from 'formidable'
 
-import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
+import { CONFIG, CONST, ERRORS, UTIL, SERVERS } from '../../../common'
 import { Logger, Err, LANG } from '../modules'
 
 import IUser from '../interfaces/users/IUser'
@@ -588,7 +588,7 @@ export function local(req: Request, res: Response, next: NextFunction): void {
 
   passport.authenticate(strategy, {
     session: false,
-    badRequestMessage: ERRORS.USER.MISSING_CREDENTIALS
+    failureFlash: ERRORS.USER.MISSING_CREDENTIALS
   }, (err: Error, user: IUser, info: object) => {
     if (err) {
       res.status(400).send(err) 
@@ -795,7 +795,7 @@ export function avatar(req: Request, res: Response): void {
     }
 
     request.post({
-      url: CONST.UPLOAD_SERVER,
+      url: SERVERS.UPLOAD_SERVER,
       formData
     }, (err: Error, response, body) => {
       if (err) console.log(err)

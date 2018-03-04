@@ -16,9 +16,6 @@ function obj2enum(obj: any): string[] {
   return arr
 }
 
-export const UPLOAD_SERVER: string = 'http://upload:3000/'
-export const STATIC_SERVER: string = 'http://static/'
-
 /** 
  * .75x | ldpi    | 120dpi | 240px
  * 1x   | mdpi    | 160dpi | 320px
@@ -36,9 +33,9 @@ export const IMAGE_TYPES = {
 export const THUMBNAIL = '.thumb'
 
 interface IImageSizes {
-  [key: string]: [[number, number, boolean]] 
-  AVATAR: [[number, number, boolean]] 
-  PHOTO: [[number, number, boolean]] 
+  [key: string]: [number, number, boolean][]
+  AVATAR: [number, number, boolean][]
+  PHOTO: [number, number, boolean][] 
 }
 
 export const IMAGE_SIZES: IImageSizes = {  

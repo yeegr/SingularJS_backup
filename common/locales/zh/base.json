@@ -106,5 +106,10 @@
     "Cancel": "取消",
     "Okay": "OK",
     "Discard": "放弃"
+  },
+  "toggle": {
+    "close": "关闭",
+    "expand": "展开",
+    "collapse": "收起"
   }
 }

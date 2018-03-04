@@ -9,6 +9,11 @@
   "scripts": {
     "setup": "$npm_package_config_init && ./devops/setup.sh",
     "mongo": "docker exec -it singular-db mongo db -u user -p UserPassWord",
+    "install:api": "cd api && npm install && cd .. ",
+    "install:upload": "cd upload && npm install && cd .. ",
+    "install:lib": "cd lib && npm install && cd .. ",
+    "install:platform": "cd platform && npm install && cd .. ",
+    "install": "npm run install:api && npm run install:upload && npm run install:lib && npm run install:platform",
     "status": "docker ps -a",
     "rmi": "docker rmi -f $(docker images -qf since=singular/mongo)",
     "api": "cd api && webpack",

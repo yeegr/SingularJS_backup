@@ -2,7 +2,7 @@ import * as React from 'react'
 import { render } from 'react-dom'
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom'
 import { Provider } from 'react-redux'
-import {UAParser} from 'ua-parser-js'
+import { UAParser } from 'ua-parser-js'
 
 import configureStore from '../redux/store/configureStore'
 

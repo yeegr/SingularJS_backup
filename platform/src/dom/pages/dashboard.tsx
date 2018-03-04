@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { App } from '../components/app'
+import App from '../components/app'
 import { LANG, NavBar } from '../modules'
 
 class Dashboard extends React.Component {

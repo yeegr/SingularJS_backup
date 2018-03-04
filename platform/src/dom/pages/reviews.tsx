@@ -1,7 +1,7 @@
 import * as React from 'react'
 import MediaQuery from 'react-responsive'
 
-import { App } from '../components/app'
+import App from '../components/app'
 import { LANG, NavBar, Icon, SplitView, SplitParent, SplitChild } from '../modules'
 
 class Reviews extends React.Component {

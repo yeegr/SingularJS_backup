@@ -8,6 +8,7 @@ export interface IGlyphs {
 
 export const GLYPHS: IGlyphs = {
   "menu": (<any>PATH).hamburger,
+  "close": (<any>PATH).cross,
   "next": (<any>PATH)["chevron-right"],
   "back": (<any>PATH)["chevron-left"],
   "double-arrow-left": (<any>PATH)["chevron-double-left"],
@@ -17,14 +18,14 @@ export const GLYPHS: IGlyphs = {
   "stats": (<any>PATH)["process-loop"],
   "system": (<any>PATH)["process-loop"],
   "account": (<any>PATH).user,
-  "reviews": (<any>PATH)["edit-box"],
+  "reviews": (<any>PATH)["pen+box"],
   "feedbacks": (<any>PATH).clipboard,
   "notifications": (<any>PATH).bell,
   "trending": (<any>PATH).fire,
   "config": (<any>PATH).wrench,
   "servers": (<any>PATH).monitoring,
   "add": (<any>PATH).plus,
-  "edit": (<any>PATH).edit,
+  "edit": (<any>PATH).pen,
   "search": (<any>PATH).magnifier,
 
   "notification-on":(<any>PATH)["bell-ring"],

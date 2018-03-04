@@ -57,14 +57,10 @@ export class SideBarDOM extends React.PureComponent<ISideBarProps, ISideBarState
           </Link>
         </div>
       ) : null,
-      expander = this.state.expanded ? (
-        <Icon type="expander" glyph={{name: "double-arrow-left"}} title="" onPress={this.toggle} />
-      ) : (
-        <Icon type="expander" glyph={{name: "double-arrow-right"}} title="" onPress={this.toggle} />
-      )
+      expander = <Icon type="expander" glyph={{name: (this.state.expanded ? "double-arrow-left" : "double-arrow-right")}} title="" onPress={this.toggle} />
 
     return (
-      <aside className="singular-sidebar" data-expanded={this.state.expanded}>
+      <aside className="singular-sidebar" aria-hidden={this.props.hidden} aria-expanded={this.state.expanded}>
         { logo }
         { expander }
         { this.props.children }

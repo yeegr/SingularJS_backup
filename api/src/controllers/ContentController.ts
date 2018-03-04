@@ -6,7 +6,7 @@ import * as path from 'path'
 import * as request from 'request'
 import { IncomingForm, Fields, Files } from 'formidable'
 
-import { CONFIG, CONST, ERRORS, UTIL } from '../../../common'
+import { CONFIG, CONST, ERRORS, UTIL, SERVERS } from '../../../common'
 import { Logger, Err } from '../modules'
 
 import Media, { IMedia } from '../models/share/MediaModel'
@@ -450,7 +450,7 @@ export function upload(req: Request, res: Response): void {
       .on('end', () => {
         request
         .post({
-          url: CONST.UPLOAD_SERVER,
+          url: SERVERS.UPLOAD_SERVER,
           formData
         }, (err: Error, response, body) => {
           if (err) console.log(err)

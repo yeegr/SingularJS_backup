@@ -10,7 +10,7 @@ import { Tasks }  from '../components/tasks'
 interface IApp {
 }
 
-export class App extends React.PureComponent<IApp> {
+class App extends React.PureComponent<IApp> {
   constructor(props: any) {
     super(props)
   }
@@ -65,3 +65,4 @@ export class App extends React.PureComponent<IApp> {
   }
 }
 
+export default App
