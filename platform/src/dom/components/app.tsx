@@ -2,24 +2,60 @@ import * as React from 'react'
 import { NavLink } from 'react-router-dom'
 import MediaQuery from 'react-responsive'
 
-import { LANG, Wrapper, TabView, Panel, SideView, SideBar, SidePane, NavBar, Icon } from '../modules'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import { IHome } from '../../redux/reducers/homeReducer'
+import { ILogin } from '../../redux/reducers/loginReducer'
+import { hideSidebar } from '../../redux/actions/homeActions'
+import * as loginActions from '../../redux/actions/loginActions'
+import { ILoginActions } from '../../redux/actions/loginActions'
 
-import { NewsComponent } from '../components/news'
-import { Tasks }  from '../components/tasks'
+import { CONST, LANG, SERVERS, SETTINGS } from '../../common'
+import { Wrapper, TabView, Panel, SideView, SearchView, SideBar, SidePane, NavBar, Icon } from '../modules'
 
-interface IApp {
+import Login from './Login'
+
+interface IProps {
+  home: IHome
+  login: ILogin
+  hideSidebar: Function
+  loginActions: ILoginActions
 }
 
-class App extends React.PureComponent<IApp> {
+interface IState {
+  sidebarHidden: boolean
+  searchPaneHidden: boolean
+}
+
+class App extends React.PureComponent<IProps, IState> {
   constructor(props: any) {
     super(props)
+
+    this.state = {
+      sidebarHidden: this.props.home.sidebarHidden,
+      searchPaneHidden: this.props.home.searchPaneHidden
+    }
+  }
+
+  componentWillMount() {
+    SETTINGS.storageEngine = localStorage
+    SETTINGS.storageType = CONST.STORAGE_TYPE.LOCAL
+    
+    this.props.loginActions.isLoggedIn()
+  }
+
+  componentWillReceiveProps(nextProps: IProps) {
+    this.setState({
+      sidebarHidden: nextProps.home.sidebarHidden,
+      searchPaneHidden: nextProps.home.searchPaneHidden
+    })
   }
 
   render() {
-    return (
+    const appView: JSX.Element = (
       <Wrapper>
         <SideView>
-          <SideBar textLogo={'SingularJS'}>
+          <SideBar textLogo={'SingularJS'} hidden={this.state.sidebarHidden} close={this.props.hideSidebar}>
             <NavLink activeClassName="singular-sidebar-navlink-active" exact to="/">
               <Icon title={LANG.t('sidebar.Dashboard')} glyph={{name: 'dashboard'}} />
             </NavLink>
@@ -51,7 +87,7 @@ class App extends React.PureComponent<IApp> {
               </NavLink>
             </div>
             <div className="singular-sidebar-section">
-              <NavLink activeClassName="singular-sidebar-navlink-active" to="/account">
+              <NavLink activeClassName="singular-sidebar-navlink-active" to="/self">
                 <Icon title={LANG.t('sidebar.Account')} glyph={{name: 'account'}} />
               </NavLink>
             </div>
@@ -60,9 +96,32 @@ class App extends React.PureComponent<IApp> {
             { this.props.children }
           </SidePane>
         </SideView>
+        <SearchView hidden={this.props.home.searchPaneHidden}>
+          <Icon title={LANG.t('base:toggle.close')} glyph={{name: 'close'}} onPress={this.props.hideSearchPane} />
+        </SearchView>
       </Wrapper>
+    )
+
+    return (this.props.login.user) ? (
+      appView
+    ) : (
+      <Login />
     )
   }
 }
 
-export default App
+const mapStateToProps = (state: any, ownProps: any) => {
+  return {
+    home: state.home,
+    login: state.login
+  }
+}
+
+const mapDispatchToProps = (dispatch: any, ownProps: any) => {
+  return {
+    hideSidebar: bindActionCreators(hideSidebar, dispatch),
+    loginActions: bindActionCreators(loginActions, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)

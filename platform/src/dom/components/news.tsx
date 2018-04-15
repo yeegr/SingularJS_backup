@@ -1,6 +1,7 @@
 import * as React from 'react'
 
-import { LANG, NavBar, TabView, Panel } from '../modules'
+import { LANG } from '../../common'
+import { NavBar, TabView, Panel } from '../modules'
 
 export class NewsComponent extends React.PureComponent {
   constructor(props: any) {

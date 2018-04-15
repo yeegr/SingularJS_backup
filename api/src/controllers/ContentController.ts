@@ -6,8 +6,8 @@ import * as path from 'path'
 import * as request from 'request'
 import { IncomingForm, Fields, Files } from 'formidable'
 
-import { CONFIG, CONST, ERRORS, UTIL, SERVERS } from '../../../common'
-import { Logger, Err } from '../modules'
+import { CONFIG, CONST, ERRORS, SERVERS } from '../../../common'
+import { Logger, Err, UTIL } from '../modules'
 
 import Media, { IMedia } from '../models/share/MediaModel'
 import IUser from '../interfaces/users/IUser'
@@ -36,7 +36,7 @@ export function list(req: Request, res: Response): void {
       if (user) {
         search(req, res, user._id)
       } else {
-        res.status(404).json({ message: ERRORS.USER.USER_NOT_FOUND })
+        res.status(404).json({ code: ERRORS.LOGIN.USER_NOT_FOUND })
       }
     })
     .catch((err: Error) => {
@@ -259,7 +259,7 @@ export function isUnique(req: Request, res: Response): void {
   let slug: string = req.body.slug
 
   if (slug.length < 1) {
-    res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
+    res.status(422).json({ code: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
   } else {
     const DataModel = UTIL.getModelFromName(req.routeVar.contentType)
 
@@ -292,10 +292,10 @@ export function create(req: Request, res: Response): void {
 
   // verify logined user
   if (!creator || validator.isEmpty(creatorRef)) {
-    res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CREATOR_REQUIRED })
+    res.status(422).json({ code: ERRORS.CONTENT.CONTENT_CREATOR_REQUIRED })
   // check if content has title
   } else if (!title || validator.isEmpty(title)) {
-    res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
+    res.status(422).json({ code: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
   } else {
     const [UserModel, DataModel] = UTIL.getModels(req)
 
@@ -345,11 +345,11 @@ export function update(req: Request, res: Response): void {
     body: any = UTIL.sanitizeInput(req.routeVar.contentType, req.body)
 
   if (!creator || validator.isEmpty(creatorRef)) {
-    res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CREATOR_REQUIRED })
+    res.status(422).json({ code: ERRORS.CONTENT.CONTENT_CREATOR_REQUIRED })
   } else if (title && validator.isEmpty(title)) {
-    res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
+    res.status(422).json({ code: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
   } else if (slug && validator.isEmpty(slug)) {
-    res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
+    res.status(422).json({ code: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
   } else {
     let log: any = {
       creator,

@@ -1,8 +1,9 @@
-const webpack = require('webpack'),
+var webpack = require('webpack'),
   fs = require('fs'),
-  path = require('path')
+  path = require('path');
 
 module.exports = {
+  mode: JSON.stringify(process.env.NODE_ENV) || 'development',
   devtool: 'source-map',
   target: 'node',
   entry: './src/index.ts',
@@ -11,11 +12,18 @@ module.exports = {
     path: path.resolve(__dirname, 'dev')
   },
   resolve: {
-    extensions: ['.ts', '.js', '.json']
+    extensions: ['.ts', '.tsx', '.js', '.json']
   },
   externals: {
     'sharp': 'commonjs sharp'
   },
+  plugins: [
+    new webpack.IgnorePlugin(/vertx/),
+    new webpack.DefinePlugin({
+      'global.GENTLY' : false,  // necessary for formidable/crypto to be packed
+      'process.env.NODE_ENV': "'" + JSON.stringify(process.env.NODE_ENV) + "'" || 'development'
+    })
+  ],
   module: {
     rules: [
       {
@@ -37,15 +45,5 @@ module.exports = {
         use: 'raw-loader'
       }
     ]
-  },
-  plugins: [
-    new webpack.IgnorePlugin(/vertx/),
-    // global.GENTLY = false is necessary for formidable to be packed
-    new webpack.DefinePlugin({ 'global.GENTLY' : false})
-    // new webpack.optimize.UglifyJsPlugin({
-    //   output: {
-    //     comments: false
-    //   }
-    // })
-  ]
-}
+  }
+};

@@ -4,22 +4,22 @@ import { IconDOM as Icon, IIconProps } from './icon'
 
 export interface INavBarProps {
   title: string
-  nav?: IIconProps
+  prev?: IIconProps
   tools?: IIconProps[]
 }
 
 export const NavBarDOM: React.StatelessComponent<INavBarProps> = (props) => {
-  let nav = null,
+  let prev = null,
     tools: any[] = [] 
 
-  if (props.nav) {
-    nav = <Icon {...props.nav} />
+  if (props.prev) {
+    prev = <Icon {...props.prev} />
   }
 
   return (
     <div className="singular-nav-bar">
       <div className="singular-nav-prev">
-        { nav }
+        { prev }
       </div>
       <div className="singular-nav-title">
         { props.title }

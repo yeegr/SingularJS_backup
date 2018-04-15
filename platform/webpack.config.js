@@ -1,46 +1,40 @@
-const webpack = require('webpack'),
+var webpack = require('webpack'),
   fs = require('fs'),
   path = require('path'),
   ExtractTextPlugin = require('extract-text-webpack-plugin'),
 
   extractLess = new ExtractTextPlugin({
-    filename: "static/css/main.css"
-  })
+    filename: 'static/css/main.css'
+  });
 
 module.exports = {
+  mode: JSON.stringify(process.env.NODE_ENV) || 'development',
   devtool: 'source-map',
   target: 'web',
   entry: {
-    bundle: path.resolve(__dirname, 'src/dom/')
+    bundle: path.resolve(__dirname, 'src/dom')
   },
   output: {
-    path: path.resolve(__dirname, 'dev'),
     filename: 'js/bundle.js',
+    path: path.resolve(__dirname, 'dev'),
     publicPath: '/'
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', 'jsx', '.json']
   },
+  externals: {
+  },
   plugins: [
     extractLess,
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) || '"development"'
     }),
-    new webpack.ProvidePlugin({
-      'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      output: {
-        comments: false
-      },
-      compress: {
-        warnings: false
-      }
-    })
+    // new webpack.ProvidePlugin({
+    //   'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+    // })
   ],
-  externals: {
-    
+  optimization: {
+    minimize: true
   },
   module: {
     rules: [
@@ -53,29 +47,37 @@ module.exports = {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         use: [
-          'source-map-loader',
-          'babel-loader',
-          'ts-loader'
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['react', 'es2015']
+            }
+          }, {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true
+            }
+          }
         ]
       }, {
         test: /\.less$/,
         exclude: /node_modules/,
         use: extractLess.extract({
           use: [{
-            loader: "css-loader",
+            loader: 'css-loader',
             options: {
               minimize: true,
               sourceMap: true
             }
           }, {
-            loader: "less-loader",
+            loader: 'less-loader',
             options: {
               sourceMap: true
             }
           // }, {
-          //   loader: "less-json-import-loader"
+          //   loader: 'less-json-import-loader'
           }],
-          fallback: "style-loader"
+          fallback: 'style-loader'
         })
       }, {
         test: /\.html$/,
@@ -84,12 +86,9 @@ module.exports = {
         test: /\.ico$/,
         loader: 'file-loader?name=[name].[ext]'
       }, {
-        test: /\.json$/,
-        loader: 'json-loader'
-      }, {
         test: /\.(jpg|gif|png|svg)$/,
         loader: 'file-loader?name=static/img/[name].[ext]'
       }
     ]
   }
-}
+};

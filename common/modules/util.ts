@@ -1,8 +1,6 @@
 import * as CONFIG from '../options/config'
 import * as CONST from '../options/constants'
 
-export * from '../../api/src/modules/util'
-
 /**
  * Check if value is NOT undefined, null or an empty string
  * 
@@ -310,4 +308,16 @@ export function readEnv(input: any): any {
   })
 
   return obj
+}
+
+/**
+ * Returns string value of text input
+ * 
+ * @export
+ * @param {string} name 
+ * @returns {string} 
+ */
+export function getValueByInputName(name: string): string {
+  let input = (document.querySelector('[name=' + name + ']') as HTMLInputElement)
+  return (input) ? input.value.trim() : null
 }

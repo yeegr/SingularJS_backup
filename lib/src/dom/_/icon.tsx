@@ -19,6 +19,7 @@ export interface IIconProps {
   badgeStyle?: any
   selected?: boolean | string
   onPress?: any
+  hideTitle?: boolean
 }
 
 export const IconDOM: React.StatelessComponent<IIconProps> = (props) => {
@@ -31,10 +32,14 @@ export const IconDOM: React.StatelessComponent<IIconProps> = (props) => {
     badge = <span className="singular-icon-badge" style={badgeStyle}>{props.badge.text.toString()}</span>
   }
 
+  let titleTag = (props.hideTitle && props.hideTitle === true) ? null : (
+    <span className="singular-icon-title" style={labelStyle}>{title}</span>
+  )
+
   return (
     <span className="singular-icon" data-type={type} data-selected={selected} id={id} style={iconStyle} onClick={props.onPress}>
       <Glyph {...props.glyph} />
-      <span className="singular-icon-title" style={labelStyle}>{title}</span>
+      { titleTag }
       { badge }
     </span>
   )

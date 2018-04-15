@@ -81,6 +81,8 @@
     "UNFOLLOW": "取消关注"
   },
   "operation": {
+    "Login": "登录",
+    "Logout": "注销",
     "Add": "添加",
     "Edit": "编辑",
     "Save": "保存",
@@ -111,5 +113,11 @@
     "close": "关闭",
     "expand": "展开",
     "collapse": "收起"
+  },
+  "error": {
+    "MISSING_CREDENTIAL": "缺少必要信息",
+    "USER_NOT_FOUND": "未能找到相应的用户",
+    "PASSWORD_INCORRECT": "密码不正确",
+    "PASSWORDS_DO_NOT_MATCH": "密码不同"
   }
 }

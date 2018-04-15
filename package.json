@@ -35,5 +35,6 @@
     "Full-stack"
   ],
   "author": "Stone Chen",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {}
 }

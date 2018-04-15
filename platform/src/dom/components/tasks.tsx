@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { LANG } from '../modules'
+import { LANG } from '../../common'
 
 export class Tasks extends React.PureComponent {
   constructor(props: any) {

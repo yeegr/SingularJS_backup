@@ -9,6 +9,7 @@ import configureStore from '../redux/store/configureStore'
 import Hello from './pages/hello'
 import Dashboard from './pages/dashboard'
 import Reviews from './pages/reviews'
+import Self from './pages/self'
 
 import './index.html'
 import './styles/main.less'
@@ -27,6 +28,7 @@ render((
       <Switch>
         <Route exact path='/' component={Dashboard} />
         <Route path='/tasks/reviews' component={Reviews} />
+        <Route path='/self' component={Self} />
         <Route path='/hello' component={Hello} />
       </Switch>
     </Router>

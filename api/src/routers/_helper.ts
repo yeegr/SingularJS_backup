@@ -3,7 +3,7 @@ import { Request, Response, NextFunction, Router } from 'express'
 import * as debug from 'debug'
 import * as mongoose from 'mongoose'
 
-import { UTIL } from '../../../common'
+import * as UTIL from '../modules/util'
 
 import Consumer from '../models/users/ConsumerModel'
 import IAction from '../interfaces/actions/IAction'

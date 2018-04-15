@@ -33,7 +33,7 @@ class ErrLogger {
         status = 409
         code = 11000
         key = err.message.split(':')[2].trim().split(' ')[0].split('_')[0]
-        message = ERR.USER.DUPLICATED_USER_INFORMATION
+        message = ERR.LOGIN.DUPLICATED_USER_INFORMATION
       break
 
       default:

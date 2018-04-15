@@ -16,6 +16,7 @@ export interface ISideBarProps {
   expanded?: boolean
   showLogo?: boolean
   textLogo?: string
+  close?: Function
 }
 
 export interface ISideBarState {
@@ -37,12 +38,23 @@ export class SideBarDOM extends React.PureComponent<ISideBarProps, ISideBarState
       showLogo: this.props.showLogo || true
     }
 
-    this.toggle = this.toggle.bind(this)
+    this.close = this.close.bind(this)
+    this.resize = this.resize.bind(this)
   }
 
-  toggle() {
+  close() {
+    this.props.close() || this.setState({ hidden: true })
+  }
+
+  resize() {
     this.setState({
       expanded: !this.state.expanded
+    })
+  }
+
+  componentWillReceiveProps(nextProps: ISideBarProps) {
+    this.setState({
+      hidden: nextProps.hidden
     })
   }
 
@@ -55,12 +67,15 @@ export class SideBarDOM extends React.PureComponent<ISideBarProps, ISideBarState
               <span className="singular-logo-text">{this.props.textLogo}</span>
             </div>
           </Link>
+          <div className="singular-sidebar-close">
+            <Icon glyph={{name: "remove"}} title="" hideTitle={true} onPress={this.close} />
+          </div>
         </div>
       ) : null,
-      expander = <Icon type="expander" glyph={{name: (this.state.expanded ? "double-arrow-left" : "double-arrow-right")}} title="" onPress={this.toggle} />
+      expander = <Icon type="expander" glyph={{name: (this.state.expanded ? "double-arrow-left" : "double-arrow-right")}} title="" onPress={this.resize} />
 
     return (
-      <aside className="singular-sidebar" aria-hidden={this.props.hidden} aria-expanded={this.state.expanded}>
+      <aside className="singular-sidebar" aria-hidden={this.state.hidden} aria-expanded={this.state.expanded}>
         { logo }
         { expander }
         { this.props.children }

@@ -4,8 +4,8 @@ import { Schema, Types } from 'mongoose'
 import * as passport from 'passport'
 import '../config/passport/consumer'
 
-import { CONST, UTIL } from '../../../common'
-import { Logger, Err } from '../modules'
+import { CONST } from '../../../common'
+import { Logger, Err, UTIL } from '../modules'
 
 import IUser from '../interfaces/users/IUser'
 import Activity, { IActivity } from '../models/workflow/ActivityModel'
@@ -39,7 +39,7 @@ class ActivityRouter {
    * @return {void}
    */
   public update(req: Request, res: Response): void {
-    let user: IUser = req.user,
+    let user: IUser = req.user as IUser,
       target = req.params.id,
       body = Object.assign({}, req.body, {
         handler: user._id,

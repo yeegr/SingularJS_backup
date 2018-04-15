@@ -27,7 +27,12 @@ export const GLYPHS: IGlyphs = {
   "add": (<any>PATH).plus,
   "edit": (<any>PATH).pen,
   "search": (<any>PATH).magnifier,
+  "clear": (<any>PATH).cross_circle,
+  "remove": (<any>PATH).cross,
 
   "notification-on":(<any>PATH)["bell-ring"],
-  "notification-off":(<any>PATH)["bell_outline"]
+  "notification-off":(<any>PATH)["bell_outline"],
+
+  "password-visible":(<any>PATH).eye,
+  "password-hidden":(<any>PATH)["eye-off"]
 }

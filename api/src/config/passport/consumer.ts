@@ -41,11 +41,11 @@ passport.use('consumerLocal', new LocalStrategy({
       if (user) {
         user.comparePassword(password, (err: Error, isMatch: boolean) => {
           if (err) { return done(err) }
-          if (!isMatch) { return done(null, false, {message: ERRORS.USER.PASSWORD_INCORRECT })}
+          if (!isMatch) { return done(null, false, { code: ERRORS.LOGIN.PASSWORD_INCORRECT })}
           return done(null, user, 'local')
         })
       } else {
-        return done(null, false, { message: ERRORS.USER.USER_NOT_FOUND })
+        return done(null, false, { code: ERRORS.LOGIN.USER_NOT_FOUND })
       }
     })
     .catch((err: Error) => {

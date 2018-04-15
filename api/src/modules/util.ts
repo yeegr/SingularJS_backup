@@ -23,6 +23,8 @@ import Follow from '../models/actions/FollowModel'
 import Share from '../models/actions/ShareModel'
 import Download from '../models/actions/DownloadModel'
 
+export * from '../../../common/modules/util'
+
 /**
  * Formats MongoDB native error to string
  * 
@@ -50,7 +52,7 @@ export function formatError(res: Response, err: NativeError, act: string = '', d
 
       case CONST.USER_ACTIONS.COMMON.CREATE:
         status = 409
-        message = ERRORS.USER.DUPLICATED_USER_INFORMATION
+        message = ERRORS.LOGIN.DUPLICATED_USER_INFORMATION
       break
 
       default:
@@ -271,7 +273,7 @@ export function getModels(req: Request): [Model<IUser>, Model<IContent>] {
 export function getSignedUser(user: IUser): object {
   let data: any = user.toJSON(),
     token: string = signToken(user)
-  return Object.assign({}, data, {token})
+  return (<any>Object).assign({}, data, {token})
 }
 
 /**
@@ -303,7 +305,7 @@ export function signToken(user: IUser): string {
  * @returns {[Schema.Types.ObjectId, string]} 
  */
 export function getLoginedUser(req: Request): [Schema.Types.ObjectId, string] {
-  const user: IUser = req.user,
+  const user: IUser = req.user as IUser,
     id: Schema.Types.ObjectId = user._id,
     ref: string = user.ref
 

@@ -1,6 +1,7 @@
 import { NativeError, Schema, model } from 'mongoose'
 
-import { CONST, UTIL } from '../../../../common'
+import { CONST } from '../../../../common'
+import * as UTIL from '../../modules/util'
 
 import IComment from '../../interfaces/actions/IComment'
 

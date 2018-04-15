@@ -14,7 +14,8 @@ import * as uaParser from 'ua-parser-js'
 // use native ES6 promises instead of mongoose promise library
 (<any>mongoose).Promise = global.Promise
 
-import { UTIL, CONFIG } from '../../common'
+import { CONFIG } from '../../common'
+import * as UTIL from './modules/util'
 
 import _HelperRouter from './routers/_helper'
 import AdminRouter from './routers/_admin'

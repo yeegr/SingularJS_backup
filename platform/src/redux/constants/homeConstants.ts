@@ -1,0 +1,6 @@
+export const SHOW_SIDEBAR: string = 'SHOW_SIDEBAR'
+export const HIDE_SIDEBAR: string = 'HIDE_SIDEBAR'
+export const TOGGLE_SIDEBAR: string = 'TOGGLE_SIDEBAR'
+export const SHOW_SEARCH_PANE: string = 'SHOW_SEARCH_PANE'
+export const HIDE_SEARCH_PANE: string = 'HIDE_SEARCH_PANE'
+export const TOGGLE_SEARCH_PANE: string = 'TOGGLE_SEARCH_PANE'

@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose'
 
-import { CONST, UTIL } from '../../../../common'
+import { CONST } from '../../../../common'
+import * as UTIL from '../../modules/util'
 
 import Consumer, { IConsumer } from '../users/ConsumerModel'
 

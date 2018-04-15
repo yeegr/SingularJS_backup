@@ -1,7 +1,15 @@
 // fetch configurations
+interface IFetch {
+  [key: string]: {
+    method: string
+    headers?: {
+      Accept?: string
+      'Content-Type': string
+    }
+  }
+}
 
-
-export const FETCH = {
+export const FETCH: IFetch = {
   GET: {
     method: 'GET'
   },
@@ -9,7 +17,7 @@ export const FETCH = {
   POST: {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'Content-Type': 'application/json'
       }
   },

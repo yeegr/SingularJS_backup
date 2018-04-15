@@ -651,7 +651,7 @@ npm i -g npm
 * [tslint](https://palantir.github.io/tslint/ "TSLint")
 * [typescript](https://www.typescriptlang.org/ "TypeScript")
 * [typings](https://github.com/typings/typings "Typings")
-* [webpack](https://webpack.js.org/ "webpack")
+* [webpack-cli](https://webpack.js.org/ "webpack")
 
 ##### [Yarn](https://yarnpkg.com/zh-Hans/ "Yarn")
 
@@ -724,9 +724,9 @@ curl: (7) Failed to connect to github-production-release-asset-2e65be.s3.amazona
 
 mongoose-delete
 
-### SingularJS components
+### SingularJS Library
 
-SingularJS将有自己的前端组件库，SingularComponents，将包括以下组件。
+SingularJS将有自己的前端组件库，将包括以下组件。
 
 * singular-glyph
 * singular-icon (top-right indicator)

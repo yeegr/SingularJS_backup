@@ -1,7 +1,8 @@
 import { Schema, model } from 'mongoose'
 import * as validator from 'validator'
 
-import { CONFIG, CONST, UTIL } from '../../../../common'
+import { CONFIG, CONST } from '../../../../common'
+import * as UTIL from '../../modules/util'
 
 import Consumer, { IConsumer } from '../users/ConsumerModel'
 

@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Glyph, Icon, Label, Avatar } from '../../../../lib/src/dom/components'
+import { Glyph, Icon, Label, Avatar } from '../modules'
 
 class Hello extends React.Component {
   constructor(props: any) {

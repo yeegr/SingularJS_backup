@@ -12,8 +12,8 @@ import '../config/passport/consumer'
 import '../config/passport/platform'
 import { IncomingForm, Fields, Files } from 'formidable'
 
-import { CONFIG, CONST, ERRORS, UTIL, SERVERS } from '../../../common'
-import { Logger, Err, LANG } from '../modules'
+import { CONFIG, CONST, ERRORS, SERVERS } from '../../../common'
+import { Logger, Err, LANG, UTIL } from '../modules'
 
 import IUser from '../interfaces/users/IUser'
 import IContent from '../interfaces/share/IContent'
@@ -75,7 +75,7 @@ export function validateQuery(body: any): [boolean, any] {
     value: string = tuple[1].toString().trim()
 
   if (['username', 'handle', 'email', 'mobile'].indexOf(key) < 0) {
-    return [result, { message: ERRORS.USER.UNKNOWN_QUERY }]
+    return [result, { code: ERRORS.LOGIN.UNKNOWN_QUERY }]
   } else {
     switch (key) {
       // validate user username
@@ -84,7 +84,7 @@ export function validateQuery(body: any): [boolean, any] {
           result = true
           query = {username: value}
         } else {
-          query = { message: ERRORS.USER.VALID_USER_NAME_REQUIRED }
+          query = { code: ERRORS.LOGIN.VALID_USER_NAME_REQUIRED }
         }
       break
 
@@ -94,7 +94,7 @@ export function validateQuery(body: any): [boolean, any] {
           result = true
           query = {handle: value}
         } else {
-          query = { message: ERRORS.USER.VALID_USER_HANDLE_REQUIRED }
+          query = { code: ERRORS.LOGIN.VALID_USER_HANDLE_REQUIRED }
         }
       break
 
@@ -104,7 +104,7 @@ export function validateQuery(body: any): [boolean, any] {
           result = true
           query = {email: value}
         } else {
-          query = { message: ERRORS.USER.VALID_EMAIL_ADDRESS_REQUIRED }
+          query = { code: ERRORS.LOGIN.VALID_EMAIL_ADDRESS_REQUIRED }
         }
       break
 
@@ -116,7 +116,7 @@ export function validateQuery(body: any): [boolean, any] {
           result = true
           query = {mobile: value}
         } else {
-          query = { message: ERRORS.USER.VALID_MOBILE_PHONE_NUMBER_REQUIRED }
+          query = { code: ERRORS.LOGIN.VALID_MOBILE_PHONE_NUMBER_REQUIRED }
         }
       break
     }
@@ -170,23 +170,23 @@ export function initTotp(req: Request, res: Response, next: NextFunction): void 
   
   if (!body.hasOwnProperty('action')) {
     res.status(400).send({
-      message: ERRORS.USER.TOTP_ACTION_REQUIRED
+      code: ERRORS.LOGIN.TOTP_ACTION_REQUIRED
     })
   } else if (!body.hasOwnProperty('type')) {
     res.status(400).send({
-      message: ERRORS.USER.TOTP_TYPE_REQUIRED
+      code: ERRORS.LOGIN.TOTP_TYPE_REQUIRED
     })
   } else if (CONST.TOTP_TYPES_ENUM.indexOf(body.type) < 0) {
     res.status(400).send({
-      message: ERRORS.USER.TOTP_TYPE_INVALID
+      code: ERRORS.LOGIN.TOTP_TYPE_INVALID
     })
   } else if (body.type === CONST.TOTP_TYPES.EMAIL && !validator.isEmail(body.value)) {
     res.status(400).send({
-      message: ERRORS.USER.VALID_EMAIL_ADDRESS_REQUIRED
+      code: ERRORS.LOGIN.VALID_EMAIL_ADDRESS_REQUIRED
     })
   } else if (body.type === CONST.TOTP_TYPES.SMS && !validator.isMobilePhone(body.value, CONFIG.DEFAULT_LOCALE)) {
     res.status(400).send({
-      message: ERRORS.USER.VALID_MOBILE_PHONE_NUMBER_REQUIRED
+      code: ERRORS.LOGIN.VALID_MOBILE_PHONE_NUMBER_REQUIRED
     })
   } else if (body.action === CONST.USER_ACTIONS.COMMON.UPDATE) {
     let query: any = {}
@@ -213,7 +213,7 @@ export function initTotp(req: Request, res: Response, next: NextFunction): void 
     .findOne(query)
     .then((data: IUser) => {
       if (!data) {
-        res.status(404).json({ message: ERRORS.USER.USER_NOT_FOUND })
+        res.status(404).json({ code: ERRORS.LOGIN.USER_NOT_FOUND })
         return false
       }
 
@@ -306,7 +306,7 @@ export function sendTotp(req: Request, res: Response, next: NextFunction): void 
         return totp.save()
       })
       .then(() => {
-        res.status(201).json({ message: ERRORS.SUCCESS })
+        res.status(201).json({ code: ERRORS.SUCCESS })
       })
       .catch((err: Error) => {
         res.status(400).send()
@@ -341,7 +341,7 @@ export function sendTotp(req: Request, res: Response, next: NextFunction): void 
         return totp.save()
       })
       .then(() => {
-        res.status(201).json({ message: ERRORS.SUCCESS })
+        res.status(201).json({ code: ERRORS.SUCCESS })
       })
       .catch((err: Error) => {
         res.status(400).send()
@@ -368,14 +368,15 @@ export function verifyPasswords(req: Request, res: Response, next: NextFunction)
 
     if (password1 && password2) {
       if (password1 !== password2) {
-        res.status(406).json({ message: ERRORS.USER.PASSWORDS_DO_NOT_MATCH })
+        res.status(406).json({ code: ERRORS.LOGIN.PASSWORDS_DO_NOT_MATCH })
       } else if (!UTIL.validatePassword(password1)) {
-        res.status(406).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
+        res.status(406).json({ code: ERRORS.LOGIN.VALID_PASSWORD_REQUIRED })
       } else {
         next()
       }
     } else {
-      res.status(406).json({ message: ERRORS.USER.MISSING_CREDENTIALS })
+      // need to edit /node_modules/passport-local/lib/strategy.js
+      res.status(406).json({ code: ERRORS.LOGIN.MISSING_CREDENTIALS })
     }
   } else {
     next()
@@ -438,12 +439,12 @@ export function verifyTotp(req: Request, res: Response, next: NextFunction): voi
   .findOne(query)
   .then((totp: ITotp) => {
     if (!totp) {
-      res.status(400).json({ message: ERRORS.USER.NO_VALID_TOTP_ISSUED })
+      res.status(400).json({ code: ERRORS.LOGIN.NO_VALID_TOTP_ISSUED })
       return null    
     }
 
     if (totp.expireAt <= now) {
-      res.status(400).json({ message: ERRORS.USER.TOTP_CODE_EXPIRED })
+      res.status(400).json({ code: ERRORS.LOGIN.TOTP_CODE_EXPIRED })
       return null
     }
 
@@ -514,9 +515,9 @@ export function create(req: Request, res: Response, next: NextFunction): void {
   const UserModel: Model<IUser> = UTIL.getModelFromName(req.routeVar.userType)
 
   if (!body.hasOwnProperty('username') || !UTIL.validateUsername(body.username)) {
-    res.status(401).json({ message: ERRORS.USER.MISSING_CREDENTIALS })      
+    res.status(401).json({ code: ERRORS.LOGIN.MISSING_CREDENTIALS })      
   } else if (!body.hasOwnProperty('password') || !UTIL.validatePassword(body.password)) {
-    res.status(401).json({ message: ERRORS.USER.VALID_PASSWORD_REQUIRED })
+    res.status(401).json({ code: ERRORS.LOGIN.VALID_PASSWORD_REQUIRED })
   } else {
     let user: IUser = new UserModel({
       username: body.username,
@@ -588,7 +589,7 @@ export function local(req: Request, res: Response, next: NextFunction): void {
 
   passport.authenticate(strategy, {
     session: false,
-    failureFlash: ERRORS.USER.MISSING_CREDENTIALS
+    failureFlash: ERRORS.LOGIN.MISSING_CREDENTIALS
   }, (err: Error, user: IUser, info: object) => {
     if (err) {
       res.status(400).send(err) 
@@ -606,6 +607,7 @@ export function local(req: Request, res: Response, next: NextFunction): void {
     next()
   })(req, res, next)
 }
+
 /**
  * Login user
  *
@@ -616,7 +618,7 @@ export function local(req: Request, res: Response, next: NextFunction): void {
  * @returns {void}
  */
 export function login(req: Request, res: Response): void {
-  const user: IUser = req.user
+  const user: IUser = req.user as IUser
 
   res.status(200).json(UTIL.getSignedUser(user))
 
@@ -890,13 +892,13 @@ export function submit(req: Request, res: Response): void {
   .then((data: IContent) => {
     if (data) {
       if (data.status === CONST.STATUSES.CONTENT.PENDING || data.status === CONST.STATUSES.CONTENT.APPROVED) {
-        res.status(422).json({ message: ERRORS.CONTENT.CONTENT_ALREADY_SUMMITED })
+        res.status(422).json({ code: ERRORS.CONTENT.CONTENT_ALREADY_SUMMITED })
       } else if (validator.isEmpty(data.title)) {
-        res.status(422).json({ message: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
+        res.status(422).json({ code: ERRORS.CONTENT.CONTENT_TITLE_REQUIRED })
       } else if (validator.isEmpty(data.slug)) {
-        res.status(422).json({ message: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
+        res.status(422).json({ code: ERRORS.CONTENT.CONTENT_SLUG_REQUIRED })
       } else if (validator.isEmpty(data.content)) {
-        res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CONTENT_REQUIRED })
+        res.status(422).json({ code: ERRORS.CONTENT.CONTENT_CONTENT_REQUIRED })
       } else {
         // approval ? pending : approved
         switch (targetRef) {
@@ -925,7 +927,7 @@ export function submit(req: Request, res: Response): void {
       }
     }
 
-    res.status(404).send({ message: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
+    res.status(404).send({ code: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
     return null
   })
   .then((data: IContent) => {
@@ -997,7 +999,7 @@ export function retract(req: Request, res: Response): void {
   .then((data: IContent) => {
     if (data) {
       if (data.status === CONST.STATUSES.CONTENT.EDITING) {
-        res.status(422).json({ message: ERRORS.CONTENT.CONTENT_CANNOT_BE_RETRACTED })
+        res.status(422).json({ code: ERRORS.CONTENT.CONTENT_CANNOT_BE_RETRACTED })
         return null
       } else {
         data.status = CONST.STATUSES.CONTENT.EDITING
@@ -1005,7 +1007,7 @@ export function retract(req: Request, res: Response): void {
       }
     }
 
-    res.status(404).send({ message: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
+    res.status(404).send({ code: ERRORS.CONTENT.NO_ELIGIBLE_CONTENT_FOUND })
     return null
   })
   .then((data: IContent) => {

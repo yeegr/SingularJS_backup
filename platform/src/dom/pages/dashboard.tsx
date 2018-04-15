@@ -1,9 +1,18 @@
 import * as React from 'react'
 
-import App from '../components/app'
-import { LANG, NavBar } from '../modules'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import { toggleSidebar } from '../../redux/actions/homeActions'
 
-class Dashboard extends React.Component {
+import { LANG } from '../../common'
+import { NavBar } from '../modules'
+import App from '../components/app'
+
+interface IProps {
+  toggleSidebar: Function
+}
+
+class Dashboard extends React.Component<IProps> {
   constructor(props: any) {
     super(props)
   }
@@ -12,9 +21,9 @@ class Dashboard extends React.Component {
     return (
       <App>
         <div className="singular-page">
-            <NavBar 
+          <NavBar 
             title={LANG.t('sidebar.Dashboard')}
-            nav={{glyph: {name: 'menu'}, title: 'menu'}}
+            prev={{glyph: {name: 'menu'}, title: LANG.t('base:navigation.Menu'), onPress: this.props.toggleSidebar}}
           />
           <div className="singular-page-content">
             <div className="singular-dashboard">
@@ -50,4 +59,17 @@ class Dashboard extends React.Component {
   }
 }
 
-export default Dashboard
+const mapStateToProps = (state: any, ownProps: any) => {
+  return {
+    home: state.home,
+    logs: state.logs
+  }
+}
+
+const mapDispatchToProps = (dispatch: any, ownProps: any) => {
+  return {
+    toggleSidebar: bindActionCreators(toggleSidebar, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard)

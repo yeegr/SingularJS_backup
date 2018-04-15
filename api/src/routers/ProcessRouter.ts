@@ -4,8 +4,8 @@ import { Schema, Types } from 'mongoose'
 import * as passport from 'passport'
 import '../config/passport/platform'
 
-import { CONST, ERRORS, UTIL } from '../../../common'
-import { Logger, Err } from '../modules'
+import { CONST, ERRORS } from '../../../common'
+import { Logger, Err, UTIL } from '../modules'
 
 import IUser from '../interfaces/users/IUser'
 import Process, { IProcess } from '../models/workflow/ProcessModel'
@@ -140,7 +140,7 @@ class ProcessRouter {
    */
   
   public update = (req: Request, res: Response): void => {
-    const user: IUser = req.user,
+    const user: IUser = req.user as IUser,
       process_id = req.params.process_id,
       activity_id = req.params.activity_id,
       now = UTIL.getTimestamp(),
@@ -218,7 +218,7 @@ class ProcessRouter {
           return null
         }
       } else {
-        res.status(400).json({ message: ERRORS.PROGRESS.ACTIVITY_IS_LOCKED })
+        res.status(400).json({ code: ERRORS.PROGRESS.ACTIVITY_IS_LOCKED })
         return null
       }
     })

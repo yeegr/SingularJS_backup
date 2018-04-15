@@ -4,7 +4,8 @@ import * as moment from 'moment-timezone'
 import * as validator from 'validator'
 import * as randomstring from 'randomstring'
 
-import { CONFIG, CONST, UTIL } from '../../../../common'
+import { CONFIG, CONST } from '../../../../common'
+import * as UTIL from '../../modules/util'
 
 import IConsumer from '../../interfaces/users/IConsumer'
 

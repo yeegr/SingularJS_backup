@@ -557,3 +557,29 @@ export const USER_UNUPDATABLE_FIELDS: string = '_id id ref updated roles status 
  * Content information not directly updatable via API
  */
 export const CONTENT_UNUPDATABLE_FIELDS: string = '_id id status updated totalRating commentCount viewCount likeCount dislikeCount saveCount shareCount downloadCount'
+
+/** 
+ * Local storage engine types
+*/
+interface IStorageType {
+  ASYNC: string
+  LOCAL: string
+}
+
+export const STORAGE_TYPE: IStorageType = {
+  ASYNC: 'ASYNC',
+  LOCAL: 'LOCAL'
+}
+
+/**
+ * Keys for locally stored content
+ */
+interface IStorageKey {
+  ACCESS_TOKEN: string
+  USER: string
+}
+
+export const STORAGE_KEY: IStorageKey = {
+  ACCESS_TOKEN: 'token',
+  USER: 'user'
+}
