@@ -9,3 +9,4 @@ export { SideViewDOM as SideView, SideBarDOM as SideBar, SidePaneDOM as SidePane
 export { SplitViewDOM as SplitView, SplitParentDOM as SplitParent, SplitChildDOM as SplitChild } from '../_/splitView'
 export { SearchViewDOM as SearchView } from '../_/searchView'
 export { TextFieldDOM as TextField } from '../_/textField'
+export { ListItemDOM as ListItem} from '../_/listItem'

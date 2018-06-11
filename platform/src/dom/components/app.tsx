@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { NavLink } from 'react-router-dom'
-import MediaQuery from 'react-responsive'
 
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
@@ -87,7 +86,7 @@ class App extends React.PureComponent<IProps, IState> {
               </NavLink>
             </div>
             <div className="singular-sidebar-section">
-              <NavLink activeClassName="singular-sidebar-navlink-active" to="/self">
+              <NavLink activeClassName="singular-sidebar-navlink-active" to="/account">
                 <Icon title={LANG.t('sidebar.Account')} glyph={{name: 'account'}} />
               </NavLink>
             </div>

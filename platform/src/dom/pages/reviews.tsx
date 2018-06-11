@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 import { toggleSidebar, showSearchPane } from '../../redux/actions/homeActions'
 
 import { LANG, SERVERS, SETTINGS } from '../../common'
-import { NavBar, Icon, SplitView, SplitParent, SplitChild } from '../modules'
+import { NavBar, Icon, SplitView, SplitParent, SplitChild, ListItem } from '../modules'
 import App from '../components/app'
 
 import * as logsActions from '../../redux/actions/logsActions'
@@ -40,34 +40,30 @@ class Reviews extends React.Component<IProps, IState> {
   render() {
     return (
       <App>
-        <div className="singular-page">
-          <div className="singular-page-content">
-            <SplitView>
-              <SplitParent>
-                <NavBar 
-                  title={LANG.t('sidebar.Reviews')}
-                  prev={{glyph: {name: 'menu'}, title: LANG.t('base:navigation.Menu'), onPress: this.props.toggleSidebar}}
-                >
-                  <Icon glyph={{name: 'search'}} title="" onPress={this.props.showSearchPane} />
-                </NavBar>
-                <div>
-                  this is the parent {}
-                </div>
-              </SplitParent>
-              <SplitChild>
-                <NavBar 
-                  title={LANG.t('sidebar.Reviews')}
-                  prev={{glyph: {name: 'back'}, title: LANG.t('base:navigation.Back'), onPress: () => history.back()}}
-                >
-                  <Icon glyph={{name: 'edit'}} title="" />
-                </NavBar>
-                <div>
-                  this is the child 2
-                </div>
-              </SplitChild>
-            </SplitView>
-          </div>
-        </div>
+        <SplitView>
+          <SplitParent>
+            <NavBar 
+              title={LANG.t('sidebar.Reviews')}
+              prev={{glyph: {name: 'menu'}, title: LANG.t('base:navigation.Menu'), onPress: this.props.toggleSidebar}}
+            >
+              <Icon glyph={{name: 'search'}} title="" onPress={this.props.showSearchPane} />
+            </NavBar>
+            <div>
+              this is the parent {}
+            </div>
+          </SplitParent>
+          <SplitChild>
+            <NavBar 
+              title={LANG.t('sidebar.Reviews')}
+              prev={{glyph: {name: 'back'}, title: LANG.t('base:navigation.Back'), onPress: () => history.back()}}
+            >
+              <Icon glyph={{name: 'edit'}} title="" />
+            </NavBar>
+            <div>
+              this is the child 2
+            </div>
+          </SplitChild>
+        </SplitView>
       </App>
     )
   }

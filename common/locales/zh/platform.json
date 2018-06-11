@@ -37,7 +37,9 @@
       "password_min_length": "登录密码不能少于{{length}}个字母",
       "password_instruction": "区分大小写，应不少于{{length}}个字母"
     },
-    "info": {
+    "account": {
+      "PersonalInformation": "个人信息",
+      "Avatar": "头像",
       "Handle": "网名",
       "Nickname": "昵称",
       "MobilePhoneNumber": "手机号码",

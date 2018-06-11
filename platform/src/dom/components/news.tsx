@@ -13,7 +13,7 @@ export class NewsComponent extends React.PureComponent {
       <div className="singular-page">
         <NavBar 
           title="轨迹"
-          nav={{glyph: {name: 'calendar'}, title: "previous"}}
+          prev={{glyph: {name: 'calendar'}, title: "previous"}}
         >
         </NavBar>
         <TabView type="text">

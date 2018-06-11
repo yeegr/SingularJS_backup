@@ -57,6 +57,10 @@ p {
   user-select: text;
 }
 
+fieldset {
+  border-width: 0;
+}
+
 body {
   background-color: @backgroundColor;
   color: @foregroundColor;
@@ -388,11 +392,11 @@ root {
   background-size: cover;
   display: inline-block;
 
-  &[data-box="circle"] {
+  &[data-type="circle"] {
     border-radius: 50%;
   }
 
-  &[data-box="rounded"] {
+  &[data-type="rounded"] {
     border-radius: 10%;
   }
 
@@ -788,7 +792,8 @@ root {
   .singular-split-parent,
   .singular-split-child {
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden;
+    position: relative;
   }
 
   & {
@@ -797,13 +802,15 @@ root {
 
       .singular-split-parent {
         flex: none;
-        width: @baseLength * 20;
-        background-color: #c9c;
+        width: @baseLength * 25;
+
+        .singular-page-content {
+          border-right: 1px solid @borderColor;
+        }
       }
 
       .singular-split-child {
         flex: 1;
-        background-color: #cc9;
 
         .singular-nav-prev {
           display: none;
@@ -839,10 +846,12 @@ root {
 // NavBar
 .singular-nav-bar {
   background-color: @primaryColor;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   flex: none;
   height: @navbarHeight;
+  position: absolute;
   width: 100%;
   z-index: 100;
   ._singular-nav-shadow;
@@ -907,6 +916,14 @@ root {
     padding: 0 @baseLength;
     text-align: left;
     white-space: nowrap;
+  }
+
+  & + .singular-page-content {
+    box-sizing: border-box;
+    height: 100%;
+    margin-top: @navbarHeight;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 }
 
@@ -1217,5 +1234,149 @@ root {
     display: block;
     margin-top: @doubleLength;
     width: 100%;
+  }
+}
+
+.singular-list {
+  background-color: @invertColor;
+  border-top: 1px solid @borderColor;
+  list-style-type: none;
+  margin: @doubleLength 0 0 0;
+  padding: 0;
+
+  .singular-li {
+    > a {
+      display: block;
+
+      &:hover {
+        background-color: rgba(0,0,0,.1);
+      }
+    }
+  }
+}
+
+.singular-list-item {
+  align-items: stretch;
+  border-bottom: 1px solid @borderColor;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: stretch;
+  padding: @baseLength;
+
+  .singular-list-item-glyph {
+    margin-top: @halfLength;
+  }
+
+  .singular-list-item-glyph,
+  .singular-list-item-glyph .singular-glyph {
+    height: @doubleLength;
+    width: @doubleLength;
+  }
+
+  &[aria-new="true"] {
+    .singular-list-item-title::after {
+      background-color: @primaryColor;
+      border-radius: 50%;
+      content: '';
+      display: inline-block;
+      position: absolute;
+      top: 0;
+      height: @baseLength;
+      width: @baseLength;
+    }
+  }
+
+  .singular-list-item-desc {
+    @margin: @unitLength * 2;
+
+    flex: 1;
+    margin: @margin @halfLength;
+
+    .singular-list-item-heading,
+    .singular-list-item-subtitle {
+      display: block;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .singular-list-item-heading {
+      color: @headingColor;
+    }
+
+    .singular-list-item-subtitle {
+      color: @subtitleColor;
+    }
+
+    .singular-list-item-title {
+      display: inline-block;
+      font-size: 1rem;
+      line-height: @tripleLength - @margin * 2;
+      min-height: @tripleLength - @margin * 2;
+      position: relative;
+    }
+  }
+
+  .singular-list-item-pointer {
+    display: flex;
+
+    .singular-list-item-badge {
+      background-color: @warningColor;
+      border-radius: 50%;
+      color: @invertColor;
+      font-size: 0.8rem;
+      font-weight: normal;
+      height: @doubleLength;
+      line-height: @doubleLength;
+      margin-top: @halfLength;
+      text-align: center;
+      white-space: nowrap;
+      width: @doubleLength;
+    }
+  }
+
+  .singular-list-item-next {
+    display: inline-block;
+    margin: @baseLength 0 0 @halfLength;
+    height: @baseLength;
+    width: @baseLength;
+
+    .singular-glyph {
+      transform: translate(-@halfLength, -@baseLength);
+      width: @doubleLength;
+    }
+  }
+}
+
+.singular-account-banner {
+  background-color: rgba(0,0,0,.1);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  
+  .singular-account-banner-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: @baseLength * 15;
+    width: 100%;
+  }
+
+  .singular-account-banner-stats {
+    display: flex;
+
+    div {
+      border-right: 1px solid @invertColor;
+      display: inline-block;
+      flex: 1;
+      margin: @baseLength 0;
+      padding: 0 @baseLength;
+      text-align: center;
+
+      &:last-child {
+        border-right-width: 0;
+      }
+    }
   }
 }

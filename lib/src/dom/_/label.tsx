@@ -12,7 +12,7 @@ export interface ILabelProps {
   onClick?: Function
 }
 
-export const LabelDOM: React.SFC<ILabelProps> = (props) => {
+export const LabelDOM: React.StatelessComponent<ILabelProps> = (props) => {
   let className = '',
     flow = props.flow || null,
     highlite = props.highlite || null,

@@ -10,6 +10,7 @@ interface ITextFieldProps {
   required?: boolean
   label?: string
   placeholder?: string
+  readonly?: boolean
   tabIndex?: number
   maxLength?: number
   constraints?: any
@@ -120,6 +121,7 @@ export class TextFieldDOM extends React.PureComponent<ITextFieldProps, ITextFiel
               value={value}
               name={this.props.name}
               required={this.props.required}
+              readOnly={this.props.readonly}
               placeholder={this.props.placeholder}
               tabIndex={this.props.tabIndex}
               maxLength={this.props.maxLength}
