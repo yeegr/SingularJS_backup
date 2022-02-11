@@ -56,7 +56,7 @@
   },
   "dependencies": {
     "@alicloud/sms-sdk": "^1.0.8",
-    "ajv": "^6.3.0",
+    "ajv": "^6.12.3",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
     "compression": "^1.7.2",
